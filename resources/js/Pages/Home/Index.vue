@@ -108,12 +108,12 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- STATS -->
-    <section class="bg-blue-900 py-10">
+    <section class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 py-16 border-y-2 border-blue-700">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center text-white">
-          <div v-for="(label, key) in {total_students:'Siswa Aktif', total_graduates:'Alumni', total_achievements:'Prestasi', total_partners:'Mitra Industri'}" :key="key">
-            <div class="text-3xl lg:text-4xl font-bold mb-1">{{ stats?.[key] || '0' }}</div>
-            <div class="text-blue-300 text-sm">{{ label }}</div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center text-white">
+          <div v-for="(label, key) in {total_students:'Siswa Aktif', total_graduates:'Alumni', total_achievements:'Prestasi', total_partners:'Mitra Industri'}" :key="key" class="py-4 px-2 rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-all group">
+            <div class="text-4xl lg:text-5xl font-black mb-2 text-blue-100 group-hover:text-white transition-colors">{{ stats?.[key] || '0' }}<span class="text-xl">+</span></div>
+            <div class="text-blue-200 text-sm font-semibold tracking-wide uppercase">{{ label }}</div>
           </div>
         </div>
       </div>
