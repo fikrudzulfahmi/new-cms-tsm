@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import PistonAnimation from '@/Components/PistonAnimation.vue'
 
 const props = defineProps(['sliders','competencies','programs','facilities','achievements','latestPosts','categories','testimonials','teachers','partners','gallery','stats'])
 
@@ -68,22 +69,27 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
       </div>
 
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
-        <div class="max-w-2xl">
-          <template v-if="sliders?.length">
-            <div v-for="(slide, i) in sliders" :key="`text-${slide.id}`" :class="['transition-all duration-700', i === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 absolute']">
-              <h1 v-if="i===currentSlide" class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">{{ slide.title }}</h1>
-              <p v-if="i===currentSlide" class="text-lg text-blue-100 mb-8 leading-relaxed">{{ slide.subtitle }}</p>
-              <div v-if="i===currentSlide" class="flex flex-wrap gap-3">
-                <a v-if="slide.button_url" :href="slide.button_url" class="btn-light">{{ slide.button_text || 'Selengkapnya' }}</a>
-                <a href="/ppdb" class="btn-secondary border-white text-white hover:bg-white hover:text-blue-900">Daftar PPDB</a>
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <template v-if="sliders?.length">
+              <div v-for="(slide, i) in sliders" :key="`text-${slide.id}`" :class="['transition-all duration-700', i === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 absolute']">
+                <h1 v-if="i===currentSlide" class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">{{ slide.title }}</h1>
+                <p v-if="i===currentSlide" class="text-lg text-blue-100 mb-8 leading-relaxed">{{ slide.subtitle }}</p>
+                <div v-if="i===currentSlide" class="flex flex-wrap gap-3">
+                  <a v-if="slide.button_url" :href="slide.button_url" class="btn-light">{{ slide.button_text || 'Selengkapnya' }}</a>
+                  <a href="/ppdb" class="btn-secondary border-white text-white hover:bg-white hover:text-blue-900">Daftar PPDB</a>
+                </div>
               </div>
-            </div>
-          </template>
-          <template v-else>
-            <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight mb-4">Jurusan Teknik Sepeda Motor</h1>
-            <p class="text-lg text-blue-100 mb-8">SMKS Islam 1 Kota Blitar — Mencetak Teknisi Handal Berkarakter Islami</p>
-            <div class="flex gap-3"><a href="#tentang" class="btn-light">Pelajari Lebih</a><a href="/ppdb" class="btn-secondary border-white text-white hover:bg-white hover:text-blue-900">Daftar PPDB</a></div>
-          </template>
+            </template>
+            <template v-else>
+              <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight mb-4">Jurusan Teknik Sepeda Motor</h1>
+              <p class="text-lg text-blue-100 mb-8">SMKS Islam 1 Kota Blitar — Mencetak Teknisi Handal Berkarakter Islami</p>
+              <div class="flex gap-3"><a href="#tentang" class="btn-light">Pelajari Lebih</a><a href="/ppdb" class="btn-secondary border-white text-white hover:bg-white hover:text-blue-900">Daftar PPDB</a></div>
+            </template>
+          </div>
+          <div class="hidden lg:flex items-center justify-center">
+            <PistonAnimation />
+          </div>
         </div>
       </div>
 

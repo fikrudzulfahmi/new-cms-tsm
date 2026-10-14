@@ -37,39 +37,41 @@ const navLinks = [
       </div>
     </Transition>
 
-    <!-- Navbar -->
-    <nav class="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-100">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
+    <!-- Navbar Glassy -->
+    <nav class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-5xl z-50 backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl shadow-2xl">
+      <div class="px-6 py-3">
+        <div class="flex items-center justify-between">
           <Link href="/" class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center text-white font-bold text-sm">TSM</div>
+            <div class="w-10 h-10 bg-blue-900 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg">TSM</div>
             <div class="hidden sm:block">
-              <div class="font-bold text-blue-900 text-sm leading-tight">Teknik Sepeda Motor</div>
-              <div class="text-xs text-slate-500">SMKS Islam 1 Kota Blitar</div>
+              <div class="font-bold text-blue-900 text-sm leading-tight">TSM</div>
+              <div class="text-xs text-slate-600">SMKS Islam 1</div>
             </div>
           </Link>
-          <div class="hidden lg:flex items-center gap-1">
-            <a v-for="link in navLinks" :key="link.href" :href="link.href" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-blue-900 hover:bg-blue-50 transition">{{ link.label }}</a>
+          <div class="hidden lg:flex items-center gap-0.5">
+            <a v-for="link in navLinks" :key="link.href" :href="link.href" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-900 hover:bg-white/40 transition backdrop-blur-sm">{{ link.label }}</a>
           </div>
-          <div class="flex items-center gap-3">
-            <Link href="/login" class="hidden lg:inline-flex items-center gap-2 bg-blue-900 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-800 transition">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+          <div class="flex items-center gap-2">
+            <Link href="/login" class="hidden lg:inline-flex items-center gap-1.5 bg-blue-900/80 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg hover:bg-blue-900 transition backdrop-blur-sm">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
               Admin
             </Link>
-            <button @click="mobileOpen=!mobileOpen" class="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100">
-              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <button @click="mobileOpen=!mobileOpen" class="lg:hidden p-1.5 rounded-lg text-slate-700 hover:bg-white/30 backdrop-blur-sm">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
           </div>
         </div>
         <!-- Mobile menu -->
         <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-1" leave-to-class="opacity-0 -translate-y-1">
-          <div v-if="mobileOpen" class="lg:hidden pb-4 border-t border-slate-100 mt-1 pt-3 space-y-1">
-            <a v-for="link in navLinks" :key="link.href" :href="link.href" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-900">{{ link.label }}</a>
-            <Link href="/login" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-blue-900 bg-blue-50">Login Admin</Link>
+          <div v-if="mobileOpen" class="lg:hidden mt-3 pt-3 border-t border-white/20 space-y-1">
+            <a v-for="link in navLinks" :key="link.href" :href="link.href" class="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-white/40">{{ link.label }}</a>
+            <Link href="/login" class="block px-3 py-2 rounded-lg text-xs font-bold text-blue-900 bg-white/40">Login Admin</Link>
           </div>
         </Transition>
       </div>
     </nav>
+    <!-- Navbar spacer -->
+    <div class="h-20"></div>
 
     <!-- Content -->
     <main class="flex-1">
