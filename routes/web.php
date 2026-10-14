@@ -11,7 +11,8 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 // ===================== PUBLIC =====================
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [HomeController::class, 'landing'])->name('landing');
+Route::get('/beranda', [HomeController::class, 'index'])->name('home');
 Route::get('/berita', [HomeController::class, 'posts'])->name('posts');
 Route::get('/berita/{slug}', [HomeController::class, 'post'])->name('post.show');
 Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('post.react');

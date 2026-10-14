@@ -10,10 +10,10 @@ const showFlash = ref(true)
 
 const navLinks = [
   { label: 'Beranda', href: '/' },
-  { label: 'Kompetensi', href: '/#kompetensi' },
-  { label: 'Program', href: '/#program' },
-  { label: 'Sarana', href: '/#sarana' },
-  { label: 'Prestasi', href: '/#prestasi' },
+  { label: 'Kompetensi', href: '/beranda#kompetensi' },
+  { label: 'Program', href: '/beranda#program' },
+  { label: 'Sarana', href: '/beranda#sarana' },
+  { label: 'Prestasi', href: '/beranda#prestasi' },
   { label: 'Berita', href: '/berita' },
   { label: 'PPDB', href: '/ppdb' },
 ]

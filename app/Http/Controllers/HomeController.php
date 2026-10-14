@@ -20,6 +20,13 @@ use Inertia\Inertia;
 
 class HomeController extends Controller
 {
+    public function landing(Request $request)
+    {
+        $this->trackVisit($request, null);
+
+        return Inertia::render('Landing/Index');
+    }
+
     public function index(Request $request)
     {
         $this->trackVisit($request, null);
