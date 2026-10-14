@@ -9,7 +9,7 @@ const props = defineProps(['stats', 'monthlyVisits', 'topPosts', 'categoryStats'
     <title>Laporan Periodik & Analisis - Admin TSM</title>
     <div class="space-y-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Laporan Periodik & Analisis</h1>
+        <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>Laporan Periodik & Analisis</h1>
         <p class="text-slate-500 text-sm">Rekap kunjungan, performa berita, dan statistik interaksi website</p>
       </div>
 

@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue'
+import '../../../css/landing.css'
 
 // ---- Konstanta (spec §6) ----
 const BASE_SPEED = 24 // °/s, gir A searah jarum jam

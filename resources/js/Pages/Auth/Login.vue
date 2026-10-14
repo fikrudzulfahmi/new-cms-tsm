@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useForm, usePage } from '@inertiajs/vue3'
-import GearAnimation from '@/Components/GearAnimation.vue'
+import GearRatio from '@/Components/Landing/GearRatio.vue'
 
 const form = useForm({ 
   email: '', 
@@ -19,23 +19,27 @@ const submit = () => {
 </script>
 
 <template>
-  <div class="min-h-screen gradient-navy flex flex-col items-center justify-center p-4">
-    <div class="w-full max-w-md">
-      <!-- Gear Animation Header -->
-      <div class="mb-8">
-        <GearAnimation />
+  <div class="min-h-screen grid-dark flex items-center justify-center p-4 py-10">
+    <div class="w-full max-w-5xl grid lg:grid-cols-2 gap-10 items-center">
+      <div class="hidden lg:block lp" style="background:transparent">
+        <span class="badge-status mb-6">Panel Kendali</span>
+        <h1 class="font-display font-extrabold text-white text-5xl leading-[1.05] tracking-[-1.5px] mb-4">Kelola Website<span class="block text-accent">Jurusan TSM.</span></h1>
+        <p class="text-on-navy-muted mb-8 max-w-md">Teknik Sepeda Motor SMKS Islam 1 Kota Blitar — Jl. Musi No. 06 Kota Blitar.</p>
+        <GearRatio />
       </div>
+    <div class="w-full max-w-md mx-auto">
 
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-4 shadow-lg">
-          <span class="text-white font-bold text-2xl">TSM</span>
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full border border-accent/45 mb-4">
+          <span class="text-accent font-mono text-sm tracking-wider">TSM</span>
         </div>
-        <h1 class="text-white text-3xl font-bold">Panel Admin</h1>
-        <p class="text-blue-300 text-sm mt-2">Teknik Sepeda Motor SMKS Islam 1 Blitar</p>
+        <div class="font-display text-white text-3xl font-bold">Panel Admin</div>
+        <p class="font-mono text-xs tracking-wider uppercase text-on-navy-subtle mt-2">Teknik Sepeda Motor SMKS Islam 1 Blitar</p>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-2xl p-8">
-        <h2 class="text-xl font-bold text-slate-800 mb-6">Masuk ke Panel Admin</h2>
+      <div class="bg-white rounded-[24px] border border-accent/30 p-8">
+        <span class="mono-label mb-2">01 — MASUK</span>
+        <h2 class="font-display text-2xl font-bold text-navy mb-6">Masuk ke Panel Admin</h2>
         
         <!-- Login Form -->
         <form @submit.prevent="submit" class="space-y-5">
@@ -72,7 +76,7 @@ const submit = () => {
           <!-- Remember Checkbox -->
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-              <input v-model="form.remember" type="checkbox" class="rounded border-slate-300 text-blue-600">
+              <input v-model="form.remember" type="checkbox" class="rounded border-slate-300 text-label">
               Ingat saya
             </label>
           </div>
@@ -90,20 +94,21 @@ const submit = () => {
               </svg>
               <span>{{ form.processing ? 'Masuk...' : 'Masuk' }}</span>
             </span>
-            <span v-if="!form.processing" class="absolute inset-0 bg-blue-800 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 -z-0"></span>
+            
           </button>
         </form>
 
         <!-- Footer -->
         <div class="mt-6 text-center">
-          <a href="/" class="text-sm text-slate-500 hover:text-blue-900 transition-colors">← Kembali ke website</a>
+          <a href="/" class="text-sm text-slate-500 hover:text-label transition-colors">← Kembali ke website</a>
         </div>
       </div>
 
       <!-- Info Box -->
-      <div class="mt-6 text-center text-blue-200 text-xs bg-white/5 rounded-lg p-4 backdrop-blur">
+      <div class="mt-6 text-center text-on-navy-subtle text-xs bg-navy-panel border border-accent/20 rounded-2xl p-4 font-mono">
         <p><strong>Demo:</strong> admin@tsm-blitar.sch.id / password123</p>
       </div>
     </div>
+  </div>
   </div>
 </template>

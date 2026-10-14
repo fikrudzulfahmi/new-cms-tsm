@@ -17,17 +17,18 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
 <template>
   <AppLayout>
     <title>Berita & Artikel - TSM SMKS Islam 1 Blitar</title>
-    <div class="bg-blue-950 py-16 text-white text-center">
-      <div class="max-w-4xl mx-auto px-4">
-        <h1 class="text-3xl md:text-4xl font-bold mb-3">Berita & Pengumuman</h1>
-        <p class="text-blue-200">Informasi terbaru seputar kegiatan Teknik Sepeda Motor SMKS Islam 1 Blitar</p>
+    <div class="grid-dark page-hero border-b border-accent/20">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <span class="badge-status mb-6">Kabar Jurusan</span>
+        <h1 class="font-display font-extrabold text-white mb-4 max-w-3xl">Berita & Pengumuman</h1>
+        <p class="text-lg max-w-2xl">Informasi terbaru seputar kegiatan Teknik Sepeda Motor SMKS Islam 1 Blitar</p>
       </div>
     </div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex flex-col md:flex-row gap-4 mb-8 justify-between">
         <div class="flex flex-wrap gap-2">
-          <button @click="category=''; filter()" :class="['px-4 py-2 rounded-xl text-sm font-medium transition', !category ? 'bg-blue-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50']">Semua</button>
-          <button v-for="c in categories" :key="c.id" @click="category=c.slug; filter()" :class="['px-4 py-2 rounded-xl text-sm font-medium transition', category===c.slug ? 'bg-blue-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50']">{{ c.name }}</button>
+          <button @click="category=''; filter()" :class="['px-4 py-2 rounded-full text-sm font-semibold transition', !category ? 'bg-navy text-white' : 'bg-white border border-line text-slate-600 hover:bg-slate-50']">Semua</button>
+          <button v-for="c in categories" :key="c.id" @click="category=c.slug; filter()" :class="['px-4 py-2 rounded-full text-sm font-semibold transition', category===c.slug ? 'bg-navy text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50']">{{ c.name }}</button>
         </div>
         <form @submit.prevent="filter" class="flex gap-2">
           <input v-model="search" type="text" placeholder="Cari berita..." class="form-input text-sm" />
@@ -35,16 +36,16 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
         </form>
       </div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <a v-for="post in posts.data" :key="post.id" :href="`/berita/${post.slug}`" class="card hover:shadow-md transition-all hover:-translate-y-1 block group">
+        <a v-for="post in posts.data" :key="post.id" :href="`/berita/${post.slug}`" class="card hover:border-accent transition-all hover:-translate-y-1 block group">
           <div class="h-48 overflow-hidden">
             <img v-if="post.cover_image" :src="`/storage/${post.cover_image}`" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" :alt="post.title" />
-            <div v-else class="w-full h-full bg-blue-50 flex items-center justify-center text-blue-200">
+            <div v-else class="w-full h-full grid-light flex items-center justify-center text-slate-300">
               <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
             </div>
           </div>
           <div class="p-5">
             <div v-if="post.category" class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold mb-2" :style="`background:${post.category.color}20;color:${post.category.color}`">{{ post.category.name }}</div>
-            <h2 class="font-bold text-slate-800 mb-2 group-hover:text-blue-900 transition-colors line-clamp-2">{{ post.title }}</h2>
+            <h2 class="font-display font-bold text-navy mb-2 group-hover:text-label transition-colors line-clamp-2">{{ post.title }}</h2>
             <p class="text-slate-500 text-sm line-clamp-2 mb-4">{{ post.excerpt }}</p>
             <div class="flex items-center justify-between text-xs text-slate-400">
               <span>{{ formatDate(post.published_at) }}</span>
@@ -59,7 +60,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
       <div v-if="!posts.data?.length" class="text-center py-16 text-slate-400">Tidak ada berita ditemukan</div>
       <!-- Pagination -->
       <div v-if="posts.links?.length > 3" class="flex justify-center gap-1 mt-10">
-        <component :is="link.url ? 'a' : 'span'" v-for="(link, i) in posts.links" :key="i" :href="link.url" v-html="link.label" :class="['px-4 py-2 rounded-xl text-sm font-medium border', link.active ? 'bg-blue-900 border-blue-900 text-white' : link.url ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed']" />
+        <component :is="link.url ? 'a' : 'span'" v-for="(link, i) in posts.links" :key="i" :href="link.url" v-html="link.label" :class="['px-4 py-2 rounded-full text-sm font-semibold border font-mono', link.active ? 'bg-blue-900 border-blue-900 text-white' : link.url ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed']" />
       </div>
     </div>
   </AppLayout>

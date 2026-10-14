@@ -91,7 +91,7 @@ const submit = () => {
     <div class="max-w-5xl mx-auto space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900">{{ isEdit ? 'Edit Berita' : 'Tambah Berita Baru' }}</h1>
+          <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>{{ isEdit ? 'Edit Berita' : 'Tambah Berita Baru' }}</h1>
           <p class="text-slate-500 text-sm">Gunakan editor di bawah dan perhatikan analisis SEO</p>
         </div>
         <a href="/admin/berita" class="text-sm text-slate-600 hover:text-blue-900">← Kembali</a>
@@ -146,7 +146,7 @@ const submit = () => {
         <!-- Right: SEO Analysis & Meta -->
         <div class="space-y-6">
           <!-- SEO Checker Card -->
-          <div class="card p-6 border-2" :class="seoAnalysis.score >= 80 ? 'border-green-300 bg-green-50/30' : seoAnalysis.score >= 50 ? 'border-amber-300 bg-amber-50/30' : 'border-red-300 bg-red-50/30'">
+          <div class="card p-6 border-2" :class="seoAnalysis.score >= 80 ? 'border-accent bg-ice/50' : seoAnalysis.score >= 50 ? 'border-amber-300 bg-amber-50/30' : 'border-red-300 bg-red-50/30'">
             <div class="flex items-center justify-between mb-4">
               <h3 class="font-bold text-slate-800">Analisis SEO Ketat</h3>
               <div :class="['text-xl font-extrabold', seoAnalysis.score >= 80 ? 'text-green-600' : seoAnalysis.score >= 50 ? 'text-amber-600' : 'text-red-600']">{{ seoAnalysis.score }}/100</div>

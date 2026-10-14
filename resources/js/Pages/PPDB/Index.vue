@@ -14,15 +14,17 @@ const submit = () => form.post('/ppdb', { onSuccess: () => form.reset() })
 <template>
   <AppLayout>
     <title>Pendaftaran PPDB - TSM SMKS Islam 1 Blitar</title>
-    <div class="bg-blue-950 py-16 text-white text-center">
-      <div class="max-w-4xl mx-auto px-4">
-        <h1 class="text-3xl md:text-4xl font-bold mb-3">PPDB Online 2026/2027</h1>
-        <p class="text-blue-200">Pendaftaran Peserta Didik Baru Jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar</p>
+    <div class="grid-dark page-hero border-b border-accent/20">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <span class="badge-status mb-6">Pendaftaran Dibuka</span>
+        <h1 class="font-display font-extrabold text-white mb-4 max-w-3xl">PPDB Online 2026/2027</h1>
+        <p class="text-lg max-w-2xl">Pendaftaran Peserta Didik Baru Jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar</p>
       </div>
     </div>
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="card p-8 shadow-lg">
-        <h2 class="text-xl font-bold text-slate-800 mb-6">Formulir Pendaftaran Calon Siswa</h2>
+      <div class="card p-8 md:p-10 -mt-12 relative">
+        <span class="mono-label mb-2">01 — FORMULIR</span>
+        <h2 class="font-display text-2xl font-bold text-navy mb-6">Formulir Pendaftaran Calon Siswa</h2>
         <form @submit.prevent="submit" class="space-y-5">
           <div class="grid sm:grid-cols-2 gap-4">
             <div>

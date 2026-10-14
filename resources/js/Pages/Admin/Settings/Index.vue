@@ -27,7 +27,7 @@ const submit = () => form.post('/admin/pengaturan', { preserveScroll: true })
     <title>Pengaturan Website - Admin TSM</title>
     <div class="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Pengaturan Website</h1>
+        <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>Pengaturan Website</h1>
         <p class="text-slate-500 text-sm">Ubah seluruh tulisan, profil, alamat, dan media sosial website</p>
       </div>
 

@@ -23,7 +23,7 @@ const destroy = (id) => {
   <AdminLayout>
     <title>{{ title }} - Admin TSM</title>
     <div class="space-y-6">
-      <h1 class="text-2xl font-bold text-slate-900">{{ title }}</h1>
+      <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>{{ title }}</h1>
 
       <div class="grid lg:grid-cols-3 gap-6">
         <!-- Form Add -->

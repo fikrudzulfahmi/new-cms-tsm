@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import GearRatioHero from '@/Components/GearRatioHero.vue'
+import GearRatio from '@/Components/Landing/GearRatio.vue'
 
 const props = defineProps(['sliders','competencies','programs','facilities','achievements','latestPosts','categories','testimonials','teachers','partners','gallery','stats'])
 
@@ -48,7 +48,7 @@ const icons = {
   'users': 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z',
 }
 const getIcon = (name) => icons[name] || icons['briefcase']
-const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional': 'bg-amber-100 text-amber-700', 'Provinsi': 'bg-blue-100 text-blue-700', 'Kota': 'bg-green-100 text-green-700', 'Sekolah': 'bg-slate-100 text-slate-600' }
+const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-navy-panel text-white', 'Provinsi': 'bg-ice text-label', 'Kota': 'bg-ice text-label', 'Sekolah': 'bg-slate-100 text-slate-600' }
 </script>
 
 <template>
@@ -56,7 +56,7 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     <title>Beranda - TSM SMKS Islam 1 Blitar</title>
 
     <!-- HERO SLIDER -->
-    <section class="relative overflow-hidden bg-blue-950 hero-slide flex items-center" id="beranda">
+    <section class="relative overflow-hidden grid-dark hero-slide flex items-center pt-24" id="beranda">
       <div class="absolute inset-0">
         <template v-if="sliders?.length">
           <div v-for="(slide, i) in sliders" :key="slide.id" :class="['absolute inset-0 transition-opacity duration-700', i === currentSlide ? 'opacity-100' : 'opacity-0']">
@@ -64,8 +64,8 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
             <div class="absolute inset-0 gradient-overlay"></div>
           </div>
         </template>
-        <div v-else class="absolute inset-0 gradient-navy"></div>
-        <div class="absolute inset-0" style="background: linear-gradient(to right, rgba(23,37,84,0.8) 0%, rgba(23,37,84,0.3) 70%, transparent 100%)"></div>
+        <div v-else class="absolute inset-0 grid-dark"></div>
+        
       </div>
 
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
@@ -73,59 +73,59 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
           <div>
             <template v-if="sliders?.length">
               <div v-for="(slide, i) in sliders" :key="`text-${slide.id}`" :class="['transition-all duration-700', i === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 absolute']">
-                <h1 v-if="i===currentSlide" class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">{{ slide.title }}</h1>
-                <p v-if="i===currentSlide" class="text-lg text-blue-100 mb-8 leading-relaxed">{{ slide.subtitle }}</p>
+                <h1 v-if="i===currentSlide" class="font-display text-4xl md:text-5xl lg:text-[62px] font-extrabold text-white leading-[1.05] tracking-[-1.5px] mb-6">{{ slide.title }}</h1>
+                <p v-if="i===currentSlide" class="text-lg text-on-navy-muted mb-8 leading-relaxed max-w-xl">{{ slide.subtitle }}</p>
                 <div v-if="i===currentSlide" class="flex flex-wrap gap-3">
                   <a v-if="slide.button_url" :href="slide.button_url" class="btn-light">{{ slide.button_text || 'Selengkapnya' }}</a>
-                  <a href="/ppdb" class="btn-secondary border-white text-white hover:bg-white hover:text-blue-900">Daftar PPDB</a>
+                  <a href="/ppdb" class="btn-ghost">Daftar PPDB</a>
                 </div>
               </div>
             </template>
             <template v-else>
-              <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight mb-4">Jurusan Teknik Sepeda Motor</h1>
-              <p class="text-lg text-blue-100 mb-8">SMKS Islam 1 Kota Blitar — Mencetak Teknisi Handal Berkarakter Islami</p>
-              <div class="flex gap-3"><a href="#tentang" class="btn-light">Pelajari Lebih</a><a href="/ppdb" class="btn-secondary border-white text-white hover:bg-white hover:text-blue-900">Daftar PPDB</a></div>
+              <h1 class="font-display text-4xl md:text-5xl lg:text-[62px] font-extrabold text-white leading-[1.05] tracking-[-1.5px] mb-6">Jurusan Teknik Sepeda Motor</h1>
+              <p class="text-lg text-on-navy-muted mb-8 max-w-xl">SMKS Islam 1 Kota Blitar — Mencetak Teknisi Handal Berkarakter Islami</p>
+              <div class="flex gap-3"><a href="#tentang" class="btn-light">Pelajari Lebih</a><a href="/ppdb" class="btn-ghost">Daftar PPDB</a></div>
             </template>
           </div>
           <div class="hidden lg:flex items-center justify-center">
-            <GearRatioHero />
+            <div class="lp w-full flex justify-center" style="background:transparent;overflow:visible"><GearRatio /></div>
           </div>
         </div>
       </div>
 
       <!-- Slider Controls -->
       <template v-if="(sliders?.length||0) > 1">
-        <button @click="prevSlide" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition">
+        <button @click="prevSlide" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 border border-accent/40 hover:border-accent bg-navy/60 rounded-full flex items-center justify-center text-white transition">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <button @click="nextSlide" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition">
+        <button @click="nextSlide" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 border border-accent/40 hover:border-accent bg-navy/60 rounded-full flex items-center justify-center text-white transition">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
         <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-          <button v-for="(_, i) in sliders" :key="i" @click="currentSlide=i" :class="['w-2.5 h-2.5 rounded-full transition-all', i===currentSlide ? 'bg-white w-6' : 'bg-white/50']"></button>
+          <button v-for="(_, i) in sliders" :key="i" @click="currentSlide=i" :class="['w-2.5 h-2.5 rounded-full transition-all', i===currentSlide ? 'bg-accent w-6' : 'bg-white/30']"></button>
         </div>
       </template>
     </section>
 
     <!-- STATS -->
-    <section class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 py-16 border-y-2 border-blue-700">
+    <section class="grid-dark pb-16 pt-4 border-b border-accent/20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center text-white">
-          <div v-for="(label, key) in {total_students:'Siswa Aktif', total_graduates:'Alumni', total_achievements:'Prestasi', total_partners:'Mitra Industri'}" :key="key" class="py-4 px-2 rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-all group">
-            <div class="text-4xl lg:text-5xl font-black mb-2 text-blue-100 group-hover:text-white transition-colors">{{ stats?.[key] || '0' }}<span class="text-xl">+</span></div>
-            <div class="text-blue-200 text-sm font-semibold tracking-wide uppercase">{{ label }}</div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-white">
+          <div v-for="(label, key) in {total_students:'Siswa Aktif', total_graduates:'Alumni', total_achievements:'Prestasi', total_partners:'Mitra Industri'}" :key="key" class="metric-card hover:border-accent/50 transition group">
+            <div class="metric-value order-2 text-3xl lg:text-4xl text-white">{{ stats?.[key] || '0' }}<span class="text-accent text-xl">+</span></div>
+            <div class="metric-label order-1 font-mono uppercase tracking-[1.5px] text-xs">{{ label }}</div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- TENTANG KAMI -->
-    <section id="tentang" class="py-20 bg-white">
+    <section id="tentang" class="py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-4">Tentang Jurusan</div>
-            <h2 class="text-3xl lg:text-4xl font-bold text-slate-900 mb-6">Teknik Sepeda Motor SMKS Islam 1 Blitar</h2>
+            <div class="mono-label mb-4">01 — TENTANG JURUSAN</div>
+            <h2 class="section-title mb-6">Teknik Sepeda Motor SMKS Islam 1 Blitar</h2>
             <div class="prose prose-blue max-w-none text-slate-600 leading-relaxed" v-html="$page.props.settings?.about_text || 'Jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar hadir untuk mencetak tenaga teknisi sepeda motor yang kompeten, berkarakter Islami, dan siap memasuki dunia industri.'"></div>
             <div class="mt-8 flex gap-3">
               <a href="#kompetensi" class="btn-primary">Kompetensi Kami</a>
@@ -133,8 +133,8 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
             </div>
           </div>
           <div class="relative">
-            <img v-if="$page.props.settings?.about_image" :src="`/storage/${$page.props.settings.about_image}`" class="w-full h-80 object-cover rounded-2xl shadow-lg" alt="Tentang Kami" />
-            <div v-else class="w-full h-80 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl shadow-lg flex items-center justify-center">
+            <img v-if="$page.props.settings?.about_image" :src="`/storage/${$page.props.settings.about_image}`" class="w-full h-80 object-cover rounded-[20px] border border-line" alt="Tentang Kami" />
+            <div v-else class="w-full h-80 grid-light border border-line rounded-[20px] flex items-center justify-center">
               <div class="text-center text-blue-400">
                 <svg class="w-16 h-16 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 <p class="text-sm">Foto Tentang Kami</p>
@@ -146,24 +146,24 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- KOMPETENSI -->
-    <section id="kompetensi" class="py-20 bg-slate-50">
+    <section id="kompetensi" class="py-24 grid-light">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-3">Kompetensi</div>
+          <div class="mono-label mb-3">02 — KOMPETENSI</div>
           <h2 class="section-title">Kompetensi Keahlian</h2>
           <p class="section-subtitle">Yang diajarkan di jurusan Teknik Sepeda Motor</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="c in competencies" :key="c.id" class="card p-6 hover:shadow-md transition-all hover:-translate-y-1 group">
-            <div class="w-12 h-12 bg-blue-100 group-hover:bg-blue-900 rounded-xl flex items-center justify-center mb-4 transition-colors">
-              <svg class="w-6 h-6 text-blue-900 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <div v-for="c in competencies" :key="c.id" class="card hover:border-accent p-6 transition-all hover:-translate-y-1 group">
+            <div class="icon-box group-hover:bg-navy group-hover:text-accent flex items-center justify-center mb-4 transition-colors">
+              <svg class="w-6 h-6 text-label group-hover:text-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" :d="getIcon(c.icon)" />
               </svg>
             </div>
-            <h3 class="font-bold text-slate-800 mb-2 group-hover:text-blue-900 transition-colors">{{ c.title }}</h3>
+            <h3 class="font-display font-bold text-slate-800 mb-2 group-hover:text-label transition-colors">{{ c.title }}</h3>
             <p class="text-slate-500 text-sm leading-relaxed">{{ c.short_description }}</p>
           </div>
-          <div v-if="!competencies?.length" v-for="i in 4" :key="i" class="card p-6 animate-pulse">
+          <div v-if="!competencies?.length" v-for="i in 4" :key="i" class="card hover:border-accent p-6 animate-pulse">
             <div class="w-12 h-12 bg-slate-200 rounded-xl mb-4"></div>
             <div class="h-4 bg-slate-200 rounded mb-2"></div>
             <div class="h-3 bg-slate-100 rounded"></div>
@@ -173,42 +173,42 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- PROGRAM UNGGULAN -->
-    <section id="program" class="py-20 bg-white">
+    <section id="program" class="py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-3">Program</div>
+          <div class="mono-label mb-3">03 — PROGRAM</div>
           <h2 class="section-title">Program Unggulan</h2>
           <p class="section-subtitle">Keunggulan yang kami tawarkan untuk masa depan Anda</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="p in programs" :key="p.id" class="text-center p-8 rounded-2xl bg-slate-50 hover:bg-blue-900 hover:text-white group transition-all hover:-translate-y-1 hover:shadow-lg cursor-default">
-            <div class="w-14 h-14 bg-blue-100 group-hover:bg-blue-800 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-colors">
-              <svg class="w-7 h-7 text-blue-900 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <div v-for="p in programs" :key="p.id" class="text-left p-8 rounded-[24px] bg-white border border-line hover:bg-navy-panel hover:border-accent/40 hover:text-white group transition-all hover:-translate-y-1 cursor-default">
+            <div class="w-14 h-14 bg-ice group-hover:bg-accent/15 rounded-2xl flex items-center justify-center mb-5 transition-colors">
+              <svg class="w-7 h-7 text-label group-hover:text-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" :d="getIcon(p.icon)"/>
               </svg>
             </div>
-            <h3 class="font-bold text-lg mb-1 group-hover:text-white">{{ p.title }}</h3>
-            <p class="text-blue-600 group-hover:text-blue-200 text-sm font-medium mb-3">{{ p.subtitle }}</p>
-            <p class="text-slate-500 group-hover:text-blue-100 text-sm leading-relaxed">{{ p.description }}</p>
+            <h3 class="font-display font-bold text-lg mb-1 group-hover:text-white">{{ p.title }}</h3>
+            <p class="font-mono text-xs tracking-wider uppercase text-label group-hover:text-accent mb-3">{{ p.subtitle }}</p>
+            <p class="text-slate-500 group-hover:text-on-navy-muted text-sm leading-relaxed">{{ p.description }}</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- SARANA -->
-    <section id="sarana" class="py-20 bg-slate-50">
+    <section id="sarana" class="py-24 grid-light">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-3">Sarana</div>
+          <div class="mono-label mb-3">04 — SARANA</div>
           <h2 class="section-title">Sarana & Prasarana</h2>
           <p class="section-subtitle">Fasilitas lengkap untuk mendukung pembelajaran</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div v-for="f in facilities" :key="f.id" class="card overflow-hidden group hover:shadow-md transition-all">
+          <div v-for="f in facilities" :key="f.id" class="card hover:border-accent overflow-hidden group transition-all">
             <div class="h-40 overflow-hidden">
               <img v-if="f.image" :src="`/storage/${f.image}`" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" :alt="f.name" />
-              <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-slate-100 flex items-center justify-center">
-                <svg class="w-10 h-10 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
+              <div v-else class="w-full h-full grid-light flex items-center justify-center">
+                <svg class="w-10 h-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
               </div>
             </div>
             <div class="p-4">
@@ -221,25 +221,25 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- PRESTASI -->
-    <section id="prestasi" class="py-20 bg-white">
+    <section id="prestasi" class="py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-semibold mb-3">Prestasi</div>
+          <div class="mono-label mb-3">05 — PRESTASI</div>
           <h2 class="section-title">Prestasi Kami</h2>
           <p class="section-subtitle">Bangga dengan pencapaian para siswa terbaik</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="a in achievements" :key="a.id" class="card p-6 hover:shadow-md transition-all">
+          <div v-for="a in achievements" :key="a.id" class="card hover:border-accent p-6 transition-all">
             <div class="flex items-start gap-4">
               <div class="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
                 <img v-if="a.image" :src="`/storage/${a.image}`" class="w-full h-full object-cover" />
-                <div v-else class="w-full h-full bg-amber-100 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                <div v-else class="w-full h-full bg-ice flex items-center justify-center">
+                  <svg class="w-6 h-6 text-label" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
                 </div>
               </div>
               <div class="flex-1 min-w-0">
                 <span :class="['badge text-xs mb-2', levelBadge[a.level] || 'bg-slate-100 text-slate-600']">{{ a.level || 'Umum' }}</span>
-                <h3 class="font-bold text-slate-800 text-sm leading-tight">{{ a.title }}</h3>
+                <h3 class="font-display font-bold text-slate-800 text-sm leading-tight">{{ a.title }}</h3>
                 <p v-if="a.student_name" class="text-slate-500 text-xs mt-1">{{ a.student_name }}</p>
                 <p v-if="a.organizer" class="text-slate-400 text-xs">{{ a.organizer }} {{ a.year ? `· ${a.year}` : '' }}</p>
               </div>
@@ -251,11 +251,11 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- BERITA -->
-    <section id="berita" class="py-20 bg-slate-50">
+    <section id="berita" class="py-24 grid-light">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
-            <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-2">Berita</div>
+            <div class="mono-label mb-2">06 — BERITA</div>
             <h2 class="section-title">Berita Terkini</h2>
           </div>
           <a href="/berita" class="btn-secondary text-sm self-start sm:self-auto">Semua Berita →</a>
@@ -268,16 +268,16 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
           </button>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <a v-for="post in filteredPosts.slice(0,6)" :key="post.id" :href="`/berita/${post.slug}`" class="card hover:shadow-md transition-all hover:-translate-y-1 block group">
+          <a v-for="post in filteredPosts.slice(0,6)" :key="post.id" :href="`/berita/${post.slug}`" class="card hover:border-accent transition-all hover:-translate-y-1 block group">
             <div class="h-44 overflow-hidden">
               <img v-if="post.cover_image" :src="`/storage/${post.cover_image}`" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" :alt="post.cover_alt||post.title" />
-              <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-slate-100 flex items-center justify-center">
-                <svg class="w-10 h-10 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+              <div v-else class="w-full h-full grid-light flex items-center justify-center">
+                <svg class="w-10 h-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
               </div>
             </div>
             <div class="p-5">
               <div v-if="post.category" class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold mb-2" :style="`background:${post.category.color}20;color:${post.category.color}`">{{ post.category.name }}</div>
-              <h3 class="font-bold text-slate-800 mb-2 line-clamp-2 group-hover:text-blue-900 transition-colors">{{ post.title }}</h3>
+              <h3 class="font-display font-bold text-slate-800 mb-2 line-clamp-2 group-hover:text-label transition-colors">{{ post.title }}</h3>
               <p class="text-slate-500 text-sm line-clamp-2 mb-3">{{ post.excerpt }}</p>
               <div class="flex items-center gap-3 text-xs text-slate-400">
                 <span>{{ formatDate(post.published_at) }}</span>
@@ -291,10 +291,10 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- GALERI -->
-    <section id="galeri" class="py-20 bg-white" v-if="gallery?.length">
+    <section id="galeri" class="py-24 bg-white" v-if="gallery?.length">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-3">Galeri</div>
+          <div class="mono-label mb-3">07 — GALERI</div>
           <h2 class="section-title">Galeri Foto</h2>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -306,19 +306,19 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- GURU -->
-    <section id="guru" class="py-20 bg-slate-50" v-if="teachers?.length">
+    <section id="guru" class="py-24 grid-light" v-if="teachers?.length">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-3">Tim Pengajar</div>
+          <div class="mono-label mb-3">08 — TIM PENGAJAR</div>
           <h2 class="section-title">Guru & Staf</h2>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="t in teachers" :key="t.id" class="card p-6 text-center hover:shadow-md transition-all">
+          <div v-for="t in teachers" :key="t.id" class="card hover:border-accent p-6 text-center transition-all">
             <div class="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-4 border-blue-100">
               <img v-if="t.photo" :src="`/storage/${t.photo}`" class="w-full h-full object-cover" :alt="t.name" />
               <div v-else class="w-full h-full bg-blue-100 flex items-center justify-center text-blue-900 font-bold text-2xl">{{ t.name?.[0] }}</div>
             </div>
-            <h3 class="font-bold text-slate-800">{{ t.name }}</h3>
+            <h3 class="font-display font-bold text-slate-800">{{ t.name }}</h3>
             <p class="text-blue-700 text-sm font-medium">{{ t.position }}</p>
             <p class="text-slate-500 text-xs mt-1">{{ t.subject }}</p>
           </div>
@@ -327,70 +327,70 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- TESTIMONI -->
-    <section id="testimoni" class="py-20 bg-blue-900">
+    <section id="testimoni" class="py-24 grid-dark">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-block px-3 py-1 bg-blue-800 text-blue-200 rounded-full text-sm font-semibold mb-3">Umpan Balik</div>
-          <h2 class="text-3xl font-bold text-white mb-2">Umpan Balik Lulusan</h2>
-          <p class="text-blue-300">Apa kata alumni tentang jurusan TSM?</p>
+          <div class="mono-label mono-label-dark mb-3">09 — UMPAN BALIK</div>
+          <h2 class="section-title !text-white mb-2">Umpan Balik Lulusan</h2>
+          <p class="text-on-navy-subtle">Apa kata alumni tentang jurusan TSM?</p>
         </div>
         <div class="grid lg:grid-cols-3 gap-6 mb-12" v-if="testimonials?.length">
-          <div v-for="(t, i) in testimonials.slice(0,3)" :key="t.id" class="bg-white/10 backdrop-blur rounded-2xl p-6 text-white">
+          <div v-for="(t, i) in testimonials.slice(0,3)" :key="t.id" class="bg-navy-panel border border-accent/20 rounded-[20px] p-6 text-white">
             <div class="flex mb-3">
-              <svg v-for="s in 5" :key="s" :class="['w-4 h-4', s <= t.rating ? 'text-amber-400' : 'text-blue-700']" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              <svg v-for="s in 5" :key="s" :class="['w-4 h-4', s <= t.rating ? 'text-accent' : 'text-white/20']" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
             </div>
-            <p class="text-blue-100 text-sm leading-relaxed mb-4 italic">"{{ t.message }}"</p>
+            <p class="text-on-navy-muted text-sm leading-relaxed mb-4 italic">"{{ t.message }}"</p>
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold">{{ t.name?.[0] }}</div>
+              <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-navy font-bold font-display">{{ t.name?.[0] }}</div>
               <div>
                 <div class="font-semibold text-sm">{{ t.name }}</div>
-                <div class="text-blue-300 text-xs">{{ t.occupation }} {{ t.graduation_year ? `· Alumni ${t.graduation_year}` : '' }}</div>
+                <div class="text-on-navy-subtle text-xs">{{ t.occupation }} {{ t.graduation_year ? `· Alumni ${t.graduation_year}` : '' }}</div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Testimonial Form -->
-        <div class="bg-white/10 backdrop-blur rounded-2xl p-8 max-w-2xl mx-auto">
+        <div class="bg-navy-panel border border-accent/20 rounded-[20px] p-8 max-w-2xl mx-auto">
           <h3 class="text-white font-bold text-xl mb-6 text-center">Bagikan Pengalaman Anda</h3>
-          <div v-if="testimonialSent" class="text-center py-4 text-green-300">
+          <div v-if="testimonialSent" class="text-center py-4 text-accent">
             <svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <p>Terima kasih! Testimoni Anda sedang direview.</p>
           </div>
           <form v-else @submit.prevent="submitTestimonial" class="space-y-4">
             <div class="grid sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-blue-200 text-sm font-medium mb-1.5">Nama Lengkap *</label>
-                <input v-model="testimonialForm.name" type="text" placeholder="Nama Anda" class="form-input bg-white/10 border-blue-700 text-white placeholder-blue-400 focus:border-blue-400 focus:ring-blue-500/30" />
-                <p v-if="testimonialForm.errors.name" class="text-red-300 text-xs mt-1">{{ testimonialForm.errors.name }}</p>
+                <label class="form-label !text-on-navy-subtle">Nama Lengkap *</label>
+                <input v-model="testimonialForm.name" type="text" placeholder="Nama Anda" class="form-input bg-white/10 border-accent/25 text-white placeholder-on-navy-subtle " />
+                <p v-if="testimonialForm.errors.name" class="text-red-200 text-xs mt-1">{{ testimonialForm.errors.name }}</p>
               </div>
               <div>
-                <label class="block text-blue-200 text-sm font-medium mb-1.5">Tahun Lulus *</label>
-                <input v-model="testimonialForm.graduation_year" type="number" placeholder="2024" min="2000" :max="new Date().getFullYear()" class="form-input bg-white/10 border-blue-700 text-white placeholder-blue-400" />
+                <label class="form-label !text-on-navy-subtle">Tahun Lulus *</label>
+                <input v-model="testimonialForm.graduation_year" type="number" placeholder="2024" min="2000" :max="new Date().getFullYear()" class="form-input bg-white/10 border-accent/25 text-white placeholder-on-navy-subtle" />
               </div>
               <div>
-                <label class="block text-blue-200 text-sm font-medium mb-1.5">Pekerjaan Sekarang</label>
-                <input v-model="testimonialForm.occupation" type="text" placeholder="Teknisi / Wirausaha" class="form-input bg-white/10 border-blue-700 text-white placeholder-blue-400" />
+                <label class="form-label !text-on-navy-subtle">Pekerjaan Sekarang</label>
+                <input v-model="testimonialForm.occupation" type="text" placeholder="Teknisi / Wirausaha" class="form-input bg-white/10 border-accent/25 text-white placeholder-on-navy-subtle" />
               </div>
               <div>
-                <label class="block text-blue-200 text-sm font-medium mb-1.5">Tempat Kerja</label>
-                <input v-model="testimonialForm.workplace" type="text" placeholder="Nama perusahaan" class="form-input bg-white/10 border-blue-700 text-white placeholder-blue-400" />
+                <label class="form-label !text-on-navy-subtle">Tempat Kerja</label>
+                <input v-model="testimonialForm.workplace" type="text" placeholder="Nama perusahaan" class="form-input bg-white/10 border-accent/25 text-white placeholder-on-navy-subtle" />
               </div>
             </div>
             <div>
-              <label class="block text-blue-200 text-sm font-medium mb-2">Rating</label>
+              <label class="form-label !text-on-navy-subtle">Rating</label>
               <div class="flex gap-2">
                 <button v-for="s in 5" :key="s" type="button" @click="testimonialForm.rating=s">
-                  <svg :class="['w-8 h-8 transition-colors', s <= testimonialForm.rating ? 'text-amber-400' : 'text-blue-700']" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                  <svg :class="['w-8 h-8 transition-colors', s <= testimonialForm.rating ? 'text-accent' : 'text-white/20']" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
                 </button>
               </div>
             </div>
             <div>
-              <label class="block text-blue-200 text-sm font-medium mb-1.5">Pesan / Testimoni *</label>
-              <textarea v-model="testimonialForm.message" rows="3" placeholder="Ceritakan pengalaman Anda..." class="form-input bg-white/10 border-blue-700 text-white placeholder-blue-400 resize-none"></textarea>
-              <p v-if="testimonialForm.errors.message" class="text-red-300 text-xs mt-1">{{ testimonialForm.errors.message }}</p>
+              <label class="form-label !text-on-navy-subtle">Pesan / Testimoni *</label>
+              <textarea v-model="testimonialForm.message" rows="3" placeholder="Ceritakan pengalaman Anda..." class="form-input bg-white/10 border-accent/25 text-white placeholder-on-navy-subtle resize-none"></textarea>
+              <p v-if="testimonialForm.errors.message" class="text-red-200 text-xs mt-1">{{ testimonialForm.errors.message }}</p>
             </div>
-            <button type="submit" :disabled="testimonialForm.processing" class="w-full btn-light justify-center py-3">
+            <button type="submit" :disabled="testimonialForm.processing" class="w-full btn-primary">
               {{ testimonialForm.processing ? 'Mengirim...' : 'Kirim Testimoni' }}
             </button>
           </form>
@@ -399,14 +399,14 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- MITRA -->
-    <section id="mitra" class="py-20 bg-white" v-if="partners?.length">
+    <section id="mitra" class="py-24 bg-white" v-if="partners?.length">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-3">Mitra</div>
+          <div class="mono-label mb-3">10 — MITRA</div>
           <h2 class="section-title">Mitra Industri</h2>
         </div>
         <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-6">
-          <div v-for="p in partners" :key="p.id" class="flex items-center justify-center p-4 border border-slate-100 rounded-xl hover:border-blue-200 hover:shadow-sm transition-all">
+          <div v-for="p in partners" :key="p.id" class="flex items-center justify-center p-4 bg-white border border-line rounded-2xl hover:border-accent transition-all">
             <img v-if="p.logo" :src="`/storage/${p.logo}`" class="max-h-12 object-contain" :alt="p.name" />
             <span v-else class="text-sm font-semibold text-slate-600 text-center">{{ p.name }}</span>
           </div>
@@ -415,51 +415,51 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
     </section>
 
     <!-- PPDB BANNER -->
-    <section class="py-16 gradient-navy">
+    <section class="py-20 grid-dark border-y border-accent/20">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="inline-block px-3 py-1 bg-white/10 text-white rounded-full text-sm font-semibold mb-4">PPDB 2026/2027</div>
-        <h2 class="text-3xl font-bold text-white mb-4">{{ $page.props.settings?.ppdb_info || 'Pendaftaran Peserta Didik Baru Dibuka!' }}</h2>
-        <p class="text-blue-200 mb-8">Bergabunglah bersama kami dan wujudkan karir di dunia otomotif</p>
-        <a href="/ppdb" class="btn-light px-8 py-3">Daftar Sekarang →</a>
+        <div class="mono-label mono-label-dark mb-4">11 — PPDB 2026/2027</div>
+        <h2 class="section-title !text-white mb-4">{{ $page.props.settings?.ppdb_info || 'Pendaftaran Peserta Didik Baru Dibuka!' }}</h2>
+        <p class="text-on-navy-muted mb-8">Bergabunglah bersama kami dan wujudkan karir di dunia otomotif</p>
+        <a href="/ppdb" class="btn-primary px-8">Daftar Sekarang →</a>
       </div>
     </section>
 
     <!-- KONTAK -->
-    <section id="kontak" class="py-20 bg-slate-50">
+    <section id="kontak" class="py-24 grid-light">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-3">Kontak</div>
+          <div class="mono-label mb-3">12 — KONTAK</div>
           <h2 class="section-title">Hubungi Kami</h2>
           <p class="section-subtitle">Kami siap menjawab pertanyaan Anda</p>
         </div>
         <div class="grid lg:grid-cols-2 gap-12">
           <div class="space-y-6">
-            <div class="card p-6">
-              <h3 class="font-bold text-slate-800 mb-4">Informasi Kontak</h3>
+            <div class="card hover:border-accent p-6">
+              <h3 class="font-display font-bold text-slate-800 mb-4">Informasi Kontak</h3>
               <div class="space-y-4 text-sm text-slate-600">
                 <div class="flex items-start gap-3">
-                  <svg class="w-5 h-5 text-blue-900 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <svg class="w-5 h-5 text-label mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                   <div><div class="font-medium text-slate-800">{{ $page.props.settings?.school_name }}</div><div>{{ $page.props.settings?.address }}</div></div>
                 </div>
                 <div class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-blue-900 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                  <svg class="w-5 h-5 text-label flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                   {{ $page.props.settings?.phone || '-' }}
                 </div>
                 <div class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-blue-900 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                  <svg class="w-5 h-5 text-label flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                   {{ $page.props.settings?.email || '-' }}
                 </div>
               </div>
             </div>
-            <div class="card p-0 overflow-hidden h-48 bg-blue-50">
+            <div class="card hover:border-accent p-0 overflow-hidden h-48 bg-blue-50">
               <div v-if="$page.props.settings?.maps_embed" v-html="$page.props.settings.maps_embed" class="w-full h-full"></div>
               <div v-else class="w-full h-full flex items-center justify-center text-slate-400">
                 <div class="text-center"><svg class="w-10 h-10 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg><p class="text-sm">Jl. Musi No. 06 Kota Blitar</p></div>
               </div>
             </div>
           </div>
-          <div class="card p-8">
-            <h3 class="font-bold text-slate-800 mb-6">Kirim Pesan</h3>
+          <div class="card hover:border-accent p-8">
+            <h3 class="font-display font-bold text-slate-800 mb-6">Kirim Pesan</h3>
             <form @submit.prevent="submitContact" class="space-y-4">
               <div class="grid sm:grid-cols-2 gap-4">
                 <div>

@@ -69,28 +69,28 @@ const menuGroups = [
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 flex">
+  <div class="min-h-screen grid-light flex">
     <!-- Sidebar Overlay (mobile) -->
-    <div v-if="sidebarOpen" @click="sidebarOpen=false" class="fixed inset-0 z-20 bg-black/40 lg:hidden"></div>
+    <div v-if="sidebarOpen" @click="sidebarOpen=false" class="fixed inset-0 z-20 bg-navy/60 lg:hidden"></div>
 
     <!-- Sidebar -->
-    <aside :class="['fixed inset-y-0 left-0 z-30 w-64 bg-blue-950 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto', sidebarOpen ? 'translate-x-0' : '-translate-x-full']">
+    <aside :class="['fixed inset-y-0 left-0 z-30 w-64 grid-dark border-r border-accent/20 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto', sidebarOpen ? 'translate-x-0' : '-translate-x-full']">
       <!-- Logo -->
-      <div class="flex items-center gap-3 px-5 py-5 border-b border-blue-900">
-        <div class="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center text-white font-bold text-xs">TSM</div>
+      <div class="flex items-center gap-3 px-5 py-5 border-b border-accent/20">
+        <div class="w-10 h-10 rounded-full border border-accent/45 flex items-center justify-center text-accent font-mono text-[11px] tracking-wider">TSM</div>
         <div>
-          <div class="text-white font-bold text-sm leading-tight">Teknik Sepeda Motor</div>
-          <div class="text-blue-400 text-xs">Panel Admin</div>
+          <div class="font-display text-white font-bold text-sm leading-tight">Teknik Sepeda Motor</div>
+          <div class="font-mono text-[11px] tracking-wider uppercase text-accent">Panel Kendali</div>
         </div>
       </div>
 
       <!-- Menu -->
       <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-5">
         <div v-for="group in menuGroups" :key="group.label || 'main'">
-          <div v-if="group.label" class="text-blue-500 text-xs font-semibold uppercase tracking-wider px-3 mb-2">{{ group.label }}</div>
+          <div v-if="group.label" class="font-mono text-on-navy-subtle text-[11px] uppercase tracking-[2px] px-3 mb-2">{{ group.label }}</div>
           <div class="space-y-0.5">
             <Link v-for="item in group.items" :key="item.href" :href="item.href"
-              :class="['flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all', isActive(item.href) ? 'bg-blue-700 text-white shadow' : 'text-blue-200 hover:bg-blue-900 hover:text-white']">
+              :class="['flex items-center gap-3 px-3 py-2.5 rounded-full text-sm font-semibold transition-all', isActive(item.href) ? 'bg-accent text-navy' : 'text-on-navy-muted hover:bg-white/5 hover:text-white']">
               <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" :d="item.icon"/>
               </svg>
@@ -101,15 +101,15 @@ const menuGroups = [
       </nav>
 
       <!-- User + Logout -->
-      <div class="p-4 border-t border-blue-900">
+      <div class="p-4 border-t border-accent/20">
         <div class="flex items-center gap-3 mb-3">
-          <div class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center text-white text-sm font-bold">{{ user?.name?.[0] }}</div>
+          <div class="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-navy text-sm font-bold font-display">{{ user?.name?.[0] }}</div>
           <div class="overflow-hidden">
             <div class="text-white text-sm font-medium truncate">{{ user?.name }}</div>
-            <div class="text-blue-400 text-xs capitalize">{{ user?.role }}</div>
+            <div class="font-mono text-on-navy-subtle text-[11px] uppercase tracking-wider">{{ user?.role }}</div>
           </div>
         </div>
-        <button @click="logout" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-blue-300 hover:bg-blue-900 hover:text-white text-sm transition">
+        <button @click="logout" class="w-full flex items-center gap-2 px-3 py-2 rounded-full border border-accent/30 text-on-navy-muted hover:border-accent hover:text-white text-sm transition">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
           Keluar
         </button>
@@ -119,11 +119,11 @@ const menuGroups = [
     <!-- Main -->
     <div class="flex-1 flex flex-col min-w-0">
       <!-- Top bar -->
-      <header class="bg-white border-b border-slate-200 h-14 flex items-center gap-4 px-4 sm:px-6 sticky top-0 z-10">
+      <header class="bg-white/85 backdrop-blur-xl border-b border-line h-16 flex items-center gap-4 px-4 sm:px-6 sticky top-0 z-10">
         <button @click="sidebarOpen=true" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <Link href="/" class="text-slate-500 hover:text-blue-900 text-sm flex items-center gap-1">
+        <Link href="/" class="text-slate-500 hover:text-label text-sm flex items-center gap-1">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           Lihat Website
         </Link>
@@ -138,12 +138,12 @@ const menuGroups = [
       <!-- Flash -->
       <Transition enter-active-class="transition duration-300" enter-from-class="opacity-0 -translate-y-2" leave-to-class="opacity-0">
         <div v-if="showFlash && (flash.success || flash.error)" class="m-4">
-          <div v-if="flash.success" class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
-            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <div v-if="flash.success" class="bg-navy border border-accent/40 text-white px-4 py-3 rounded-2xl flex items-center gap-3 text-sm">
+            <svg class="w-5 h-5 text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             {{ flash.success }}
-            <button @click="showFlash=false" class="ml-auto text-green-600 hover:text-green-800">✕</button>
+            <button @click="showFlash=false" class="ml-auto text-on-navy-subtle hover:text-white">✕</button>
           </div>
-          <div v-if="flash.error" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
+          <div v-if="flash.error" class="bg-white border border-red-200 text-red-700 px-4 py-3 rounded-2xl flex items-center gap-3 text-sm">
             <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             {{ flash.error }}
             <button @click="showFlash=false" class="ml-auto text-red-600 hover:text-red-800">✕</button>

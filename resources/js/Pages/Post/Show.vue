@@ -26,19 +26,20 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
 <template>
   <AppLayout>
     <title>{{ post.title }} - TSM SMKS Islam 1 Blitar</title>
+    <div class="grid-dark h-28 border-b border-accent/20"></div>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Breadcrumb -->
-      <div class="flex items-center gap-2 text-sm text-slate-500 mb-6">
-        <a href="/" class="hover:text-blue-900">Beranda</a>
+      <div class="flex items-center gap-2 font-mono text-xs tracking-wider uppercase text-slate-500 mb-6">
+        <a href="/" class="hover:text-label">Beranda</a>
         <span>/</span>
-        <a href="/berita" class="hover:text-blue-900">Berita</a>
+        <a href="/berita" class="hover:text-label">Berita</a>
         <span>/</span>
         <span class="text-slate-800 truncate">{{ post.title }}</span>
       </div>
 
       <!-- Category & Title -->
       <div v-if="post.category" class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3" :style="`background:${post.category.color}20;color:${post.category.color}`">{{ post.category.name }}</div>
-      <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 leading-tight">{{ post.title }}</h1>
+      <h1 class="font-display text-3xl sm:text-[44px] font-extrabold text-navy mb-5 leading-[1.1] tracking-[-1px]">{{ post.title }}</h1>
       <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500 pb-6 border-b border-slate-200 mb-8">
         <span>Oleh <strong>{{ post.author?.name || 'Admin' }}</strong></span>
         <span>·</span>
@@ -50,7 +51,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
       </div>
 
       <!-- Cover Image -->
-      <div v-if="post.cover_image" class="mb-8 rounded-2xl overflow-hidden shadow-lg max-h-[450px]">
+      <div v-if="post.cover_image" class="mb-8 rounded-[20px] overflow-hidden border border-line max-h-[450px]">
         <img :src="`/storage/${post.cover_image}`" class="w-full h-full object-cover" :alt="post.cover_alt || post.title" />
       </div>
 
@@ -60,19 +61,19 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
       <!-- Reactions & Share -->
       <div class="flex flex-wrap items-center justify-between gap-4 py-6 border-y border-slate-200 mb-12">
         <div class="flex items-center gap-3">
-          <button @click="react('like')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 text-blue-900 font-semibold text-sm hover:bg-blue-100 transition">
+          <button @click="react('like')" class="flex items-center gap-2 px-4 py-2 rounded-full border border-line bg-ice text-blue-900 font-semibold text-sm hover:bg-blue-100 transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
             Suka ({{ post.likes_count }})
           </button>
-          <button @click="react('unlike')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition">
+          <button @click="react('unlike')" class="flex items-center gap-2 px-4 py-2 rounded-full border border-line bg-white text-slate-700 font-semibold text-sm hover:bg-slate-200 transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v5a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/></svg>
             Tidak Suka ({{ post.unlikes_count }})
           </button>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-sm text-slate-500 font-medium">Bagikan:</span>
-          <a :href="`https://wa.me/?text=${encodeURIComponent(post.title + ' ' + window.location.href)}`" target="_blank" class="w-9 h-9 bg-green-500 text-white rounded-xl flex items-center justify-center hover:bg-green-600 transition">WA</a>
-          <a :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`" target="_blank" class="w-9 h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition">FB</a>
+          <a :href="`https://wa.me/?text=${encodeURIComponent(post.title + ' ' + window.location.href)}`" target="_blank" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-green-600 transition">WA</a>
+          <a :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`" target="_blank" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-blue-700 transition">FB</a>
         </div>
       </div>
 
@@ -137,13 +138,13 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
       <div v-if="relatedPosts?.length">
         <h3 class="font-bold text-xl text-slate-800 mb-6">Berita Terkait</h3>
         <div class="grid sm:grid-cols-3 gap-6">
-          <a v-for="rp in relatedPosts" :key="rp.id" :href="`/berita/${rp.slug}`" class="card hover:shadow-md transition block group">
+          <a v-for="rp in relatedPosts" :key="rp.id" :href="`/berita/${rp.slug}`" class="card hover:border-accent transition block group">
             <div class="h-36 overflow-hidden">
               <img v-if="rp.cover_image" :src="`/storage/${rp.cover_image}`" class="w-full h-full object-cover group-hover:scale-105 transition" />
               <div v-else class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">TSM</div>
             </div>
             <div class="p-4">
-              <h4 class="font-bold text-slate-800 text-sm line-clamp-2 group-hover:text-blue-900">{{ rp.title }}</h4>
+              <h4 class="font-bold text-slate-800 text-sm line-clamp-2 group-hover:text-label">{{ rp.title }}</h4>
               <p class="text-xs text-slate-400 mt-2">{{ formatDate(rp.published_at) }}</p>
             </div>
           </a>

@@ -19,7 +19,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900">Kelola Berita</h1>
+          <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>Kelola Berita</h1>
           <p class="text-slate-500 text-sm">Buat dan kelola berita dengan analisis SEO ketat</p>
         </div>
         <a href="/admin/berita/create" class="btn-primary text-sm flex items-center gap-2">
@@ -48,7 +48,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
                   <span v-if="p.category" class="badge text-xs" :style="`background:${p.category.color}20;color:${p.category.color}`">{{ p.category.name }}</span>
                 </td>
                 <td class="p-4">
-                  <span :class="['badge text-xs', p.status==='published' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700']">{{ p.status }}</span>
+                  <span :class="['badge text-xs', p.status==='published' ? 'bg-navy text-accent' : 'bg-ice text-label border border-line']">{{ p.status }}</span>
                 </td>
                 <td class="p-4">
                   <span :class="['font-bold', p.seo_score >= 80 ? 'text-green-600' : p.seo_score >= 50 ? 'text-amber-600' : 'text-red-600']">{{ p.seo_score }}/100</span>

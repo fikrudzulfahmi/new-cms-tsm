@@ -17,7 +17,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
     <title>Kelola Komentar - Admin TSM</title>
     <div class="space-y-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Moderasi Komentar</h1>
+        <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>Moderasi Komentar</h1>
         <p class="text-slate-500 text-sm">Kelola interaksi dan tanggapan pembaca pada berita</p>
       </div>
 
@@ -47,7 +47,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
                   <a :href="`/berita/${c.post?.slug}`" target="_blank" class="hover:underline">{{ c.post?.title }}</a>
                 </td>
                 <td class="p-4">
-                  <span :class="['badge text-xs', c.is_approved ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700']">{{ c.is_approved ? 'Disetujui' : 'Pending' }}</span>
+                  <span :class="['badge text-xs', c.is_approved ? 'bg-navy text-accent' : 'bg-ice text-label border border-line']">{{ c.is_approved ? 'Disetujui' : 'Pending' }}</span>
                 </td>
                 <td class="p-4 text-right space-x-2">
                   <button v-if="!c.is_approved" @click="approve(c.id)" class="text-green-600 hover:underline font-medium">Setujui</button>
