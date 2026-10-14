@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import PistonAnimation from '@/Components/PistonAnimation.vue'
+import GearRatioHero from '@/Components/GearRatioHero.vue'
 
 const props = defineProps(['sliders','competencies','programs','facilities','achievements','latestPosts','categories','testimonials','teachers','partners','gallery','stats'])
 
@@ -88,7 +88,7 @@ const levelBadge = { 'Internasional': 'bg-purple-100 text-purple-700', 'Nasional
             </template>
           </div>
           <div class="hidden lg:flex items-center justify-center">
-            <PistonAnimation />
+            <GearRatioHero />
           </div>
         </div>
       </div>
