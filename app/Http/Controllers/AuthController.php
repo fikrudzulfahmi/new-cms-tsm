@@ -16,12 +16,12 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::user();
             if (!$user->is_active) {
                 Auth::logout();
@@ -29,7 +29,7 @@ class AuthController extends Controller
             }
             $user->update(['last_login_at' => now()]);
             $request->session()->regenerate();
-            return redirect()->route('admin.dashboard');
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
