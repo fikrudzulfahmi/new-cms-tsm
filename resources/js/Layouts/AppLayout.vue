@@ -70,8 +70,6 @@ const navLinks = [
         </Transition>
       </div>
     </nav>
-    <!-- Navbar spacer -->
-    <div class="h-20"></div>
 
     <!-- Content -->
     <main class="flex-1">

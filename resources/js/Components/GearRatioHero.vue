@@ -1,154 +1,181 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import * as THREE from 'three'
 
 const containerRef = ref(null)
-const scene = ref(null)
-const camera = ref(null)
-const renderer = ref(null)
-const gears = ref([])
-const mouse = ref({ x: 0, y: 0 })
+const canvasRef = ref(null)
+let scene, camera, renderer, gears = []
+let mouse = { x: 0, y: 0 }
 
 onMounted(() => {
   if (!containerRef.value) return
-
-  // Scene setup
-  scene.value = new THREE.Scene()
-  scene.value.background = new THREE.Color(0x0f172a) // Navy dark
   
+  import('three').then(THREE => {
+    initThreeScene(THREE)
+  }).catch(() => {
+    // Fallback to canvas animation if Three.js fails
+    initCanvasAnimation()
+  })
+})
+
+const initThreeScene = (THREE) => {
   const width = containerRef.value.clientWidth
   const height = containerRef.value.clientHeight
 
-  camera.value = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
-  camera.value.position.z = 8
+  scene = new THREE.Scene()
+  scene.background = new THREE.Color(0x0f172a)
 
-  renderer.value = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-  renderer.value.setSize(width, height)
-  renderer.value.setPixelRatio(window.devicePixelRatio)
-  containerRef.value.appendChild(renderer.value.domElement)
+  camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
+  camera.position.z = 8
 
-  // Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
-  scene.value.add(ambientLight)
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+  renderer.setSize(width, height)
+  renderer.setPixelRatio(window.devicePixelRatio || 1)
+  containerRef.value.appendChild(renderer.domElement)
 
-  const pointLight = new THREE.PointLight(0x3b82f6, 1)
-  pointLight.position.set(10, 10, 10)
-  scene.value.add(pointLight)
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7)
+  scene.add(ambientLight)
 
-  const pointLight2 = new THREE.PointLight(0x60a5fa, 0.5)
-  pointLight2.position.set(-10, -10, 10)
-  scene.value.add(pointLight2)
+  const pointLight = new THREE.PointLight(0x3b82f6, 1.5)
+  pointLight.position.set(8, 8, 8)
+  scene.add(pointLight)
 
-  // Create gears
-  const gearConfigs = [
-    { x: -3, y: 0, z: 0, size: 1.5, teeth: 32, speed: 0.01, color: 0x1e3a8a },
-    { x: 0.5, y: 1.5, z: -1, size: 0.9, teeth: 20, speed: -0.015, color: 0x3b82f6 },
-    { x: 2, y: -1, z: 0.5, size: 1.2, teeth: 28, speed: 0.012, color: 0x60a5fa },
-    { x: 3.5, y: 0.5, z: -0.8, size: 0.7, teeth: 16, speed: -0.018, color: 0x1e40af },
+  const pointLight2 = new THREE.PointLight(0x60a5fa, 1)
+  pointLight2.position.set(-8, -8, 8)
+  scene.add(pointLight2)
+
+  const configs = [
+    { x: -3, y: 0, z: 0, size: 1.5, teeth: 32, speed: 0.008, color: 0x1e3a8a },
+    { x: 0.5, y: 1.5, z: -1, size: 0.9, teeth: 20, speed: -0.012, color: 0x3b82f6 },
+    { x: 2.2, y: -1, z: 0.5, size: 1.1, teeth: 26, speed: 0.010, color: 0x60a5fa },
+    { x: 3.8, y: 0.8, z: -0.8, size: 0.6, teeth: 14, speed: -0.015, color: 0x1e40af },
   ]
 
-  gearConfigs.forEach(config => {
-    const gear = createGear(config.size, config.teeth, config.color)
-    gear.position.set(config.x, config.y, config.z)
-    gear.userData = { speed: config.speed, rotationAxis: new THREE.Vector3(0, 0, 1) }
-    scene.value.add(gear)
-    gears.value.push(gear)
+  configs.forEach(cfg => {
+    const gear = createGear(THREE, cfg.size, cfg.teeth, cfg.color)
+    gear.position.set(cfg.x, cfg.y, cfg.z)
+    gear.userData = { speed: cfg.speed }
+    scene.add(gear)
+    gears.push(gear)
   })
 
-  // Mouse movement
   document.addEventListener('mousemove', (e) => {
-    mouse.value.x = (e.clientX / window.innerWidth) * 2 - 1
-    mouse.value.y = -(e.clientY / window.innerHeight) * 2 + 1
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1
   })
 
-  // Animation loop
   const animate = () => {
     requestAnimationFrame(animate)
-
-    // Rotate gears
-    gears.value.forEach(gear => {
-      gear.rotation.z += gear.userData.speed
-    })
-
-    // Tilt scene based on mouse
-    scene.value.rotation.x = mouse.value.y * 0.5
-    scene.value.rotation.y = mouse.value.x * 0.5
-
-    renderer.value.render(scene.value, camera.value)
+    gears.forEach(g => g.rotation.z += g.userData.speed)
+    scene.rotation.x = mouse.y * 0.3
+    scene.rotation.y = mouse.x * 0.3
+    renderer.render(scene, camera)
   }
-
   animate()
 
-  // Handle resize
-  const handleResize = () => {
-    const w = containerRef.value.clientWidth
-    const h = containerRef.value.clientHeight
-    camera.value.aspect = w / h
-    camera.value.updateProjectionMatrix()
-    renderer.value.setSize(w, h)
-  }
+  window.addEventListener('resize', () => {
+    const w = containerRef.value?.clientWidth || 400
+    const h = containerRef.value?.clientHeight || 300
+    camera.aspect = w / h
+    camera.updateProjectionMatrix()
+    renderer.setSize(w, h)
+  })
+}
 
-  window.addEventListener('resize', handleResize)
-
-  return () => {
-    window.removeEventListener('resize', handleResize)
-    renderer.value?.dispose()
-  }
-})
-
-const createGear = (radius, teeth, color) => {
+const createGear = (THREE, radius, teeth, color) => {
   const geometry = new THREE.BufferGeometry()
-  const positions = []
-  const indices = []
+  const positions = [], indices = []
+  const toothH = 0.25
 
-  const toothHeight = 0.3
-  const toothWidth = 0.5
-
-  // Create gear teeth
   for (let i = 0; i < teeth * 2; i++) {
     const angle = (i / (teeth * 2)) * Math.PI * 2
-    const r = i % 2 === 0 ? radius + toothHeight : radius - toothHeight * 0.5
-    const x = Math.cos(angle) * r
-    const y = Math.sin(angle) * r
-    positions.push(x, y, 0)
+    const r = i % 2 === 0 ? radius + toothH : radius - toothH * 0.3
+    positions.push(Math.cos(angle) * r, Math.sin(angle) * r, 0)
   }
 
-  // Center
-  const centerIdx = positions.length / 3
+  const center = positions.length / 3
   positions.push(0, 0, 0)
 
-  // Create faces
   for (let i = 0; i < teeth * 2; i++) {
     const next = (i + 1) % (teeth * 2)
-    indices.push(i, centerIdx, next)
+    indices.push(i, center, next)
   }
 
   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3))
   geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
   geometry.computeVertexNormals()
 
-  const material = new THREE.MeshPhongMaterial({ 
-    color: color,
-    shininess: 100,
+  const material = new THREE.MeshPhongMaterial({
+    color,
+    shininess: 120,
     emissive: color,
-    emissiveIntensity: 0.2
+    emissiveIntensity: 0.15
   })
 
-  const mesh = new THREE.Mesh(geometry, material)
-  return mesh
+  return new THREE.Mesh(geometry, material)
+}
+
+const initCanvasAnimation = () => {
+  const canvas = canvasRef.value
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
+  canvas.width = containerRef.value.clientWidth
+  canvas.height = containerRef.value.clientHeight
+
+  let time = 0
+  const animate = () => {
+    time += 0.02
+    ctx.fillStyle = '#0f172a'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    const gears = [
+      { x: canvas.width * 0.25, y: canvas.height / 2, r: 50, teeth: 12, t: time },
+      { x: canvas.width * 0.65, y: canvas.height * 0.35, r: 35, teeth: 8, t: -time * 1.5 },
+      { x: canvas.width * 0.55, y: canvas.height * 0.7, r: 40, teeth: 10, t: time * 0.8 },
+    ]
+
+    gears.forEach(g => {
+      ctx.save()
+      ctx.translate(g.x, g.y)
+      ctx.rotate(g.t)
+      ctx.fillStyle = '#1e3a8a'
+      ctx.strokeStyle = '#3b82f6'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      for (let i = 0; i < g.teeth * 2; i++) {
+        const a = (i / (g.teeth * 2)) * Math.PI * 2
+        const r = i % 2 === 0 ? g.r : g.r * 0.7
+        const x = Math.cos(a) * r
+        const y = Math.sin(a) * r
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+      }
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      ctx.fillStyle = '#3b82f6'
+      ctx.beginPath()
+      ctx.arc(0, 0, g.r * 0.2, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    })
+
+    requestAnimationFrame(animate)
+  }
+  animate()
 }
 </script>
 
 <template>
   <div 
     ref="containerRef" 
-    class="w-full h-96 rounded-2xl overflow-hidden shadow-2xl border border-blue-400/20"
+    class="w-full h-96 rounded-2xl overflow-hidden shadow-2xl border border-blue-400/20 relative"
     style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)"
   >
-    <div class="absolute inset-0 flex items-center justify-center text-center pointer-events-none">
-      <div class="text-blue-200/40">
-        <p class="text-sm">Gerakkan mouse untuk interaksi</p>
-      </div>
+    <canvas 
+      ref="canvasRef" 
+      class="absolute inset-0 w-full h-full"
+    ></canvas>
+    <div class="absolute inset-0 flex items-center justify-center text-center pointer-events-none opacity-40">
+      <p class="text-xs text-blue-300">Gerakkan mouse untuk interaksi</p>
     </div>
   </div>
 </template>
