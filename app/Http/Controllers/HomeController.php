@@ -24,7 +24,44 @@ class HomeController extends Controller
     {
         $this->trackVisit($request, null);
 
-        return Inertia::render('Landing/Index');
+        $categories = Category::active()
+            ->withCount(['posts' => fn($q) => $q->published()])
+            ->orderBy('sort_order')->get();
+
+        // Berita terbaru + 4 terbaru per kategori, agar tab kategori selalu terisi.
+        $postCols = ['id', 'category_id', 'title', 'slug', 'excerpt', 'cover_image', 'cover_alt', 'published_at', 'reading_time', 'views_count', 'is_featured'];
+        $posts = Post::published()->with('category:id,name,slug,color')
+            ->orderByDesc('published_at')->take(8)->get($postCols);
+        foreach ($categories as $cat) {
+            $posts = $posts->merge(
+                Post::published()->with('category:id,name,slug,color')
+                    ->where('category_id', $cat->id)
+                    ->orderByDesc('published_at')->take(4)->get($postCols)
+            );
+        }
+        $posts = $posts->unique('id')->sortByDesc('published_at')->values();
+
+        return Inertia::render('Landing/Index', [
+            'sliders' => Slider::active()->get(),
+            'competencies' => Competency::active()->get(),
+            'programs' => Program::active()->get(),
+            'facilities' => Facility::active()->take(9)->get(),
+            'achievements' => Achievement::active()->orderByDesc('is_featured')->orderByDesc('achieved_at')->take(6)->get(),
+            'posts' => $posts,
+            'categories' => $categories,
+            'testimonials' => Testimonial::approved()->orderByDesc('is_featured')->latest()->take(6)->get(),
+            'teachers' => Teacher::active()->take(8)->get(),
+            'partners' => Partner::active()->get(),
+            'gallery' => Gallery::active()->images()->take(8)->get(),
+            'stats' => [
+                'students' => Setting::get('stat_students', '150+'),
+                'graduates' => Setting::get('stat_graduates', '500+'),
+                'absorption' => Setting::get('stat_absorption', '85%'),
+                'achievements' => Achievement::active()->count(),
+                'partners' => Partner::active()->count(),
+                'teachers' => Teacher::active()->count(),
+            ],
+        ]);
     }
 
     public function index(Request $request)
