@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Superapp\PortalController;
+use App\Http\Controllers\Superapp\SuperadminController;
 use Illuminate\Support\Facades\Route;
 
 // ===================== PUBLIC =====================
@@ -28,6 +30,8 @@ Route::post('/testimoni', [HomeController::class, 'testimonialStore'])->name('te
 // ===================== AUTH =====================
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
+Route::get('/masuk', [AuthController::class, 'showMasuk'])->name('masuk')->middleware('guest');
+Route::post('/masuk', [AuthController::class, 'login'])->middleware(['guest', 'throttle:10,1']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // ===================== ADMIN =====================
@@ -115,3 +119,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::delete('/pesan/{message}', [ContentController::class, 'messagesDestroy'])->name('messages.destroy');
 
 });
+
+// ===================== TSM SUPERAPP =====================
+// Superadmin: mengatur data siswa/guru, akun & plotting fitur
+Route::prefix('superadmin')->middleware(['auth', 'role:superadmin'])->group(function () {
+    Route::get('/', [SuperadminController::class, 'dashboard'])->name('superadmin');
+    Route::get('/pengguna', [SuperadminController::class, 'users'])->name('superadmin.users');
+    Route::post('/pengguna', [SuperadminController::class, 'usersStore']);
+    Route::put('/pengguna/{user}', [SuperadminController::class, 'usersUpdate']);
+    Route::delete('/pengguna/{user}', [SuperadminController::class, 'usersDestroy']);
+    Route::get('/fitur/{feature}', [SuperadminController::class, 'feature'])->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus']);
+    Route::get('/{page}', [SuperadminController::class, 'comingSoon'])->whereIn('page', ['siswa', 'guru']);
+});
+
+// Guru & siswa: card fitur sesuai plotting; admin fitur -> /app/{fitur}/admin
+Route::middleware(['auth', 'role:superadmin,guru,siswa'])->group(function () {
+    Route::get('/portal', [PortalController::class, 'index'])->name('portal');
+    Route::get('/app/{feature}/{area?}', [PortalController::class, 'feature'])
+        ->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus'])->whereIn('area', ['admin']);
+});
+

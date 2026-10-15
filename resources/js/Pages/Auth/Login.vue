@@ -3,6 +3,8 @@ import { computed } from 'vue'
 import { useForm, usePage } from '@inertiajs/vue3'
 import GearRatio from '@/Components/Landing/GearRatio.vue'
 
+const props = defineProps({ mode: { type: String, default: 'cms' } })
+const isApp = computed(() => props.mode === 'app')
 const form = useForm({ 
   email: '', 
   password: '', 
@@ -10,10 +12,8 @@ const form = useForm({
 })
 
 const submit = () => {
-  form.post('/login', {
-    onError: (errors) => {
-      console.log('Login errors:', errors)
-    }
+  form.post(isApp.value ? '/masuk' : '/login', {
+    onFinish: () => form.reset('password')
   })
 }
 </script>
@@ -22,9 +22,11 @@ const submit = () => {
   <div class="min-h-screen grid-dark flex items-center justify-center p-4 py-10">
     <div class="w-full max-w-5xl grid lg:grid-cols-2 gap-10 items-center">
       <div class="hidden lg:block lp" style="background:transparent">
-        <span class="badge-status mb-6">Panel Kendali</span>
-        <h1 class="font-display font-extrabold text-white text-5xl leading-[1.05] tracking-[-1.5px] mb-4">Kelola Website<span class="block text-accent">Jurusan TSM.</span></h1>
-        <p class="text-on-navy-muted mb-8 max-w-md">Teknik Sepeda Motor SMKS Islam 1 Kota Blitar — Jl. Musi No. 06 Kota Blitar.</p>
+        <span class="badge-status mb-6">{{ isApp ? 'TSM Superapp' : 'Panel Kendali' }}</span>
+        <h1 v-if="isApp" class="font-display font-extrabold text-white text-5xl leading-[1.05] tracking-[-1.5px] mb-4">Satu akun,<span class="block text-accent">semua layanan TSM.</span></h1>
+        <h1 v-else class="font-display font-extrabold text-white text-5xl leading-[1.05] tracking-[-1.5px] mb-4">Kelola Website<span class="block text-accent">Jurusan TSM.</span></h1>
+        <p v-if="isApp" class="text-on-navy-muted mb-8 max-w-md">LMS, PKL, UKK, dan Perpustakaan Digital untuk guru dan siswa Teknik Sepeda Motor.</p>
+        <p v-if="!isApp" class="text-on-navy-muted mb-8 max-w-md">Teknik Sepeda Motor SMKS Islam 1 Kota Blitar — Jl. Musi No. 06 Kota Blitar.</p>
         <GearRatio />
       </div>
     <div class="w-full max-w-md mx-auto">
@@ -33,13 +35,13 @@ const submit = () => {
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-full border border-accent/45 mb-4">
           <span class="text-accent font-mono text-sm tracking-wider">TSM</span>
         </div>
-        <div class="font-display text-white text-3xl font-bold">Panel Admin</div>
+        <div class="font-display text-white text-3xl font-bold">{{ isApp ? 'TSM Superapp' : 'Panel Admin' }}</div>
         <p class="font-mono text-xs tracking-wider uppercase text-on-navy-subtle mt-2">Teknik Sepeda Motor SMKS Islam 1 Blitar</p>
       </div>
 
       <div class="bg-white rounded-[24px] border border-accent/30 p-8">
-        <span class="mono-label mb-2">01 — MASUK</span>
-        <h2 class="font-display text-2xl font-bold text-navy mb-6">Masuk ke Panel Admin</h2>
+        <span class="mono-label mb-2">MASUK</span>
+        <h2 class="font-display text-2xl font-bold text-navy mb-6">{{ isApp ? 'Masuk Guru & Siswa' : 'Masuk ke Panel Admin' }}</h2>
         
         <!-- Login Form -->
         <form @submit.prevent="submit" class="space-y-5">
@@ -49,7 +51,7 @@ const submit = () => {
             <input 
               v-model="form.email" 
               type="email" 
-              placeholder="admin@tsm-blitar.sch.id" 
+              :placeholder="isApp ? 'nama@tsm-blitar.sch.id' : 'admin@tsm-blitar.sch.id'" 
               class="form-input" 
               :class="{ 'border-red-400 ring-red-200': form.errors.email }"
               autocomplete="email"
@@ -104,10 +106,7 @@ const submit = () => {
         </div>
       </div>
 
-      <!-- Info Box -->
-      <div class="mt-6 text-center text-on-navy-subtle text-xs bg-navy-panel border border-accent/20 rounded-2xl p-4 font-mono">
-        <p><strong>Demo:</strong> admin@tsm-blitar.sch.id / password123</p>
-      </div>
+      <p v-if="isApp" class="mt-6 text-center text-on-navy-subtle text-xs">Belum punya akun? Akun guru dan siswa dibuat oleh superadmin jurusan.</p>
     </div>
   </div>
   </div>

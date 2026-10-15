@@ -25,6 +25,7 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'role' => $request->user()->role,
                     'avatar' => $request->user()->avatar,
+                    'home' => $request->user()->homeUrl(),
                 ] : null,
             ],
             'settings' => cache()->remember('site_settings', 3600, function () {
