@@ -37,8 +37,8 @@ class DatabaseSeeder extends Seeder
             ['key'=>'hero_bg','value'=>'','group'=>'beranda','type'=>'image','label'=>'Hero Background'],
             ['key'=>'about_text','value'=>'Jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar hadir untuk mencetak tenaga teknisi sepeda motor yang kompeten, berkarakter Islami, dan siap memasuki dunia industri.','group'=>'beranda','type'=>'html','label'=>'Teks Tentang Kami'],
             ['key'=>'about_image','value'=>'','group'=>'beranda','type'=>'image','label'=>'Foto Tentang Kami'],
-            ['key'=>'ppdb_open','value'=>'1','group'=>'ppdb','type'=>'boolean','label'=>'PPDB Dibuka'],
-            ['key'=>'ppdb_info','value'=>'Pendaftaran Peserta Didik Baru Tahun Pelajaran 2026/2027 sudah dibuka!','group'=>'ppdb','type'=>'textarea','label'=>'Info PPDB'],
+            ['key'=>'ppdb_open','value'=>'1','group'=>'ppdb','type'=>'boolean','label'=>'SPMB Dibuka'],
+            ['key'=>'ppdb_info','value'=>'Pendaftaran SPMB (Sistem Penerimaan Murid Baru) Tahun Pelajaran 2026/2027 sudah dibuka!','group'=>'ppdb','type'=>'textarea','label'=>'Info SPMB'],
             ['key'=>'footer_text','value'=>'© 2026 Teknik Sepeda Motor SMKS Islam 1 Kota Blitar. Semua hak dilindungi.','group'=>'umum','type'=>'textarea','label'=>'Teks Footer'],
         ];
         foreach ($settings as $s) {
@@ -78,7 +78,7 @@ class DatabaseSeeder extends Seeder
 
         $sliders = [
             ['title'=>'Selamat Datang di Jurusan TSM','subtitle'=>'Mencetak Teknisi Handal Berkarakter Islami','button_text'=>'Pelajari Lebih Lanjut','button_url'=>'#tentang','sort_order'=>1],
-            ['title'=>'PPDB 2026/2027 Dibuka!','subtitle'=>'Daftar sekarang dan raih masa depan cerah bersama kami','button_text'=>'Daftar PPDB','button_url'=>'/ppdb','sort_order'=>2],
+            ['title'=>'SPMB 2026/2027 Dibuka!','subtitle'=>'Daftar sekarang dan raih masa depan cerah bersama kami','button_text'=>'Daftar SPMB','button_url'=>'/spmb','sort_order'=>2],
         ];
         foreach ($sliders as $s) {
             DB::table('sliders')->insert(array_merge($s, ['image'=>null,'is_active'=>true,'created_at'=>now(),'updated_at'=>now()]));

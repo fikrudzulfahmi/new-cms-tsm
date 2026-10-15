@@ -19,8 +19,9 @@ Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('p
 Route::post('/berita/{postId}/comment', [HomeController::class, 'comment'])->name('post.comment');
 Route::post('/berita/{postId}/share', [HomeController::class, 'share'])->name('post.share');
 Route::post('/komentar/{comment}/like', [HomeController::class, 'likeComment'])->name('comment.like');
-Route::get('/ppdb', [HomeController::class, 'ppdb'])->name('ppdb');
-Route::post('/ppdb', [HomeController::class, 'ppdbStore'])->name('ppdb.store');
+Route::get('/spmb', [HomeController::class, 'ppdb'])->name('ppdb');
+Route::post('/spmb', [HomeController::class, 'ppdbStore'])->name('ppdb.store');
+Route::permanentRedirect('/ppdb', '/spmb');
 Route::post('/kontak', [HomeController::class, 'contact'])->name('contact');
 Route::post('/testimoni', [HomeController::class, 'testimonialStore'])->name('testimonial.store');
 

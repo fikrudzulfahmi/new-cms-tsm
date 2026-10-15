@@ -15,7 +15,7 @@ const navLinks = [
   { label: 'Sarana', href: '/beranda#sarana' },
   { label: 'Prestasi', href: '/beranda#prestasi' },
   { label: 'Berita', href: '/berita' },
-  { label: 'PPDB', href: '/ppdb' },
+  { label: 'SPMB', href: '/spmb' },
 ]
 </script>
 
@@ -52,7 +52,7 @@ const navLinks = [
             <a v-for="link in navLinks" :key="link.href" :href="link.href" class="px-3 py-2 rounded-full text-sm font-semibold text-on-navy-muted hover:text-white hover:bg-white/5 transition">{{ link.label }}</a>
           </div>
           <div class="flex items-center gap-2">
-            <Link href="/ppdb" class="hidden md:inline-flex items-center gap-2 bg-accent text-navy text-sm font-bold px-4 py-2 rounded-full hover:brightness-105 transition">Daftar</Link>
+            <Link href="/spmb" class="hidden md:inline-flex items-center gap-2 bg-accent text-navy text-sm font-bold px-4 py-2 rounded-full hover:brightness-105 transition">Daftar</Link>
             <Link href="/login" class="hidden lg:inline-flex items-center gap-1.5 border border-accent/40 text-white text-sm font-semibold px-4 py-2 rounded-full hover:border-accent transition">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
               Admin
@@ -66,7 +66,7 @@ const navLinks = [
           <div v-if="mobileOpen" class="lg:hidden mt-3 pt-3 pb-2 border-t border-accent/20 space-y-1">
             <a v-for="link in navLinks" :key="link.href" :href="link.href" @click="mobileOpen=false" class="block px-4 py-2.5 rounded-2xl text-sm font-semibold text-on-navy-muted hover:text-white hover:bg-white/5">{{ link.label }}</a>
             <div class="grid grid-cols-2 gap-2 pt-2">
-              <Link href="/ppdb" class="btn-primary">Daftar</Link>
+              <Link href="/spmb" class="btn-primary">Daftar</Link>
               <Link href="/login" class="btn-ghost">Admin</Link>
             </div>
           </div>
@@ -115,7 +115,7 @@ const navLinks = [
               <li><a href="/beranda#program" class="hover:text-accent transition">Program Unggulan</a></li>
               <li><a href="/beranda#prestasi" class="hover:text-accent transition">Prestasi</a></li>
               <li><a href="/berita" class="hover:text-accent transition">Berita</a></li>
-              <li><a href="/ppdb" class="hover:text-accent transition">PPDB</a></li>
+              <li><a href="/spmb" class="hover:text-accent transition">SPMB</a></li>
             </ul>
           </div>
           <div>

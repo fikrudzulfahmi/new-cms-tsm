@@ -31,7 +31,7 @@ const props = defineProps(['stats', 'monthlyVisits', 'topPosts', 'categoryStats'
           <div class="text-xs text-amber-600 mt-1">Tanggapan & diskusi</div>
         </div>
         <div class="card p-6">
-          <div class="text-slate-500 text-xs font-medium">Total Pendaftar PPDB</div>
+          <div class="text-slate-500 text-xs font-medium">Total Pendaftar SPMB</div>
           <div class="text-3xl font-bold text-slate-800 mt-1">{{ stats.total_ppdb }}</div>
           <div class="text-xs text-purple-600 mt-1">Calon siswa baru</div>
         </div>

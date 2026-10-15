@@ -8,17 +8,17 @@ const form = useForm({
   father_phone: '', student_phone: '', address: '', notes: ''
 })
 
-const submit = () => form.post('/ppdb', { onSuccess: () => form.reset() })
+const submit = () => form.post('/spmb', { onSuccess: () => form.reset() })
 </script>
 
 <template>
   <AppLayout>
-    <title>Pendaftaran PPDB - TSM SMKS Islam 1 Blitar</title>
+    <title>Pendaftaran SPMB - TSM SMKS Islam 1 Blitar</title>
     <div class="grid-dark page-hero border-b border-accent/20">
       <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <span class="badge-status mb-6">Pendaftaran Dibuka</span>
-        <h1 class="font-display font-extrabold text-white mb-4 max-w-3xl">PPDB Online 2026/2027</h1>
-        <p class="text-lg max-w-2xl">Pendaftaran Peserta Didik Baru Jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar</p>
+        <h1 class="font-display font-extrabold text-white mb-4 max-w-3xl">SPMB Online 2026/2027</h1>
+        <p class="text-lg max-w-2xl">Sistem Penerimaan Murid Baru (SPMB) Jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar</p>
       </div>
     </div>
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -93,7 +93,7 @@ const submit = () => form.post('/ppdb', { onSuccess: () => form.reset() })
           </div>
 
           <button type="submit" :disabled="form.processing" class="w-full btn-primary justify-center py-3.5">
-            {{ form.processing ? 'Mengirim Pendaftaran...' : 'Kirim Pendaftaran PPDB' }}
+            {{ form.processing ? 'Mengirim Pendaftaran...' : 'Kirim Pendaftaran SPMB' }}
           </button>
         </form>
       </div>

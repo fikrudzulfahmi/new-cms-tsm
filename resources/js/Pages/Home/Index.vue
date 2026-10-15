@@ -77,14 +77,14 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
                 <p v-if="i===currentSlide" class="text-lg text-on-navy-muted mb-8 leading-relaxed max-w-xl">{{ slide.subtitle }}</p>
                 <div v-if="i===currentSlide" class="flex flex-wrap gap-3">
                   <a v-if="slide.button_url" :href="slide.button_url" class="btn-light">{{ slide.button_text || 'Selengkapnya' }}</a>
-                  <a href="/ppdb" class="btn-ghost">Daftar PPDB</a>
+                  <a href="/spmb" class="btn-ghost">Daftar SPMB</a>
                 </div>
               </div>
             </template>
             <template v-else>
               <h1 class="font-display text-4xl md:text-5xl lg:text-[62px] font-extrabold text-white leading-[1.05] tracking-[-1.5px] mb-6">Jurusan Teknik Sepeda Motor</h1>
               <p class="text-lg text-on-navy-muted mb-8 max-w-xl">SMKS Islam 1 Kota Blitar — Mencetak Teknisi Handal Berkarakter Islami</p>
-              <div class="flex gap-3"><a href="#tentang" class="btn-light">Pelajari Lebih</a><a href="/ppdb" class="btn-ghost">Daftar PPDB</a></div>
+              <div class="flex gap-3"><a href="#tentang" class="btn-light">Pelajari Lebih</a><a href="/spmb" class="btn-ghost">Daftar SPMB</a></div>
             </template>
           </div>
           <div class="hidden lg:flex items-center justify-center">
@@ -414,13 +414,13 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
       </div>
     </section>
 
-    <!-- PPDB BANNER -->
+    <!-- SPMB BANNER -->
     <section class="py-20 grid-dark border-y border-accent/20">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="mono-label mono-label-dark mb-4">11 — PPDB 2026/2027</div>
-        <h2 class="section-title !text-white mb-4">{{ $page.props.settings?.ppdb_info || 'Pendaftaran Peserta Didik Baru Dibuka!' }}</h2>
+        <div class="mono-label mono-label-dark mb-4">11 — SPMB 2026/2027</div>
+        <h2 class="section-title !text-white mb-4">{{ $page.props.settings?.ppdb_info || 'Pendaftaran SPMB Dibuka!' }}</h2>
         <p class="text-on-navy-muted mb-8">Bergabunglah bersama kami dan wujudkan karir di dunia otomotif</p>
-        <a href="/ppdb" class="btn-primary px-8">Daftar Sekarang →</a>
+        <a href="/spmb" class="btn-primary px-8">Daftar Sekarang →</a>
       </div>
     </section>
 

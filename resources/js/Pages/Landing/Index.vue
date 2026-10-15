@@ -100,11 +100,11 @@ const karier = [
 ]
 
 const faqs = [
-  { q: 'Apa syarat mendaftar di jurusan TSM?', a: 'Lulusan SMP/MTs sederajat, mengisi formulir pendaftaran online, serta melampirkan fotokopi ijazah/SKL, KK, dan akta kelahiran.' },
+  { q: 'Apa syarat mendaftar SPMB di jurusan TSM?', a: 'Lulusan SMP/MTs sederajat, mengisi formulir pendaftaran online, serta melampirkan fotokopi ijazah/SKL, KK, dan akta kelahiran.' },
   { q: 'Apakah siswa perempuan boleh masuk TSM?', a: 'Tentu boleh. Materi dan fasilitas praktik terbuka untuk semua siswa, dan banyak alumni perempuan berkarier di dunia otomotif.' },
   { q: 'Apakah ada sertifikat keahlian?', a: 'Ya. Di kelas XII siswa mengikuti Uji Kompetensi Keahlian (UKK) dan sertifikasi bersama mitra industri.' },
   { q: 'Di mana siswa melaksanakan PKL?', a: 'Di bengkel resmi, dealer, dan industri otomotif yang menjadi mitra jurusan, dengan pendampingan guru pembimbing.' },
-  { q: 'Apakah tersedia beasiswa?', a: 'Tersedia beasiswa prestasi dan bantuan bagi siswa kurang mampu. Hubungi panitia PPDB untuk informasi lengkap.' },
+  { q: 'Apakah tersedia beasiswa?', a: 'Tersedia beasiswa prestasi dan bantuan bagi siswa kurang mampu. Hubungi panitia SPMB untuk informasi lengkap.' },
 ]
 const openFaq = ref(0)
 
@@ -210,7 +210,7 @@ onBeforeUnmount(() => {
 
           <div class="nav-actions">
             <a href="#kontak" class="btn btn-ghost btn-nav">Kontak</a>
-            <Link href="/ppdb" class="btn btn-primary btn-nav">Daftar Sekarang</Link>
+            <a href="#spmb" class="btn btn-primary btn-nav">Gabung Bersama Kami</a>
           </div>
 
           <button type="button" class="nav-burger" :aria-label="menuOpen ? 'Tutup menu' : 'Buka menu'" :aria-expanded="menuOpen" aria-controls="mobile-menu" @click="menuOpen = !menuOpen">
@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
             <a v-for="l in navLinks" :key="l.href" :href="l.href" @click="menuOpen = false">{{ l.label }}</a>
             <div class="mobile-actions">
               <a href="#kontak" class="btn btn-ghost" @click="menuOpen = false">Kontak</a>
-              <Link href="/ppdb" class="btn btn-primary">Daftar Sekarang</Link>
+              <a href="#spmb" class="btn btn-primary" @click="menuOpen = false">Gabung Bersama Kami</a>
             </div>
           </div>
         </div>
@@ -231,16 +231,16 @@ onBeforeUnmount(() => {
 
       <div class="container hero-content">
         <div class="hero-text">
-          <span v-if="s.ppdb_open === '1'" class="badge"><span class="badge-dot" aria-hidden="true"></span>{{ s.ppdb_info || 'PENDAFTARAN DIBUKA' }}</span>
+          <span class="badge"><span class="badge-dot" aria-hidden="true"></span>AYO GABUNG BERSAMA KAMI</span>
           <transition name="fade" mode="out-in">
             <h1 :key="slideIdx">{{ current.title }} <span v-if="current.subtitle" class="accent">{{ current.subtitle }}</span></h1>
           </transition>
           <p class="lead">{{ s.site_tagline || 'Belajar langsung di bengkel praktik, dari mesin konvensional hingga sistem injeksi dan motor listrik.' }}</p>
           <div class="hero-buttons">
-            <Link href="/ppdb" class="btn btn-primary btn-lg">
-              Daftar Sekarang
+            <a href="#spmb" class="btn btn-primary btn-lg">
+              Gabung Bersama Kami
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </Link>
+            </a>
             <a :href="current.button_url || '#kompetensi'" class="btn btn-ghost btn-lg">{{ current.button_text || 'Lihat Kompetensi' }}</a>
           </div>
           <div v-if="headlines.length > 1" class="hero-dots" aria-label="Pilih headline">
@@ -382,11 +382,9 @@ onBeforeUnmount(() => {
       <!-- ================= SARANA ================= -->
       <section id="sarana" class="section section-tint">
         <div class="container">
-          <div class="section-head split reveal">
-            <div>
-              <span class="mono-label">04 — SARANA &amp; PRASARANA</span>
-              <h2>Bengkel praktik berstandar industri.</h2>
-            </div>
+          <div class="section-head reveal">
+            <span class="mono-label">04 — SARANA &amp; PRASARANA</span>
+            <h2>Bengkel praktik berstandar industri.</h2>
             <div class="chips">
               <button v-for="c in facCats" :key="c" type="button" class="chip" :class="{ on: facCat === c }" @click="facCat = c">{{ c }}</button>
             </div>
@@ -586,15 +584,16 @@ onBeforeUnmount(() => {
       </section>
 
       <!-- ================= CTA ================= -->
-      <section id="daftar" class="section section-cta">
+      <section id="spmb" class="section section-cta">
         <div class="container">
           <div class="cta-panel grid-dark reveal">
             <div class="cta-text">
+              <span class="mono-label accent">SPMB — SISTEM PENERIMAAN MURID BARU</span>
               <h2>Siap jadi <span class="accent">mekanik profesional?</span></h2>
-              <p>{{ s.ppdb_info || 'Pendaftaran peserta didik baru sudah dibuka.' }} Daftar online sekarang atau tanya panitia lewat WhatsApp.</p>
+              <p>{{ s.ppdb_open === '1' ? (s.ppdb_info || 'Pendaftaran SPMB sudah dibuka.') : 'Pendaftaran SPMB belum dibuka. Pantau terus pengumuman terbaru dari kami.' }} Daftar online sekarang atau tanya panitia lewat WhatsApp.</p>
             </div>
             <div class="cta-actions">
-              <Link href="/ppdb" class="btn btn-primary btn-lg">Daftar Online</Link>
+              <Link href="/spmb" class="btn btn-primary btn-lg">Daftar SPMB</Link>
               <a :href="waLink" class="btn btn-ghost btn-lg" :target="waNumber ? '_blank' : null" rel="noopener">Tanya via WhatsApp</a>
             </div>
           </div>
@@ -663,7 +662,7 @@ onBeforeUnmount(() => {
               <ul>
                 <li><Link href="/berita">Semua Berita</Link></li>
                 <li v-for="c in categories.slice(0, 4)" :key="c.id"><Link :href="`/berita?kategori=${c.slug}`">{{ c.name }}</Link></li>
-                <li><Link href="/ppdb">PPDB</Link></li>
+                <li><Link href="/spmb">SPMB</Link></li>
               </ul>
             </div>
             <div>

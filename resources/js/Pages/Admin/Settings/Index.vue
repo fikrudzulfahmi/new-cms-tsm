@@ -62,7 +62,7 @@ const submit = () => form.post('/admin/pengaturan', { preserveScroll: true })
             <input type="file" @input="form.about_image = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
           </div>
           <div>
-            <label class="form-label">Info Banner PPDB</label>
+            <label class="form-label">Info Banner SPMB</label>
             <input v-model="form.ppdb_info" type="text" class="form-input" />
           </div>
         </div>

@@ -134,7 +134,7 @@ class DemoContentSeeder extends Seeder
         $isEmpty = fn ($v) => !$v || str_starts_with($v, 'dummy/');
         foreach (Slider::orderBy('id')->get() as $i => $s) {
             $s->update(['image' => $isEmpty($s->image) ? $this->pickPhoto(['bengkel', 'siswa', 'motor', 'sekolah'], $i) : $s->image,
-                'sort_order' => $s->sort_order ?: $i + 1, 'button_text' => $s->button_text ?: 'Selengkapnya', 'button_url' => $s->button_url ?: '/ppdb']);
+                'sort_order' => $s->sort_order ?: $i + 1, 'button_text' => $s->button_text ?: 'Selengkapnya', 'button_url' => $s->button_url ?: '/spmb']);
         }
         foreach (Competency::orderBy('id')->get() as $i => $c) {
             $c->update(['image' => $isEmpty($c->image) ? $this->pickPhoto(['bengkel', 'motor', 'alat', 'pabrik'], $i + 3) : $c->image,
@@ -203,7 +203,7 @@ class DemoContentSeeder extends Seeder
         $posts = [
             ['Siswa TSM SMKS Islam 1 Blitar Juara 1 LKS Kota Blitar 2026', 'Prestasi', 'lks kota blitar'],
             ['Kunjungan Industri ke Pabrik Astra Honda Motor Cikarang', 'Kegiatan', 'kunjungan industri'],
-            ['Pendaftaran Peserta Didik Baru TSM Tahun Ajaran 2027/2028 Dibuka', 'Pengumuman', 'ppdb tsm'],
+            ['Pendaftaran SPMB TSM Tahun Ajaran 2027/2028 Dibuka', 'Pengumuman', 'spmb tsm'],
             ['Cara Merawat Motor Injeksi Agar Tetap Irit dan Awet', 'Artikel Otomotif', 'motor injeksi'],
             ['Teaching Factory TSM Layani Servis Motor Warga Sekitar', 'Kegiatan', 'teaching factory'],
             ['Uji Kompetensi Keahlian Kelas XII Berjalan Lancar', 'Berita Sekolah', 'uji kompetensi keahlian'],
@@ -310,12 +310,12 @@ class DemoContentSeeder extends Seeder
             }
         }
 
-        // ---------- PPDB ----------
+        // ---------- SPMB ----------
         $schools = ['SMPN 1 Blitar', 'SMPN 3 Blitar', 'MTsN Kota Blitar', 'SMP Islam Blitar', 'SMPN 2 Kanigoro', 'MTs Al-Muhsin'];
         $statuses = ['baru', 'baru', 'diproses', 'diterima', 'diterima', 'ditolak'];
         for ($i = 0; $i < 18; $i++) {
             $n = $names[$i % 10] . ($i >= 10 ? ' ' . chr(65 + $i) : '');
-            $r = Registration::create(['registration_number' => 'PPDB-2027-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT), 'full_name' => $n, 'nisn' => (string) (3000000000 + $i * 1371),
+            $r = Registration::create(['registration_number' => 'SPMB-2027-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT), 'full_name' => $n, 'nisn' => (string) (3000000000 + $i * 1371),
                 'gender' => $i % 3 ? 'L' : 'P', 'birth_date' => Carbon::create(2011, 1 + $i % 12, 1 + $i), 'birth_place' => 'Blitar', 'address' => "Jl. Demo No. $i, Kota Blitar",
                 'phone' => '0812' . str_pad((string) (3456000 + $i), 8, '0', STR_PAD_LEFT), 'email' => "calon$i@contoh.id", 'origin_school' => $schools[$i % 6],
                 'parent_name' => 'Orang Tua ' . $n, 'parent_phone' => '0857' . str_pad((string) (1200000 + $i), 8, '0', STR_PAD_LEFT), 'notes' => '[DEMO]', 'status' => $statuses[$i % 6]]);
@@ -331,7 +331,7 @@ class DemoContentSeeder extends Seeder
 
         // ---------- Kunjungan 90 hari ----------
         $postIds = Post::published()->pluck('id')->all();
-        $paths = ['/', '/beranda', '/berita', '/ppdb', '/beranda#prestasi', '/beranda#galeri'];
+        $paths = ['/', '/beranda', '/berita', '/spmb', '/beranda#prestasi', '/beranda#galeri'];
         $devices = ['mobile', 'mobile', 'mobile', 'desktop', 'desktop', 'tablet'];
         $browsers = ['Chrome', 'Chrome', 'Chrome', 'Safari', 'Firefox', 'Edge', 'Samsung Internet'];
         $refs = [null, null, 'https://www.google.com/', 'https://www.facebook.com/', 'https://www.instagram.com/', 'https://wa.me/'];
@@ -396,7 +396,7 @@ class DemoContentSeeder extends Seeder
 <p style="text-align: center">Simak dokumentasi kegiatan pada video berikut.</p>
 <div data-youtube-video=""><iframe width="640" height="360" allowfullscreen="true" src="https://www.youtube-nocookie.com/embed/{$yt}?controls=1"></iframe></div>
 <h2>Hasil dan Harapan</h2>
-<p>Dengan demikian, kegiatan {$kw} memberi dampak positif bagi siswa. Bahkan, beberapa siswa mendapat tawaran kerja dari mitra industri. Informasi pendaftaran dapat dilihat di halaman <a href="/ppdb">PPDB</a>, sedangkan info resmi kurikulum ada di <a href="https://kurikulum.kemdikbud.go.id" target="_blank" rel="noopener noreferrer">situs Kemendikbud</a>.</p>
+<p>Dengan demikian, kegiatan {$kw} memberi dampak positif bagi siswa. Bahkan, beberapa siswa mendapat tawaran kerja dari mitra industri. Informasi pendaftaran dapat dilihat di halaman <a href="/spmb">SPMB</a>, sedangkan info resmi kurikulum ada di <a href="https://kurikulum.kemdikbud.go.id" target="_blank" rel="noopener noreferrer">situs Kemendikbud</a>.</p>
 <p><mark>Catatan:</mark> ini adalah konten dummy untuk keperluan pratinjau tampilan.</p>
 HTML;
     }
