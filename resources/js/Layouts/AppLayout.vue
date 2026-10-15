@@ -1,22 +1,13 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { usePage } from '@inertiajs/vue3'
+import SiteNav from '@/Components/Shared/SiteNav.vue'
 
 const page = usePage()
 const settings = computed(() => page.props.settings || {})
 const flash = computed(() => page.props.flash || {})
-const mobileOpen = ref(false)
 const showFlash = ref(true)
 
-const navLinks = [
-  { label: 'Beranda', href: '/' },
-  { label: 'Kompetensi', href: '/beranda#kompetensi' },
-  { label: 'Program', href: '/beranda#program' },
-  { label: 'Sarana', href: '/beranda#sarana' },
-  { label: 'Prestasi', href: '/beranda#prestasi' },
-  { label: 'Berita', href: '/berita' },
-  { label: 'SPMB', href: '/spmb' },
-]
 </script>
 
 <template>
@@ -37,42 +28,7 @@ const navLinks = [
       </div>
     </Transition>
 
-    <!-- Navbar: floating glassy navy (Clean Orbit) -->
-    <nav class="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-6xl z-50 backdrop-blur-xl bg-navy/80 border border-accent/25 rounded-full shadow-[0_10px_40px_rgba(10,26,58,.35)]" :class="mobileOpen ? 'rounded-3xl' : ''">
-      <div class="pl-3 pr-3 sm:pl-4 py-2.5">
-        <div class="flex items-center justify-between gap-3">
-          <Link href="/" class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full border border-accent/45 flex items-center justify-center text-accent font-mono font-medium text-xs tracking-wider">TSM</div>
-            <div class="hidden sm:block leading-tight">
-              <div class="font-display font-bold text-white text-sm">Teknik Sepeda Motor</div>
-              <div class="font-mono text-[11px] tracking-wider uppercase text-on-navy-subtle">SMKS Islam 1 Blitar</div>
-            </div>
-          </Link>
-          <div class="hidden lg:flex items-center gap-1">
-            <a v-for="link in navLinks" :key="link.href" :href="link.href" :target="link.href === '/spmb' ? '_blank' : null" class="px-3 py-2 rounded-full text-sm font-semibold text-on-navy-muted hover:text-white hover:bg-white/5 transition">{{ link.label }}</a>
-          </div>
-          <div class="flex items-center gap-2">
-            <a href="/spmb" target="_blank" rel="noopener" class="hidden md:inline-flex items-center gap-2 bg-accent text-navy text-sm font-bold px-4 py-2 rounded-full hover:brightness-105 transition">Daftar</a>
-            <Link href="/login" class="hidden lg:inline-flex items-center gap-1.5 border border-accent/40 text-white text-sm font-semibold px-4 py-2 rounded-full hover:border-accent transition">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-              Admin
-            </Link>
-            <button @click="mobileOpen=!mobileOpen" aria-label="Menu" class="lg:hidden w-10 h-10 rounded-full border border-accent/40 text-white flex items-center justify-center">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path v-if="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/><path v-else stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-        </div>
-        <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150" leave-to-class="opacity-0 -translate-y-1">
-          <div v-if="mobileOpen" class="lg:hidden mt-3 pt-3 pb-2 border-t border-accent/20 space-y-1">
-            <a v-for="link in navLinks" :key="link.href" :href="link.href" :target="link.href === '/spmb' ? '_blank' : null" @click="mobileOpen=false" class="block px-4 py-2.5 rounded-2xl text-sm font-semibold text-on-navy-muted hover:text-white hover:bg-white/5">{{ link.label }}</a>
-            <div class="grid grid-cols-2 gap-2 pt-2">
-              <a href="/spmb" target="_blank" rel="noopener" class="btn-primary">Daftar</a>
-              <Link href="/login" class="btn-ghost">Admin</Link>
-            </div>
-          </div>
-        </Transition>
-      </div>
-    </nav>
+    <SiteNav />
 
     <!-- Content -->
     <main class="flex-1">
@@ -110,10 +66,10 @@ const navLinks = [
           <div>
             <h4 class="font-mono text-xs tracking-[2px] uppercase text-accent mb-5">Tautan Cepat</h4>
             <ul class="space-y-2.5 text-on-navy-muted text-sm">
-              <li><a href="/beranda#tentang" class="hover:text-accent transition">Tentang Kami</a></li>
-              <li><a href="/beranda#kompetensi" class="hover:text-accent transition">Kompetensi</a></li>
-              <li><a href="/beranda#program" class="hover:text-accent transition">Program Unggulan</a></li>
-              <li><a href="/beranda#prestasi" class="hover:text-accent transition">Prestasi</a></li>
+              <li><a href="/#tentang" class="hover:text-accent transition">Tentang Kami</a></li>
+              <li><a href="/#kompetensi" class="hover:text-accent transition">Kompetensi</a></li>
+              <li><a href="/#program" class="hover:text-accent transition">Program Unggulan</a></li>
+              <li><a href="/#prestasi" class="hover:text-accent transition">Prestasi</a></li>
               <li><a href="/berita" class="hover:text-accent transition">Berita</a></li>
               <li><a href="/spmb" target="_blank" rel="noopener" class="hover:text-accent transition">SPMB</a></li>
             </ul>

@@ -2,6 +2,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import { computed, onMounted, onBeforeUnmount, ref, nextTick, watch } from 'vue'
 import GearRatio from '@/Components/Landing/GearRatio.vue'
+import SiteNav from '@/Components/Shared/SiteNav.vue'
 import { CONFIG } from './content.js'
 import '../../../css/landing.css'
 
@@ -26,18 +27,6 @@ const flash = computed(() => page.props.flash || {})
 const img = (p) => (p ? (/^https?:\/\//.test(p) ? p : `/storage/${p}`) : null)
 const schoolName = computed(() => s.value.school_name || CONFIG.namaSmk)
 const address = computed(() => s.value.address || CONFIG.alamat)
-
-const menuOpen = ref(false)
-const scrolled = ref(false)
-
-const navLinks = [
-  { href: '#kompetensi', label: 'Kompetensi' },
-  { href: '#program', label: 'Program' },
-  { href: '#sarana', label: 'Sarana' },
-  { href: '#prestasi', label: 'Prestasi' },
-  { href: '#berita', label: 'Berita' },
-  { href: '#alumni', label: 'Alumni' },
-]
 
 /* ---------- HEADLINE (hero berganti dari slider) ---------- */
 const slideIdx = ref(0)
@@ -138,7 +127,6 @@ const socials = computed(() => [
 
 /* ---------- Scroll / reveal ---------- */
 let io = null
-function onScroll() { scrolled.value = window.scrollY > 16 }
 function observeReveal() {
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   const els = document.querySelectorAll('.lp .reveal:not(.is-in)')
@@ -160,13 +148,10 @@ function observeReveal() {
 watch([postCat, facCat], () => nextTick(() => document.querySelectorAll('.lp .reveal:not(.is-in)').forEach(el => el.classList.add('is-in'))))
 
 onMounted(() => {
-  onScroll()
-  window.addEventListener('scroll', onScroll, { passive: true })
   observeReveal()
   if (headlines.value.length > 1) slideTimer = setInterval(() => goSlide(slideIdx.value + 1), 6000)
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', onScroll)
   io?.disconnect()
   clearInterval(slideTimer)
 })
@@ -190,44 +175,7 @@ onBeforeUnmount(() => {
         </template>
       </div>
 
-      <nav class="nav" :class="{ 'is-scrolled': scrolled }" aria-label="Navigasi utama">
-        <div class="container nav-inner">
-          <a href="#" class="brand" aria-label="Beranda TSM">
-            <svg class="brand-logo" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-              <circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="2"/>
-              <circle cx="20" cy="20" r="6" fill="currentColor"/>
-              <path d="M20 3v8M20 29v8M3 20h8M29 20h8M8 8l5.5 5.5M26.5 26.5L32 32M32 8l-5.5 5.5M13.5 26.5L8 32" stroke="currentColor" stroke-width="1.6"/>
-            </svg>
-            <span class="brand-text">
-              <span class="brand-title">TSM</span>
-              <span class="brand-sub">{{ schoolName }}</span>
-            </span>
-          </a>
-
-          <ul class="nav-links">
-            <li v-for="l in navLinks" :key="l.href"><a :href="l.href">{{ l.label }}</a></li>
-          </ul>
-
-          <div class="nav-actions">
-            <a href="#kontak" class="btn btn-ghost btn-nav">Kontak</a>
-            <a href="#spmb" class="btn btn-primary btn-nav">Gabung Bersama Kami</a>
-          </div>
-
-          <button type="button" class="nav-burger" :aria-label="menuOpen ? 'Tutup menu' : 'Buka menu'" :aria-expanded="menuOpen" aria-controls="mobile-menu" @click="menuOpen = !menuOpen">
-            <span></span><span></span><span></span>
-          </button>
-        </div>
-
-        <div v-show="menuOpen" id="mobile-menu" class="mobile-menu">
-          <div class="container">
-            <a v-for="l in navLinks" :key="l.href" :href="l.href" @click="menuOpen = false">{{ l.label }}</a>
-            <div class="mobile-actions">
-              <a href="#kontak" class="btn btn-ghost" @click="menuOpen = false">Kontak</a>
-              <a href="#spmb" class="btn btn-primary" @click="menuOpen = false">Gabung Bersama Kami</a>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <SiteNav />
 
       <div class="container hero-content">
         <div class="hero-text">
