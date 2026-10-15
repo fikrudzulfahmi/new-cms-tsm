@@ -124,7 +124,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div class="mono-label mb-4">01 — TENTANG JURUSAN</div>
+            <div class="mono-label mb-4">TENTANG JURUSAN</div>
             <h2 class="section-title mb-6">Teknik Sepeda Motor SMKS Islam 1 Blitar</h2>
             <div class="prose prose-blue max-w-none text-slate-600 leading-relaxed" v-html="$page.props.settings?.about_text || 'Jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar hadir untuk mencetak tenaga teknisi sepeda motor yang kompeten, berkarakter Islami, dan siap memasuki dunia industri.'"></div>
             <div class="mt-8 flex gap-3">
@@ -149,7 +149,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section id="kompetensi" class="py-24 grid-light">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="mono-label mb-3">02 — KOMPETENSI</div>
+          <div class="mono-label mb-3">KOMPETENSI</div>
           <h2 class="section-title">Kompetensi Keahlian</h2>
           <p class="section-subtitle">Yang diajarkan di jurusan Teknik Sepeda Motor</p>
         </div>
@@ -176,7 +176,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section id="program" class="py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="mono-label mb-3">03 — PROGRAM</div>
+          <div class="mono-label mb-3">PROGRAM</div>
           <h2 class="section-title">Program Unggulan</h2>
           <p class="section-subtitle">Keunggulan yang kami tawarkan untuk masa depan Anda</p>
         </div>
@@ -199,7 +199,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section id="sarana" class="py-24 grid-light">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="mono-label mb-3">04 — SARANA</div>
+          <div class="mono-label mb-3">SARANA</div>
           <h2 class="section-title">Sarana & Prasarana</h2>
           <p class="section-subtitle">Fasilitas lengkap untuk mendukung pembelajaran</p>
         </div>
@@ -224,7 +224,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section id="prestasi" class="py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="mono-label mb-3">05 — PRESTASI</div>
+          <div class="mono-label mb-3">PRESTASI</div>
           <h2 class="section-title">Prestasi Kami</h2>
           <p class="section-subtitle">Bangga dengan pencapaian para siswa terbaik</p>
         </div>
@@ -255,7 +255,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
-            <div class="mono-label mb-2">06 — BERITA</div>
+            <div class="mono-label mb-2">BERITA</div>
             <h2 class="section-title">Berita Terkini</h2>
           </div>
           <a href="/berita" class="btn-secondary text-sm self-start sm:self-auto">Semua Berita →</a>
@@ -294,7 +294,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section id="galeri" class="py-24 bg-white" v-if="gallery?.length">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="mono-label mb-3">07 — GALERI</div>
+          <div class="mono-label mb-3">GALERI</div>
           <h2 class="section-title">Galeri Foto</h2>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -309,7 +309,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section id="guru" class="py-24 grid-light" v-if="teachers?.length">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="mono-label mb-3">08 — TIM PENGAJAR</div>
+          <div class="mono-label mb-3">TIM PENGAJAR</div>
           <h2 class="section-title">Guru & Staf</h2>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -330,7 +330,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section id="testimoni" class="py-24 grid-dark">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="mono-label mono-label-dark mb-3">09 — UMPAN BALIK</div>
+          <div class="mono-label mono-label-dark mb-3">UMPAN BALIK</div>
           <h2 class="section-title !text-white mb-2">Umpan Balik Lulusan</h2>
           <p class="text-on-navy-subtle">Apa kata alumni tentang jurusan TSM?</p>
         </div>
@@ -402,7 +402,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section id="mitra" class="py-24 bg-white" v-if="partners?.length">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="mono-label mb-3">10 — MITRA</div>
+          <div class="mono-label mb-3">MITRA</div>
           <h2 class="section-title">Mitra Industri</h2>
         </div>
         <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-6">
@@ -417,7 +417,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <!-- SPMB BANNER -->
     <section class="py-20 grid-dark border-y border-accent/20">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="mono-label mono-label-dark mb-4">11 — SPMB 2026/2027</div>
+        <div class="mono-label mono-label-dark mb-4">SPMB 2026/2027</div>
         <h2 class="section-title !text-white mb-4">{{ $page.props.settings?.spmb_info || 'Pendaftaran SPMB Dibuka!' }}</h2>
         <p class="text-on-navy-muted mb-8">Bergabunglah bersama kami dan wujudkan karir di dunia otomotif</p>
         <a href="/spmb" target="_blank" rel="noopener" class="btn-primary px-8">Daftar Sekarang →</a>
@@ -428,7 +428,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section id="kontak" class="py-24 grid-light">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <div class="mono-label mb-3">12 — KONTAK</div>
+          <div class="mono-label mb-3">KONTAK</div>
           <h2 class="section-title">Hubungi Kami</h2>
           <p class="section-subtitle">Kami siap menjawab pertanyaan Anda</p>
         </div>

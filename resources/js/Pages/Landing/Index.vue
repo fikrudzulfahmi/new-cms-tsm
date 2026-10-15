@@ -321,7 +321,7 @@ onBeforeUnmount(() => {
         <div class="container">
           <div class="section-head split reveal">
             <div>
-              <span class="mono-label">01 — KOMPETENSI KEAHLIAN</span>
+              <span class="mono-label">KOMPETENSI KEAHLIAN</span>
               <h2>Apa saja yang kamu pelajari di TSM?</h2>
             </div>
             <p class="head-aside">Materi disusun bersama mitra industri, dengan porsi praktik yang besar di bengkel sekolah.</p>
@@ -342,7 +342,7 @@ onBeforeUnmount(() => {
       <section id="alur" class="section grid-light">
         <div class="container">
           <div class="section-head center reveal">
-            <span class="mono-label">02 — ALUR BELAJAR</span>
+            <span class="mono-label">ALUR BELAJAR</span>
             <h2 class="h2-narrow">Tiga tahun, dari dasar hingga siap terjun ke bengkel.</h2>
           </div>
           <div class="alur-grid">
@@ -360,7 +360,7 @@ onBeforeUnmount(() => {
       <section id="program" class="section">
         <div class="container">
           <div class="section-head reveal">
-            <span class="mono-label">03 — PROGRAM UNGGULAN</span>
+            <span class="mono-label">PROGRAM UNGGULAN</span>
             <h2>Lebih dari sekadar belajar di kelas.</h2>
           </div>
           <div class="prog-grid">
@@ -383,7 +383,7 @@ onBeforeUnmount(() => {
       <section id="sarana" class="section section-tint">
         <div class="container">
           <div class="section-head reveal">
-            <span class="mono-label">04 — SARANA &amp; PRASARANA</span>
+            <span class="mono-label">SARANA &amp; PRASARANA</span>
             <h2>Bengkel praktik berstandar industri.</h2>
             <div class="chips">
               <button v-for="c in facCats" :key="c" type="button" class="chip" :class="{ on: facCat === c }" @click="facCat = c">{{ c }}</button>
@@ -407,7 +407,7 @@ onBeforeUnmount(() => {
         <div class="container">
           <div class="section-head split reveal">
             <div>
-              <span class="mono-label accent">05 — PRESTASI</span>
+              <span class="mono-label accent">PRESTASI</span>
               <h2>Bukti kompetensi di ajang lomba.</h2>
             </div>
             <p class="head-aside">{{ stats.achievements }} prestasi tercatat, dari tingkat sekolah hingga nasional.</p>
@@ -433,7 +433,7 @@ onBeforeUnmount(() => {
         <div class="container">
           <div class="section-head split reveal">
             <div>
-              <span class="mono-label">06 — BERITA TERKINI</span>
+              <span class="mono-label">BERITA TERKINI</span>
               <h2>Kabar dari jurusan.</h2>
             </div>
             <Link href="/berita" class="btn btn-outline btn-sm">Semua berita →</Link>
@@ -474,7 +474,7 @@ onBeforeUnmount(() => {
       <section v-if="gallery.length" id="galeri" class="section section-tint">
         <div class="container">
           <div class="section-head reveal">
-            <span class="mono-label">07 — GALERI</span>
+            <span class="mono-label">GALERI</span>
             <h2>Suasana belajar di TSM.</h2>
           </div>
           <div class="gal-grid">
@@ -490,7 +490,7 @@ onBeforeUnmount(() => {
       <section v-if="teachers.length" id="guru" class="section">
         <div class="container">
           <div class="section-head reveal">
-            <span class="mono-label">08 — GURU &amp; INSTRUKTUR</span>
+            <span class="mono-label">GURU &amp; INSTRUKTUR</span>
             <h2>Dibimbing praktisi berpengalaman.</h2>
           </div>
           <div class="teach-grid">
@@ -508,7 +508,7 @@ onBeforeUnmount(() => {
       <section id="karier" class="section section-tint">
         <div class="container karier-wrap">
           <div class="karier-intro reveal">
-            <span class="mono-label">09 — PROSPEK KARIER</span>
+            <span class="mono-label">PROSPEK KARIER</span>
             <h2>Lulus, lalu ke mana?</h2>
             <p>Keahlian otomotif roda dua dibutuhkan di banyak jalur, baik bekerja, membuka usaha, maupun melanjutkan studi.</p>
           </div>
@@ -526,7 +526,7 @@ onBeforeUnmount(() => {
         <div class="container">
           <div class="section-head split reveal">
             <div>
-              <span class="mono-label">10 — UMPAN BALIK LULUSAN</span>
+              <span class="mono-label">UMPAN BALIK LULUSAN</span>
               <h2>Kata alumni tentang TSM.</h2>
             </div>
             <button type="button" class="btn btn-outline btn-sm" @click="showTesti = !showTesti">{{ showTesti ? 'Tutup formulir' : 'Kirim testimoni' }}</button>
@@ -569,7 +569,7 @@ onBeforeUnmount(() => {
       <section id="faq" class="section section-tint">
         <div class="container faq-wrap">
           <div class="faq-intro reveal">
-            <span class="mono-label">11 — FAQ</span>
+            <span class="mono-label">FAQ</span>
             <h2>Pertanyaan yang sering diajukan.</h2>
           </div>
           <div class="faq-list reveal">
@@ -604,7 +604,7 @@ onBeforeUnmount(() => {
       <section id="kontak" class="section">
         <div class="container contact-wrap">
           <div class="contact-info reveal">
-            <span class="mono-label">12 — HUBUNGI KAMI</span>
+            <span class="mono-label">HUBUNGI KAMI</span>
             <h2>Kunjungi atau hubungi kami.</h2>
             <ul>
               <li><b>Alamat</b>{{ address }}</li>
