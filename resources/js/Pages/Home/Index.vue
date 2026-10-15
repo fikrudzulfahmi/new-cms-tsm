@@ -56,7 +56,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <title>Beranda - TSM SMKS Islam 1 Blitar</title>
 
     <!-- HERO SLIDER -->
-    <section class="relative overflow-hidden grid-dark hero-slide flex items-center pt-24" id="beranda">
+    <section class="relative overflow-hidden grid-dark hero-slide flex items-center pt-20 min-h-[min(100svh,820px)]" id="beranda">
       <div class="absolute inset-0">
         <template v-if="sliders?.length">
           <div v-for="(slide, i) in sliders" :key="slide.id" :class="['absolute inset-0 transition-opacity duration-700', i === currentSlide ? 'opacity-100' : 'opacity-0']">
@@ -68,7 +68,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
         
       </div>
 
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-12 w-full">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <template v-if="sliders?.length">
