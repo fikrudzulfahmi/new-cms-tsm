@@ -7,6 +7,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
+use App\Models\Setting;
 
 /**
  * Data dummy untuk pratinjau situs. Jalankan: php artisan db:seed --class=DemoContentSeeder
@@ -49,9 +51,74 @@ class DemoContentSeeder extends Seeder
         return $path;
     }
 
+
+    private const FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
+    private const FONT_R = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
+
+    /** Foto asli (Wikimedia Commons, lisensi bebas) dari dummy/photos/<topik>/ */
+    private function photo(string $topic, int $i): string
+    {
+        $files = array_values(array_filter(Storage::disk('public')->files("dummy/photos/$topic"), fn ($f) => str_ends_with($f, '.jpg')));
+        sort($files);
+        return $files ? $files[$i % count($files)] : $this->img("fallback-$topic-$i", $topic, 1200, 675, $i);
+    }
+
+    private function pickPhoto(array $topics, int $i): string
+    {
+        return $this->photo($topics[$i % count($topics)], intdiv($i, count($topics)) + $i);
+    }
+
+    /** Avatar inisial bulat (guru, alumni, user) */
+    private function avatar(string $name, int $i, int $size = 400): string
+    {
+        $path = 'dummy/avatar-' . Str::slug($name) . '.png';
+        $im = imagecreatetruecolor($size, $size);
+        $colors = [[10, 26, 58], [18, 40, 90], [30, 79, 168], [74, 93, 128], [124, 200, 255]];
+        [$r, $g, $b] = $colors[$i % count($colors)];
+        imagefill($im, 0, 0, imagecolorallocate($im, $r, $g, $b));
+        $fg = $i % count($colors) === 4 ? imagecolorallocate($im, 10, 26, 58) : imagecolorallocate($im, 255, 255, 255);
+        $ring = imagecolorallocatealpha($im, 124, 200, 255, 70);
+        imagesetthickness($im, 6);
+        imageellipse($im, (int) ($size / 2), (int) ($size / 2), (int) ($size * 0.86), (int) ($size * 0.86), $ring);
+        $clean = trim(preg_replace('/^((drs?|h|hj|ir)\.\s*)+/i', '', preg_replace('/,.*$/', '', $name)));
+        $parts = preg_split('/\s+/', $clean);
+        $ini = strtoupper(mb_substr($parts[0] ?? 'T', 0, 1) . mb_substr($parts[1] ?? '', 0, 1));
+        $fs = $size * 0.3;
+        $box = imagettfbbox($fs, 0, self::FONT, $ini);
+        imagettftext($im, $fs, 0, (int) (($size - ($box[2] - $box[0])) / 2), (int) (($size + ($box[1] - $box[7])) / 2), $fg, self::FONT, $ini);
+        ob_start(); imagepng($im); Storage::disk('public')->put($path, ob_get_clean()); imagedestroy($im);
+        return $path;
+    }
+
+    /** Logo teks sederhana (mitra / situs) */
+    private function logo(string $name, int $i, int $w = 480, int $h = 240, bool $transparent = false): string
+    {
+        $path = 'dummy/logo-' . Str::slug($name) . '.png';
+        $im = imagecreatetruecolor($w, $h);
+        imagesavealpha($im, true);
+        imagealphablending($im, false);
+        $bg = $transparent ? imagecolorallocatealpha($im, 0, 0, 0, 127) : imagecolorallocate($im, 255, 255, 255);
+        imagefilledrectangle($im, 0, 0, $w, $h, $bg);
+        imagealphablending($im, true);
+        $navy = imagecolorallocate($im, 10, 26, 58); $blue = imagecolorallocate($im, 30, 79, 168); $acc = imagecolorallocate($im, 124, 200, 255);
+        $txt = $transparent ? imagecolorallocate($im, 255, 255, 255) : $navy;
+        $cx = (int) ($h * 0.5); $cy = (int) ($h / 2); $r = (int) ($h * 0.3);
+        imagefilledellipse($im, $cx, $cy, $r * 2, $r * 2, $i % 2 ? $navy : $blue);
+        imagesetthickness($im, 4);
+        for ($k = 0; $k < 8; $k++) { $a = deg2rad($k * 45); imageline($im, (int) ($cx + cos($a) * $r), (int) ($cy + sin($a) * $r), (int) ($cx + cos($a) * ($r + 12)), (int) ($cy + sin($a) * ($r + 12)), $acc); }
+        imagefilledellipse($im, $cx, $cy, (int) ($r * 0.7), (int) ($r * 0.7), $acc);
+        $words = explode(' ', preg_replace('/^PT\s+/', '', $name));
+        $l1 = implode(' ', array_slice($words, 0, 2)); $l2 = implode(' ', array_slice($words, 2));
+        $fs = $h * 0.14;
+        imagettftext($im, $fs, 0, (int) ($h * 0.95), (int) ($h * ($l2 ? 0.47 : 0.57)), $txt, self::FONT, $l1);
+        if ($l2) imagettftext($im, $fs * 0.75, 0, (int) ($h * 0.95), (int) ($h * 0.7), $transparent ? $acc : $blue, self::FONT_R, $l2);
+        ob_start(); imagepng($im); Storage::disk('public')->put($path, ob_get_clean()); imagedestroy($im);
+        return $path;
+    }
+
     public function run(): void
     {
-        Storage::disk('public')->deleteDirectory('dummy');
+        Storage::disk('public')->delete(Storage::disk('public')->files('dummy'));
         $this->cleanup();
 
         $admin = User::first();
@@ -63,13 +130,54 @@ class DemoContentSeeder extends Seeder
             $cats = Category::pluck('id', 'name');
         }
 
-        // ---------- Gambar untuk data yang sudah ada tapi belum bergambar ----------
-        foreach (Slider::all() as $i => $s) if (!$s->image) $s->update(['image' => $this->img("slider-$i", $s->title, 1600, 900, $i)]);
-        foreach (Teacher::all() as $i => $t) if (!$t->photo) $t->update(['photo' => $this->img("guru-$i", $t->name, 600, 600, $i + 1)]);
-        foreach (Partner::all() as $i => $p) if (!$p->logo) $p->update(['logo' => $this->img("mitra-$i", $p->name, 400, 200, $i)]);
-        foreach (Facility::all() as $i => $f) if (!$f->image) $f->update(['image' => $this->img("sarana-$i", $f->name, 900, 600, $i)]);
-        foreach (Competency::all() as $i => $c) if (!$c->image) $c->update(['image' => $this->img("komp-$i", $c->title, 900, 600, $i + 2)]);
-        foreach (Program::all() as $i => $p) if (!$p->image) $p->update(['image' => $this->img("prog-$i", $p->title, 900, 600, $i + 1)]);
+        // ---------- Lengkapi data yang sudah ada (gambar + kolom kosong) ----------
+        $isEmpty = fn ($v) => !$v || str_starts_with($v, 'dummy/');
+        foreach (Slider::orderBy('id')->get() as $i => $s) {
+            $s->update(['image' => $isEmpty($s->image) ? $this->pickPhoto(['bengkel', 'siswa', 'motor', 'sekolah'], $i) : $s->image,
+                'sort_order' => $s->sort_order ?: $i + 1, 'button_text' => $s->button_text ?: 'Selengkapnya', 'button_url' => $s->button_url ?: '/ppdb']);
+        }
+        foreach (Competency::orderBy('id')->get() as $i => $c) {
+            $c->update(['image' => $isEmpty($c->image) ? $this->pickPhoto(['bengkel', 'motor', 'alat', 'pabrik'], $i + 3) : $c->image,
+                'description' => $c->description ?: "<p>{$c->short_description}</p><p>Siswa mempelajari {$c->title} melalui teori, praktik bengkel, dan teaching factory dengan standar industri. Kompetensi ini diujikan pada Uji Kompetensi Keahlian (UKK) kelas XII.</p><ul><li>Materi teori &amp; K3</li><li>Praktik unit nyata</li><li>Sertifikasi kompetensi</li></ul>"]);
+        }
+        foreach (Program::orderBy('id')->get() as $i => $p) {
+            $p->update(['image' => $isEmpty($p->image) ? $this->pickPhoto(['siswa', 'kelas', 'bengkel', 'pabrik'], $i + 5) : $p->image]);
+        }
+        $cond = ['Baik', 'Sangat Baik', 'Baik', 'Cukup'];
+        foreach (Facility::orderBy('id')->get() as $i => $f) {
+            $f->update(['image' => $isEmpty($f->image) ? $this->pickPhoto(['bengkel', 'alat', 'kelas', 'sekolah', 'motor'], $i + 2) : $f->image,
+                'description' => $f->description ?: "{$f->name} digunakan untuk kegiatan praktik siswa Jurusan TSM dan dirawat rutin oleh toolman.",
+                'quantity' => $f->quantity ?: rand(2, 30), 'condition' => $f->condition ?: $cond[$i % 4], 'sort_order' => $f->sort_order ?: $i + 1]);
+        }
+        foreach (Teacher::where(fn ($q) => $q->where('bio', 'not like', '[DEMO]%')->orWhereNull('bio'))->orderBy('id')->get() as $i => $t) {
+            $t->update(['photo' => $isEmpty($t->photo) ? $this->avatar($t->name, $i) : $t->photo,
+                'education' => $t->education ?: 'S1 Pendidikan Teknik Otomotif', 'email' => $t->email ?: Str::slug(explode(',', $t->name)[0], '.') . '@tsm-blitar.sch.id',
+                'bio' => $t->bio ?: "{$t->position} Jurusan Teknik Sepeda Motor yang aktif membimbing siswa dalam lomba dan praktik industri.", 'sort_order' => $t->sort_order ?: $i + 1]);
+        }
+        foreach (Partner::where(fn ($q) => $q->where('description', 'not like', '[DEMO]%')->orWhereNull('description'))->orderBy('id')->get() as $i => $p) {
+            $p->update(['logo' => $isEmpty($p->logo) ? $this->logo($p->name, $i) : $p->logo, 'website' => $p->website ?: 'https://example.com',
+                'category' => $p->category ?: 'Industri', 'description' => $p->description ?: "Mitra industri {$p->name} untuk PKL, rekrutmen, dan pelatihan guru.", 'sort_order' => $p->sort_order ?: $i + 1]);
+        }
+        foreach (Category::orderBy('id')->get() as $i => $c) $c->update(['sort_order' => $c->sort_order ?: $i + 1, 'description' => $c->description ?: "Kumpulan berita kategori {$c->name}."]);
+        foreach (Post::where(fn ($q) => $q->where('excerpt', 'not like', '[DEMO]%')->orWhereNull('excerpt'))->get() as $i => $p) {
+            $p->update(['cover_image' => $isEmpty($p->cover_image) ? $this->photo('sekolah', $i) : $p->cover_image, 'cover_alt' => $p->cover_alt ?: $p->title,
+                'published_at' => $p->published_at ?: now()->subDays(60), 'views_count' => $p->views_count ?: 321]);
+        }
+        foreach (User::all() as $i => $u) {
+            if (Schema::hasColumn('users', 'avatar') && $isEmpty($u->avatar)) $u->forceFill(['avatar' => $this->avatar($u->name, $i + 2), 'last_login_at' => now()])->save();
+        }
+
+        // ---------- Pengaturan situs ----------
+        $set = fn ($k, $v) => Setting::where('key', $k)->update(['value' => $v]);
+        $get = fn ($k) => Setting::where('key', $k)->value('value');
+        if ($isEmpty($get('site_logo'))) $set('site_logo', $this->logo('TSM SMKS Islam 1', 0, 480, 160, true));
+        if ($isEmpty($get('site_favicon'))) $set('site_favicon', $this->avatar('T S', 0, 128));
+        if ($isEmpty($get('hero_bg'))) $set('hero_bg', $this->photo('bengkel', 1));
+        if ($isEmpty($get('about_image'))) $set('about_image', $this->photo('siswa', 1));
+        if (!$get('maps_embed')) $set('maps_embed', '<iframe src="https://www.google.com/maps?q=SMK+Islam+1+Blitar&output=embed" width="100%" height="320" style="border:0" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>');
+        foreach (['facebook_url' => 'https://facebook.com/', 'instagram_url' => 'https://instagram.com/', 'youtube_url' => 'https://youtube.com/@', 'tiktok_url' => 'https://tiktok.com/@'] as $k => $v) {
+            if (!$get($k)) $set($k, $v . 'tsm.smksislam1blitar');
+        }
 
         $extraTeachers = [
             ['Drs. H. Imam Syafi\'i, M.Pd.', 'Kepala Sekolah', 'Manajemen Pendidikan', 'S2 Manajemen Pendidikan'],
@@ -83,7 +191,7 @@ class DemoContentSeeder extends Seeder
         foreach ($extraTeachers as $i => [$n, $pos, $sub, $edu]) {
             Teacher::create(['name' => "$n", 'position' => $pos, 'subject' => $sub, 'education' => $edu, 'email' => Str::slug(explode(',', $n)[0], '.') . '@tsm-blitar.sch.id',
                 'bio' => "[DEMO] $pos berpengalaman lebih dari " . (5 + $i * 2) . ' tahun di bidang otomotif roda dua.',
-                'photo' => $this->img("guru-x$i", $n, 600, 600, $i), 'sort_order' => $base + $i + 1, 'is_active' => true]);
+                'photo' => $this->avatar($n, $i + 1), 'sort_order' => $base + $i + 1, 'is_active' => true]);
         }
 
         // ---------- Tag ----------
@@ -119,13 +227,13 @@ class DemoContentSeeder extends Seeder
             $post = Post::create([
                 'category_id' => $catId, 'user_id' => $admin?->id, 'title' => $title, 'slug' => Str::slug($title),
                 'excerpt' => "[DEMO] " . Str::limit("Ulasan lengkap tentang $kw di Jurusan Teknik Sepeda Motor SMKS Islam 1 Blitar, mulai dari latar belakang, pelaksanaan, hingga hasil yang dicapai.", 200),
-                'body' => $body, 'cover_image' => $this->img("berita-$i", $title, 1200, 675, $i), 'cover_alt' => $title,
+                'body' => $body, 'cover_image' => $this->pickPhoto(['bengkel', 'siswa', 'motor', 'kelas', 'pabrik', 'sekolah', 'piala', 'alat', 'masjid'], $i), 'cover_alt' => $title,
                 'status' => $published ? 'published' : 'draft', 'published_at' => $published ? $date : null,
-                'is_featured' => $i < 3, 'allow_comments' => true,
+                'is_featured' => $i < 3, 'allow_comments' => true, 'canonical_url' => url('/berita/' . Str::slug($title)),
                 'views_count' => $published ? rand(40, 1500) : 0, 'likes_count' => 0, 'dislikes_count' => 0, 'shares_count' => rand(0, 60),
                 'reading_time' => max(1, (int) round(str_word_count(strip_tags($body)) / 200)),
                 'meta_title' => Str::limit($title, 60, ''), 'meta_description' => Str::limit("Berita $kw dari Jurusan Teknik Sepeda Motor SMKS Islam 1 Blitar: informasi lengkap, foto kegiatan, dan video dokumentasi.", 156, ''),
-                'focus_keyword' => $kw, 'seo_score' => rand(55, 95), 'created_at' => $date, 'updated_at' => $date,
+                'seo_report' => json_encode(['generated' => 'demo']), 'focus_keyword' => $kw, 'seo_score' => rand(55, 95), 'created_at' => $date, 'updated_at' => $date,
             ]);
             $post->tags()->sync($tags->random(rand(2, 4))->pluck('id'));
 
@@ -165,7 +273,7 @@ class DemoContentSeeder extends Seeder
         foreach ($ach as $i => [$t, $s, $lv, $rk, $org]) {
             Achievement::create(['title' => $t, 'student_name' => $s, 'level' => $lv, 'rank' => $rk, 'organizer' => $org, 'year' => 2026 - intdiv($i, 3),
                 'achieved_at' => Carbon::now()->subMonths($i * 2), 'description' => "[DEMO] $t yang diraih $s, diselenggarakan oleh $org.",
-                'image' => $this->img("prestasi-$i", $t, 900, 600, $i), 'is_featured' => $i < 4, 'sort_order' => $i, 'is_active' => true]);
+                'image' => $this->pickPhoto(['piala', 'siswa', 'bengkel', 'motor'], $i), 'is_featured' => $i < 4, 'sort_order' => $i, 'is_active' => true]);
         }
 
         // ---------- Testimoni ----------
@@ -179,26 +287,26 @@ class DemoContentSeeder extends Seeder
         ];
         foreach ($testi as $i => [$n, $y, $o, $w, $m, $st]) {
             Testimonial::create(['name' => $n, 'graduation_year' => $y, 'occupation' => $o, 'workplace' => $w, 'message' => $m, 'rating' => 5 - ($i % 2),
-                'photo' => $this->img("testi-$i", $n, 400, 400, $i), 'status' => $st, 'is_featured' => $i < 3]);
+                'photo' => $this->avatar($n, $i + 3), 'status' => $st, 'is_featured' => $i < 3]);
         }
 
         // ---------- Galeri ----------
         $albums = ['Praktik Bengkel', 'Kunjungan Industri', 'Prestasi', 'Kegiatan Keagamaan'];
         for ($i = 0; $i < 12; $i++) {
             $t = $albums[$i % 4] . ' #' . ($i + 1);
-            Gallery::create(['title' => $t, 'type' => 'image', 'file' => $this->img("galeri-$i", $t, 900, 600, $i), 'album' => $albums[$i % 4],
+            Gallery::create(['title' => $t, 'type' => 'image', 'file' => $this->pickPhoto([['bengkel', 'alat', 'motor'], ['pabrik', 'motor', 'bengkel'], ['piala', 'siswa', 'kelas'], ['masjid', 'siswa', 'sekolah']][$i % 4], intdiv($i, 4) + $i + 7), 'album' => $albums[$i % 4],
                 'caption' => "[DEMO] Dokumentasi $t", 'sort_order' => $i, 'is_active' => true]);
         }
         foreach ($yt as $i => $v) {
             Gallery::create(['title' => 'Video Profil TSM ' . ($i + 1), 'type' => 'video', 'video_url' => "https://www.youtube.com/watch?v=$v",
-                'file' => $this->img("video-$i", 'Video Profil TSM ' . ($i + 1), 900, 600, $i + 1), 'album' => 'Video', 'caption' => '[DEMO] Video YouTube', 'sort_order' => 20 + $i, 'is_active' => true]);
+                'file' => $this->photo('sekolah', $i + 3), 'album' => 'Video', 'caption' => '[DEMO] Video YouTube', 'sort_order' => 20 + $i, 'is_active' => true]);
         }
 
         // ---------- Mitra tambahan ----------
         foreach (['PT Astra Honda Motor', 'PT Yamaha Indonesia', 'Suzuki Indomobil', 'AHASS Blitar Raya', 'Federal Oil', 'Bengkel Mitra Jaya'] as $i => $n) {
             if (!Partner::where('name', $n)->exists()) {
                 Partner::create(['name' => $n, 'website' => 'https://example.com', 'category' => $i < 3 ? 'APM' : 'Bengkel/Industri', 'description' => "[DEMO] Mitra industri $n",
-                    'logo' => $this->img("mitra-x$i", $n, 400, 200, $i), 'sort_order' => 50 + $i, 'is_active' => true]);
+                    'logo' => $this->logo($n, $i + 1), 'sort_order' => 50 + $i, 'is_active' => true]);
             }
         }
 
@@ -261,6 +369,7 @@ class DemoContentSeeder extends Seeder
         Partner::where('description', 'like', '[DEMO]%')->delete();
         Registration::where('notes', '[DEMO]')->delete();
         ContactMessage::where('subject', 'like', '[DEMO]%')->delete();
+        Setting::where('value', 'like', 'dummy/%')->update(['value' => null]);
         foreach ([Slider::class => 'image', Teacher::class => 'photo', Partner::class => 'logo', Facility::class => 'image', Competency::class => 'image', Program::class => 'image'] as $m => $col) {
             $m::where($col, 'like', 'dummy/%')->update([$col => null]);
         }
@@ -269,6 +378,7 @@ class DemoContentSeeder extends Seeder
     private function body(string $title, string $kw, int $i, string $yt): string
     {
         $kwU = ucfirst($kw);
+        $img = $this->photo('bengkel', $i + 4);
         return <<<HTML
 <p><strong>{$kwU}</strong> menjadi salah satu kegiatan penting di Jurusan Teknik Sepeda Motor (TSM) SMKS Islam 1 Blitar. Kegiatan ini dirancang agar siswa mendapatkan pengalaman nyata sesuai kebutuhan dunia usaha dan dunia industri. Selain itu, kegiatan ini juga menumbuhkan karakter islami, disiplin, dan tanggung jawab.</p>
 <h2>Latar Belakang {$kwU}</h2>
@@ -278,6 +388,7 @@ class DemoContentSeeder extends Seeder
 <h2>Pelaksanaan Kegiatan</h2>
 <p>Kegiatan dilaksanakan dalam beberapa tahap. Pertama, siswa mengikuti pembekalan teori di kelas. Kemudian, siswa praktik langsung di bengkel dengan pendampingan guru produktif. Akhirnya, hasil praktik dievaluasi bersama.</p>
 <ol><li>Pembekalan materi dan keselamatan kerja (K3).</li><li>Praktik pemeriksaan dan perawatan unit.</li><li>Diagnosis kerusakan menggunakan <u>scanner</u> resmi.</li><li>Evaluasi dan refleksi hasil kerja.</li></ol>
+<p><img src="/storage/{$img}" alt="Praktik {$kw} di bengkel TSM"></p>
 <h3>Peralatan yang Digunakan</h3>
 <ul><li>Engine stand dan unit motor praktik</li><li>Multimeter digital dan <s>tester lampu</s> scanner injeksi</li><li>Kunci momen (torque wrench)</li></ul>
 <table><tbody><tr><th><p>Tahap</p></th><th><p>Waktu</p></th><th><p>Penanggung Jawab</p></th></tr><tr><td><p>Pembekalan</p></td><td><p>07.00 – 09.00</p></td><td><p>Guru Teori</p></td></tr><tr><td><p>Praktik</p></td><td><p>09.00 – 13.00</p></td><td><p>Guru Produktif</p></td></tr><tr><td><p>Evaluasi</p></td><td><p>13.00 – 14.00</p></td><td><p>Kaprog TSM</p></td></tr></tbody></table>
