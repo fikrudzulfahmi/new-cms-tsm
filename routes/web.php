@@ -19,7 +19,7 @@ Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('p
 Route::post('/berita/{postId}/comment', [HomeController::class, 'comment'])->name('post.comment');
 Route::post('/berita/{postId}/share', [HomeController::class, 'share'])->name('post.share');
 Route::post('/komentar/{comment}/like', [HomeController::class, 'likeComment'])->name('comment.like');
-// SPMB memakai aplikasi sekolah sendiri: /spmb (dan /ppdb lama) diarahkan ke link di Pengaturan
+// SPMB memakai aplikasi sekolah sendiri: /spmb (dan link lama /ppdb) diarahkan ke Link SPMB di Admin → Pengaturan
 Route::get('/spmb', [HomeController::class, 'spmb'])->name('spmb');
 Route::get('/ppdb', [HomeController::class, 'spmb']);
 Route::post('/kontak', [HomeController::class, 'contact'])->name('contact');

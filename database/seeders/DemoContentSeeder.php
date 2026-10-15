@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\{Achievement, Category, Comment, ContactMessage, Competency, Facility, Gallery, Partner, Post, PostReaction, Program, Registration, Slider, Tag, Teacher, Testimonial, User, Visit};
+use App\Models\{Achievement, Category, Comment, ContactMessage, Competency, Facility, Gallery, Partner, Post, PostReaction, Program, Slider, Tag, Teacher, Testimonial, User, Visit};
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -310,18 +310,6 @@ class DemoContentSeeder extends Seeder
             }
         }
 
-        // ---------- SPMB ----------
-        $schools = ['SMPN 1 Blitar', 'SMPN 3 Blitar', 'MTsN Kota Blitar', 'SMP Islam Blitar', 'SMPN 2 Kanigoro', 'MTs Al-Muhsin'];
-        $statuses = ['baru', 'baru', 'diproses', 'diterima', 'diterima', 'ditolak'];
-        for ($i = 0; $i < 18; $i++) {
-            $n = $names[$i % 10] . ($i >= 10 ? ' ' . chr(65 + $i) : '');
-            $r = Registration::create(['registration_number' => 'SPMB-2027-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT), 'full_name' => $n, 'nisn' => (string) (3000000000 + $i * 1371),
-                'gender' => $i % 3 ? 'L' : 'P', 'birth_date' => Carbon::create(2011, 1 + $i % 12, 1 + $i), 'birth_place' => 'Blitar', 'address' => "Jl. Demo No. $i, Kota Blitar",
-                'phone' => '0812' . str_pad((string) (3456000 + $i), 8, '0', STR_PAD_LEFT), 'email' => "calon$i@contoh.id", 'origin_school' => $schools[$i % 6],
-                'parent_name' => 'Orang Tua ' . $n, 'parent_phone' => '0857' . str_pad((string) (1200000 + $i), 8, '0', STR_PAD_LEFT), 'notes' => '[DEMO]', 'status' => $statuses[$i % 6]]);
-            $r->forceFill(['created_at' => Carbon::now()->subDays($i * 2)])->save();
-        }
-
         // ---------- Pesan kontak ----------
         $msgs = [['Info biaya sekolah', 'Assalamualaikum, berapa biaya pendaftaran dan SPP per bulan?'], ['Kerja sama PKL', 'Kami bengkel resmi di Kediri, ingin menerima siswa PKL.'],
                  ['Servis motor', 'Apakah teaching factory menerima servis motor umum?'], ['Beasiswa', 'Apakah ada beasiswa untuk siswa yatim?'], ['Alumni', 'Saya alumni 2015, ingin ikut reuni.']];
@@ -367,7 +355,6 @@ class DemoContentSeeder extends Seeder
         Gallery::where('caption', 'like', '[DEMO]%')->delete();
         Teacher::where('bio', 'like', '[DEMO]%')->delete();
         Partner::where('description', 'like', '[DEMO]%')->delete();
-        Registration::where('notes', '[DEMO]')->delete();
         ContactMessage::where('subject', 'like', '[DEMO]%')->delete();
         Setting::where('value', 'like', 'dummy/%')->update(['value' => null]);
         foreach ([Slider::class => 'image', Teacher::class => 'photo', Partner::class => 'logo', Facility::class => 'image', Competency::class => 'image', Program::class => 'image'] as $m => $col) {

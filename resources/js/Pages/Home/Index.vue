@@ -418,7 +418,7 @@ const levelBadge = { 'Internasional': 'bg-navy text-accent', 'Nasional': 'bg-nav
     <section class="py-20 grid-dark border-y border-accent/20">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="mono-label mono-label-dark mb-4">11 — SPMB 2026/2027</div>
-        <h2 class="section-title !text-white mb-4">{{ $page.props.settings?.ppdb_info || 'Pendaftaran SPMB Dibuka!' }}</h2>
+        <h2 class="section-title !text-white mb-4">{{ $page.props.settings?.spmb_info || 'Pendaftaran SPMB Dibuka!' }}</h2>
         <p class="text-on-navy-muted mb-8">Bergabunglah bersama kami dan wujudkan karir di dunia otomotif</p>
         <a href="/spmb" target="_blank" rel="noopener" class="btn-primary px-8">Daftar Sekarang →</a>
       </div>

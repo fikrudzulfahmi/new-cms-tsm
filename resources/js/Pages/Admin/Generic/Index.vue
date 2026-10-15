@@ -71,8 +71,8 @@ const pendingCount = props.items?.filter(i => i.status === 'pending').length || 
               <div class="flex items-center gap-3 min-w-0 pr-4">
                 <img v-if="item.image || item.photo || item.logo || item.file" :src="`/storage/${item.image || item.photo || item.logo || item.file}`" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                 <div class="min-w-0">
-                  <div class="font-bold text-sm text-slate-800 truncate">{{ item.title || item.name || item.full_name }}</div>
-                  <div class="text-xs text-slate-500 truncate">{{ item.subtitle || item.short_description || item.position || item.category || item.level || item.message || item.registration_number || '' }}<span v-if="item.status" class="ml-2 badge-status">{{ item.status }}</span></div>
+                  <div class="font-bold text-sm text-slate-800 truncate">{{ item.title || item.name }}</div>
+                  <div class="text-xs text-slate-500 truncate">{{ item.subtitle || item.short_description || item.position || item.category || item.level || item.message|| '' }}<span v-if="item.status" class="ml-2 badge-status">{{ item.status }}</span></div>
                 </div>
               </div>
               <button v-if="!isTesti" @click="destroy(item.id)" class="text-red-600 text-xs font-semibold hover:underline flex-shrink-0">Hapus</button>

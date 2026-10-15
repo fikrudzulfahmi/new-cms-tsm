@@ -590,7 +590,7 @@ onBeforeUnmount(() => {
             <div class="cta-text">
               <span class="mono-label accent">SPMB — SISTEM PENERIMAAN MURID BARU</span>
               <h2>Siap jadi <span class="accent">mekanik profesional?</span></h2>
-              <p>{{ s.ppdb_open === '1' ? (s.ppdb_info || 'Pendaftaran SPMB sudah dibuka.') : 'Pendaftaran SPMB belum dibuka. Pantau terus pengumuman terbaru dari kami.' }} Daftar online sekarang atau tanya panitia lewat WhatsApp.</p>
+              <p>{{ s.spmb_open === '1' ? (s.spmb_info || 'Pendaftaran SPMB sudah dibuka.') : 'Pendaftaran SPMB belum dibuka. Pantau terus pengumuman terbaru dari kami.' }} Daftar online sekarang atau tanya panitia lewat WhatsApp.</p>
             </div>
             <div class="cta-actions">
               <a href="/spmb" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Daftar SPMB</a>
