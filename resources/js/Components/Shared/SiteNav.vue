@@ -1,5 +1,5 @@
 <script setup>
-// Navbar publik tunggal: dipakai landing (/) dan AppLayout (/beranda, /berita, artikel)
+// Navbar publik tunggal: dipakai landing (/) dan AppLayout (/berita, artikel)
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 

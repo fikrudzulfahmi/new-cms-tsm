@@ -64,31 +64,6 @@ class HomeController extends Controller
         ]);
     }
 
-    public function index(Request $request)
-    {
-        $this->trackVisit($request, null);
-
-        return Inertia::render('Home/Index', [
-            'sliders' => Slider::active()->get(),
-            'competencies' => Competency::active()->get(),
-            'programs' => Program::active()->get(),
-            'facilities' => Facility::active()->take(8)->get(),
-            'achievements' => Achievement::active()->featured()->take(6)->get(),
-            'latestPosts' => Post::published()->with('category')->orderByDesc('published_at')->take(6)->get(),
-            'categories' => Category::active()->withCount(['posts' => fn($q) => $q->published()])->get(),
-            'testimonials' => Testimonial::approved()->featured()->take(6)->get(),
-            'teachers' => Teacher::active()->take(8)->get(),
-            'partners' => Partner::active()->get(),
-            'gallery' => Gallery::active()->images()->take(12)->get(),
-            'stats' => [
-                'total_students' => Setting::get('stat_students', '150+'),
-                'total_graduates' => Setting::get('stat_graduates', '500+'),
-                'total_achievements' => Achievement::active()->count(),
-                'total_partners' => Partner::active()->count(),
-            ],
-        ]);
-    }
-
     public function posts(Request $request)
     {
         $this->trackVisit($request, null);
