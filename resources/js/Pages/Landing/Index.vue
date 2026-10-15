@@ -572,8 +572,8 @@ onBeforeUnmount(() => {
             <span class="mono-label">11 — FAQ</span>
             <h2>Pertanyaan yang sering diajukan.</h2>
           </div>
-          <div class="faq-list">
-            <div v-for="(f, i) in faqs" :key="i" class="faq-item reveal" :class="{ open: openFaq === i }">
+          <div class="faq-list reveal">
+            <div v-for="(f, i) in faqs" :key="i" class="faq-item" :class="{ open: openFaq === i }">
               <button type="button" :aria-expanded="openFaq === i" @click="openFaq = openFaq === i ? -1 : i">
                 {{ f.q }}<span aria-hidden="true">{{ openFaq === i ? '−' : '+' }}</span>
               </button>

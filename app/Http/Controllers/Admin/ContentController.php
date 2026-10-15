@@ -76,7 +76,7 @@ class ContentController extends Controller
     public function achievementsDestroy(Achievement $achievement) { $achievement->delete(); return back()->with('success','Data dihapus.'); }
 
     // --- Testimonials ---
-    public function testimonials() { return Inertia::render('Admin/Generic/Index', ['title'=>'Testimoni','routeName'=>'testimoni','items'=>Testimonial::latest()->get(),'fields'=>[]]); }
+    public function testimonials() { return Inertia::render('Admin/Generic/Index', ['title'=>'Testimoni','routeName'=>'testimoni','items'=>Testimonial::orderByRaw("FIELD(status,'pending','approved','rejected')")->latest()->get(),'fields'=>[]]); }
     public function testimonialsUpdate(Testimonial $testimonial, Request $r) { $d=$r->validate(['status'=>'required|in:pending,approved,rejected','is_featured'=>'boolean']); $testimonial->update($d); return back()->with('success','Testimoni diperbarui!'); }
     public function testimonialsDestroy(Testimonial $testimonial) { $testimonial->delete(); return back()->with('success','Testimoni dihapus.'); }
 

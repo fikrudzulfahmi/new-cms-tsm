@@ -313,7 +313,7 @@ class HomeController extends Controller
             'rating' => $request->rating,
             'status' => 'pending',
         ]);
-        return back()->with('success', 'Terima kasih atas testimoni Anda! Kami akan segera menampilkannya.');
+        return back()->with('success', 'Terima kasih! Testimoni Anda sudah terkirim dan akan tampil setelah disetujui admin.');
     }
 
     private function trackVisit(Request $request, $postId)
