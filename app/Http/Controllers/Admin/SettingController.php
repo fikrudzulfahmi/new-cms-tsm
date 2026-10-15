@@ -11,19 +11,27 @@ class SettingController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Settings/Index', [
-            'settings' => Setting::all()->groupBy('group'),
+            'settings' => Setting::pluck('value', 'key'),
         ]);
     }
 
     public function update(Request $request)
     {
-        foreach ($request->settings as $key => $value) {
+        $request->validate([
+            'spmb_url' => ['nullable', 'url', 'max:500', 'regex:#^https?://#i'],
+            'email' => ['nullable', 'email', 'max:150'],
+            'about_image' => ['nullable', 'image', 'max:5120'],
+        ], ['spmb_url.url' => 'Link SPMB harus berupa URL lengkap, contoh: https://spmb.sekolah.sch.id', 'spmb_url.regex' => 'Link SPMB harus diawali http:// atau https://']);
+
+        // Form mengirim field datar (school_name, phone, ...); format lama "settings[key]" tetap didukung
+        $input = array_merge($request->except(['_token', '_method', 'settings', 'about_image']), (array) $request->input('settings', []));
+        foreach ($input as $key => $value) {
             $setting = Setting::where('key', $key)->first();
-            if (!$setting) continue;
-            if ($setting->type === 'image' && $request->hasFile("settings.{$key}")) {
-                $value = $request->file("settings.{$key}")->store('settings', 'public');
-            }
-            $setting->update(['value' => $value]);
+            if (!$setting || $setting->type === 'image') continue;
+            $setting->update(['value' => $value ?? '']);
+        }
+        if ($request->hasFile('about_image')) {
+            Setting::where('key', 'about_image')->update(['value' => $request->file('about_image')->store('settings', 'public')]);
         }
         cache()->forget('site_settings');
         return back()->with('success', 'Pengaturan berhasil disimpan!');

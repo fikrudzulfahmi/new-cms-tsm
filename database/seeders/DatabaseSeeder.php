@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
             ['key'=>'about_text','value'=>'Jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar hadir untuk mencetak tenaga teknisi sepeda motor yang kompeten, berkarakter Islami, dan siap memasuki dunia industri.','group'=>'beranda','type'=>'html','label'=>'Teks Tentang Kami'],
             ['key'=>'about_image','value'=>'','group'=>'beranda','type'=>'image','label'=>'Foto Tentang Kami'],
             ['key'=>'ppdb_open','value'=>'1','group'=>'ppdb','type'=>'boolean','label'=>'SPMB Dibuka'],
+            ['key'=>'spmb_url','value'=>'','group'=>'ppdb','type'=>'text','label'=>'Link Aplikasi SPMB'],
             ['key'=>'ppdb_info','value'=>'Pendaftaran SPMB (Sistem Penerimaan Murid Baru) Tahun Pelajaran 2026/2027 sudah dibuka!','group'=>'ppdb','type'=>'textarea','label'=>'Info SPMB'],
             ['key'=>'footer_text','value'=>'© 2026 Teknik Sepeda Motor SMKS Islam 1 Kota Blitar. Semua hak dilindungi.','group'=>'umum','type'=>'textarea','label'=>'Teks Footer'],
         ];

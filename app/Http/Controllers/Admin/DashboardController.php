@@ -8,7 +8,6 @@ use App\Models\Category;
 use App\Models\Comment;
 use App\Models\ContactMessage;
 use App\Models\Post;
-use App\Models\Registration;
 use App\Models\Testimonial;
 use App\Models\Visit;
 use Carbon\Carbon;
@@ -55,7 +54,6 @@ class DashboardController extends Controller
                 'total_visits' => Visit::count(),
                 'total_posts' => Post::count(),
                 'total_achievements' => Achievement::count(),
-                'total_ppdb' => Registration::count(),
                 'posts_total' => Post::count(),
                 'posts_published' => Post::where('status', 'published')->count(),
                 'posts_draft' => Post::where('status', 'draft')->count(),
@@ -65,14 +63,12 @@ class DashboardController extends Controller
                 'comments_pending' => Comment::pending()->count(),
                 'achievements_total' => Achievement::count(),
                 'messages_unread' => ContactMessage::where('is_read', false)->count(),
-                'registrations_new' => Registration::where('status', 'baru')->count(),
                 'testimonials_pending' => Testimonial::where('status', 'pending')->count(),
             ],
             'visitChart' => $days,
             'topPosts' => $topPosts,
             'deviceDistribution' => $devices,
             'recentComments' => Comment::with('post:id,title,slug')->latest()->take(5)->get(),
-            'recentRegistrations' => Registration::latest()->take(5)->get(['id', 'registration_number', 'full_name', 'phone', 'status', 'created_at']),
         ]);
     }
 }

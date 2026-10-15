@@ -19,9 +19,9 @@ Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('p
 Route::post('/berita/{postId}/comment', [HomeController::class, 'comment'])->name('post.comment');
 Route::post('/berita/{postId}/share', [HomeController::class, 'share'])->name('post.share');
 Route::post('/komentar/{comment}/like', [HomeController::class, 'likeComment'])->name('comment.like');
-Route::get('/spmb', [HomeController::class, 'ppdb'])->name('ppdb');
-Route::post('/spmb', [HomeController::class, 'ppdbStore'])->name('ppdb.store');
-Route::permanentRedirect('/ppdb', '/spmb');
+// SPMB memakai aplikasi sekolah sendiri: /spmb (dan /ppdb lama) diarahkan ke link di Pengaturan
+Route::get('/spmb', [HomeController::class, 'spmb'])->name('spmb');
+Route::get('/ppdb', [HomeController::class, 'spmb']);
 Route::post('/kontak', [HomeController::class, 'contact'])->name('contact');
 Route::post('/testimoni', [HomeController::class, 'testimonialStore'])->name('testimonial.store');
 
@@ -114,7 +114,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('/pesan/{message}/read', [ContentController::class, 'messagesRead'])->name('messages.read');
     Route::delete('/pesan/{message}', [ContentController::class, 'messagesDestroy'])->name('messages.destroy');
 
-    Route::get('/pendaftaran', [ContentController::class, 'registrations'])->name('registrations.index');
-    Route::patch('/pendaftaran/{registration}', [ContentController::class, 'registrationsUpdate'])->name('registrations.update');
-    Route::delete('/pendaftaran/{registration}', [ContentController::class, 'registrationsDestroy'])->name('registrations.destroy');
 });

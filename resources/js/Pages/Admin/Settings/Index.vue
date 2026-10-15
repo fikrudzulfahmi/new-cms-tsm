@@ -11,6 +11,7 @@ const form = useForm({
   email: props.settings?.email || '',
   about_text: props.settings?.about_text || '',
   ppdb_info: props.settings?.ppdb_info || '',
+  spmb_url: props.settings?.spmb_url || '',
   footer_text: props.settings?.footer_text || '',
   instagram_url: props.settings?.instagram_url || '',
   facebook_url: props.settings?.facebook_url || '',
@@ -64,6 +65,12 @@ const submit = () => form.post('/admin/pengaturan', { preserveScroll: true })
           <div>
             <label class="form-label">Info Banner SPMB</label>
             <input v-model="form.ppdb_info" type="text" class="form-input" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="form-label">Link Aplikasi SPMB Sekolah</label>
+            <input v-model="form.spmb_url" type="url" placeholder="https://spmb.sekolah.sch.id" class="form-input" />
+            <p v-if="form.errors.spmb_url" class="text-xs text-red-600 mt-1">{{ form.errors.spmb_url }}</p>
+            <p class="text-xs text-slate-500 mt-1">Semua tombol "Daftar SPMB" di website diarahkan ke link ini (dibuka di tab baru).</p>
           </div>
         </div>
 

@@ -100,7 +100,7 @@ const karier = [
 ]
 
 const faqs = [
-  { q: 'Apa syarat mendaftar SPMB di jurusan TSM?', a: 'Lulusan SMP/MTs sederajat, mengisi formulir pendaftaran online, serta melampirkan fotokopi ijazah/SKL, KK, dan akta kelahiran.' },
+  { q: 'Apa syarat mendaftar SPMB di jurusan TSM?', a: 'Lulusan SMP/MTs sederajat, mendaftar melalui aplikasi SPMB sekolah, serta melampirkan fotokopi ijazah/SKL, KK, dan akta kelahiran.' },
   { q: 'Apakah siswa perempuan boleh masuk TSM?', a: 'Tentu boleh. Materi dan fasilitas praktik terbuka untuk semua siswa, dan banyak alumni perempuan berkarier di dunia otomotif.' },
   { q: 'Apakah ada sertifikat keahlian?', a: 'Ya. Di kelas XII siswa mengikuti Uji Kompetensi Keahlian (UKK) dan sertifikasi bersama mitra industri.' },
   { q: 'Di mana siswa melaksanakan PKL?', a: 'Di bengkel resmi, dealer, dan industri otomotif yang menjadi mitra jurusan, dengan pendampingan guru pembimbing.' },
@@ -593,7 +593,7 @@ onBeforeUnmount(() => {
               <p>{{ s.ppdb_open === '1' ? (s.ppdb_info || 'Pendaftaran SPMB sudah dibuka.') : 'Pendaftaran SPMB belum dibuka. Pantau terus pengumuman terbaru dari kami.' }} Daftar online sekarang atau tanya panitia lewat WhatsApp.</p>
             </div>
             <div class="cta-actions">
-              <Link href="/spmb" class="btn btn-primary btn-lg">Daftar SPMB</Link>
+              <a href="/spmb" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Daftar SPMB</a>
               <a :href="waLink" class="btn btn-ghost btn-lg" :target="waNumber ? '_blank' : null" rel="noopener">Tanya via WhatsApp</a>
             </div>
           </div>
@@ -662,7 +662,7 @@ onBeforeUnmount(() => {
               <ul>
                 <li><Link href="/berita">Semua Berita</Link></li>
                 <li v-for="c in categories.slice(0, 4)" :key="c.id"><Link :href="`/berita?kategori=${c.slug}`">{{ c.name }}</Link></li>
-                <li><Link href="/spmb">SPMB</Link></li>
+                <li><a href="/spmb" target="_blank" rel="noopener">SPMB</a></li>
               </ul>
             </div>
             <div>

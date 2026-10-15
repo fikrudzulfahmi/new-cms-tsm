@@ -235,43 +235,13 @@ class HomeController extends Controller
         return response()->json(['ok' => true]);
     }
 
-    public function ppdb(Request $request)
+    public function spmb()
     {
-        return Inertia::render('PPDB/Index', [
-            'ppdb_open' => Setting::get('ppdb_open', '0') == '1',
-            'ppdb_info' => Setting::get('ppdb_info'),
-        ]);
-    }
-
-    public function ppdbStore(Request $request)
-    {
-        $request->merge(array_filter([
-            'nisn' => $request->input('nisn') ?? $request->input('nik'),
-            'origin_school' => $request->input('origin_school') ?? $request->input('school_origin'),
-            'phone' => $request->input('phone') ?? $request->input('student_phone'),
-            'parent_phone' => $request->input('parent_phone') ?? $request->input('father_phone'),
-            'parent_name' => $request->input('parent_name') ?? 'Orang Tua / Wali',
-        ], fn($v) => $v !== null));
-        $request->validate([
-            'full_name' => 'required|string|max:200',
-            'nisn' => 'nullable|string|max:20',
-            'gender' => 'required|in:L,P',
-            'birth_date' => 'required|date',
-            'birth_place' => 'required|string|max:100',
-            'address' => 'required|string|max:500',
-            'phone' => 'required|string|max:20',
-            'email' => 'nullable|email|max:150',
-            'origin_school' => 'required|string|max:200',
-            'parent_name' => 'required|string|max:200',
-            'parent_phone' => 'required|string|max:20',
-        ]);
-
-        $no = 'TSM-' . date('Y') . '-' . str_pad(\App\Models\Registration::count() + 1, 4, '0', STR_PAD_LEFT);
-        \App\Models\Registration::create(array_merge($request->only([
-            'full_name','nisn','gender','birth_date','birth_place','address','phone','email','origin_school','parent_name','parent_phone','notes'
-        ]), ['registration_number' => $no, 'status' => 'baru']));
-
-        return back()->with('success', "Pendaftaran berhasil! Nomor registrasi Anda: {$no}. Simpan nomor ini.");
+        $url = trim((string) Setting::get('spmb_url'));
+        if ($url && preg_match('#^https?://#i', $url)) {
+            return redirect()->away($url);
+        }
+        return redirect('/#spmb');
     }
 
     public function contact(Request $request)

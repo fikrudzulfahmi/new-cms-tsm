@@ -44,7 +44,7 @@ class ReportController extends Controller
                 'total_visits' => Visit::count(),
                 'total_posts' => Post::count(),
                 'total_comments' => \App\Models\Comment::count(),
-                'total_ppdb' => \App\Models\Registration::count(),
+                'total_messages' => \App\Models\ContactMessage::count(),
             ],
             'categoryStats' => \App\Models\Category::withCount('posts')->orderByDesc('posts_count')->get(),
             'from' => $from->toDateString(),

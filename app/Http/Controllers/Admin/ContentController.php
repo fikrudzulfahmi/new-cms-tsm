@@ -9,7 +9,6 @@ use App\Models\Facility;
 use App\Models\Gallery;
 use App\Models\Partner;
 use App\Models\Program;
-use App\Models\Registration;
 use App\Models\Slider;
 use App\Models\Teacher;
 use App\Models\Testimonial;
@@ -109,8 +108,4 @@ class ContentController extends Controller
     public function messagesRead(\App\Models\ContactMessage $message) { $message->update(['is_read'=>true]); return back(); }
     public function messagesDestroy(\App\Models\ContactMessage $message) { $message->delete(); return back()->with('success','Pesan dihapus.'); }
 
-    // --- Registrations ---
-    public function registrations(Request $r) { $q=\App\Models\Registration::latest(); if($r->status)$q->where('status',$r->status); return Inertia::render('Admin/Generic/Index', ['title'=>'Pendaftaran PPDB','routeName'=>'pendaftaran','items'=>$q->take(200)->get(),'fields'=>[]]); }
-    public function registrationsUpdate(\App\Models\Registration $registration, Request $r) { $registration->update($r->validate(['status'=>'required|in:baru,diproses,diterima,ditolak','notes'=>'nullable|string'])); return back()->with('success','Status pendaftaran diperbarui!'); }
-    public function registrationsDestroy(\App\Models\Registration $registration) { $registration->delete(); return back()->with('success','Data dihapus.'); }
 }
