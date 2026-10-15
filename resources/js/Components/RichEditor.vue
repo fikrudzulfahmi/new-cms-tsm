@@ -158,8 +158,8 @@ const tableOps = [
     <div class="sticky top-0 z-10 flex flex-wrap items-center gap-1 px-2 py-2 border-b border-line bg-ice-section">
       <template v-for="(g, gi) in groups" :key="gi">
         <button v-for="b in g" :key="b.t" type="button" :title="b.t" :aria-label="b.t" @click="b.a" :disabled="sourceMode || !editor"
-          :class="['h-8 min-w-8 px-1.5 rounded-lg text-sm text-navy flex items-center justify-center transition disabled:opacity-40',
-                   b.on && b.on() ? 'bg-navy text-accent' : 'hover:bg-ice']">
+          :class="['h-8 min-w-8 px-1.5 rounded-lg text-sm flex items-center justify-center border transition disabled:opacity-40',
+                   b.on && b.on() ? 'bg-accent/30 border-accent text-label font-semibold' : 'border-transparent text-navy hover:bg-ice']">
           <svg v-if="b.i" class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path :d="b.i"/></svg>
           <span v-else :class="b.cls">{{ b.l }}</span>
         </button>
