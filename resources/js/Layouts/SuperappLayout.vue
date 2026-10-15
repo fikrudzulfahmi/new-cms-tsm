@@ -27,7 +27,7 @@ const menuGroups = [
   { label: null, items: [{ label: 'Dashboard', href: '/superadmin', icon: I.home }] },
   { label: 'Data Master', items: [
     { label: 'Data Siswa', href: '/superadmin/siswa', icon: I.siswa },
-    { label: 'Data Guru', href: '/superadmin/guru', icon: I.guru, soon: true },
+    { label: 'Data Guru', href: '/superadmin/guru', icon: I.guru },
     { label: 'Pengguna & Akses', href: '/superadmin/pengguna', icon: I.akun },
   ] },
   { label: 'Fitur', items: [

@@ -11,6 +11,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Superapp\PortalController;
 use App\Http\Controllers\Superapp\SuperadminController;
 use App\Http\Controllers\Superapp\StudentController;
+use App\Http\Controllers\Superapp\TeacherController;
 use Illuminate\Support\Facades\Route;
 
 // ===================== PUBLIC =====================
@@ -138,7 +139,10 @@ Route::prefix('superadmin')->middleware(['auth', 'role:superadmin'])->group(func
     Route::post('/siswa/sinkron', [StudentController::class, 'sync'])->middleware('throttle:30,1');
     Route::post('/siswa/sinkron-semua', [StudentController::class, 'syncAll'])->middleware('throttle:6,1');
     Route::put('/siswa/{user}', [StudentController::class, 'update']);
-    Route::get('/{page}', [SuperadminController::class, 'comingSoon'])->whereIn('page', ['guru']);
+    Route::get('/guru', [TeacherController::class, 'index'])->name('superadmin.teachers');
+    Route::post('/guru', [TeacherController::class, 'store']);
+    Route::put('/guru/{user}', [TeacherController::class, 'update']);
+    Route::delete('/guru/{user}', [TeacherController::class, 'destroy']);
 });
 
 // Guru & siswa: card fitur sesuai plotting; admin fitur -> /app/{fitur}/admin

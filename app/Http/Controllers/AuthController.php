@@ -87,19 +87,40 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Login email + password. Di /masuk (Superapp) kolom "email" juga menerima no HP,
+     * supaya guru bisa masuk dengan email atau nomor HP yang didaftarkan superadmin.
+     */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $isApp = $request->is('masuk');
+        $d = $request->validate([
+            'email' => ['required', 'string', 'max:150'],
+            'password' => 'required|string',
+        ], ['email.required' => $isApp ? 'Isi email atau no HP.' : 'Isi email.']);
+
+        $login = trim($d['email']);
+        $phone = $isApp && !str_contains($login, '@') ? User::normalizePhone($login) : null;
+        if (!$phone && !filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            return back()->withErrors(['email' => $isApp ? 'Masukkan email atau no HP yang valid.' : 'Format email tidak valid.'])->withInput($request->only('email', 'remember'));
+        }
+
+        $key = 'login:' . $request->ip() . ':' . strtolower($login);
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            return back()->withErrors(['email' => 'Terlalu banyak percobaan. Coba lagi dalam ' . RateLimiter::availableIn($key) . ' detik.'])->withInput($request->only('email', 'remember'));
+        }
+
+        $credentials = $phone ? ['phone' => $phone, 'password' => $d['password']] : ['email' => strtolower($login), 'password' => $d['password']];
+        // siswa tidak memakai password; login siswa lewat /masuk/siswa (NIS + tanggal lahir)
+        $credentials[] = fn ($q) => $q->where('role', '!=', 'siswa');
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::user();
             if (!$user->is_active) {
                 Auth::logout();
-                return back()->withErrors(['email' => 'Akun Anda dinonaktifkan.']);
+                return back()->withErrors(['email' => 'Akun Anda dinonaktifkan. Hubungi superadmin.']);
             }
+            RateLimiter::clear($key);
             $user->forceFill(['last_login_at' => now()])->save();
             $request->session()->regenerate();
 
@@ -112,7 +133,8 @@ class AuthController extends Controller
             return redirect($home);
         }
 
-        return back()->withErrors(['email' => 'Email atau password salah.'])->withInput($request->only('email', 'remember'));
+        RateLimiter::hit($key, 300);
+        return back()->withErrors(['email' => $isApp ? 'Email/no HP atau password salah.' : 'Email atau password salah.'])->withInput($request->only('email', 'remember'));
     }
 
     public function logout(Request $request)

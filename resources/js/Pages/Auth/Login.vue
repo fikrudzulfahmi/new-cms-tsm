@@ -55,14 +55,14 @@ const submit = () => {
         <form v-else @submit.prevent="submit" class="space-y-5">
           <!-- Email Field -->
           <div>
-            <label class="form-label">Alamat Email</label>
+            <label class="form-label">{{ isApp ? 'Email atau No HP' : 'Alamat Email' }}</label>
             <input 
               v-model="form.email" 
-              type="email" 
-              :placeholder="isApp ? 'nama@tsm-blitar.sch.id' : 'admin@tsm-blitar.sch.id'" 
+              :type="isApp ? 'text' : 'email'" 
+              :placeholder="isApp ? 'nama@sekolah.sch.id atau 0812xxxxxxx' : 'admin@tsm-blitar.sch.id'" 
               class="form-input" 
               :class="{ 'border-red-400 ring-red-200': form.errors.email }"
-              autocomplete="email"
+              :autocomplete="isApp ? 'username' : 'email'"
               required
             />
             <p v-if="form.errors.email" class="text-red-500 text-xs mt-1">{{ form.errors.email }}</p>
