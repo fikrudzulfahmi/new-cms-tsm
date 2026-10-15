@@ -41,6 +41,7 @@ class PostController extends Controller
         $data = $request->validate($this->rules());
         $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['title']);
         $data['user_id'] = auth()->id();
+        $data['body'] = $this->cleanBody($data['body'] ?? null);
         $data['reading_time'] = max(1, round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
         $data['seo_score'] = $this->calcSeoScore($data);
         $data['seo_report'] = json_encode($this->buildSeoReport($data));
@@ -80,6 +81,7 @@ class PostController extends Controller
     {
         $data = $request->validate($this->rules($post->id));
         if (empty($data['slug'])) $data['slug'] = Str::slug($data['title']);
+        $data['body'] = $this->cleanBody($data['body'] ?? null);
         $data['reading_time'] = max(1, round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
         $data['seo_score'] = $this->calcSeoScore($data);
         $data['seo_report'] = json_encode($this->buildSeoReport($data));
@@ -132,6 +134,20 @@ class PostController extends Controller
             'post' => $post->only('id', 'title', 'views_count', 'likes_count', 'dislikes_count', 'shares_count', 'comments_count', 'seo_score', 'seo_report'),
             'visitChart' => $days,
         ]);
+    }
+
+    /** Bersihkan HTML editor: buang script/style/event handler, iframe hanya YouTube. */
+    private function cleanBody(?string $html): ?string
+    {
+        if ($html === null) return null;
+        $html = preg_replace('#<(script|style|object|embed|form)\b[^>]*>.*?</\1>#is', '', $html);
+        $html = preg_replace('#<(script|style|object|embed|form|input|button)\b[^>]*/?>#i', '', $html);
+        $html = preg_replace('#\s+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $html);
+        $html = preg_replace('#(href|src)\s*=\s*(["\'])\s*(javascript|vbscript|data):[^"\']*\2#i', '$1="#"', $html);
+        $html = preg_replace_callback('#<iframe\b[^>]*>.*?</iframe>#is', function ($m) {
+            return preg_match('#src=["\']https://(www\.)?(youtube(-nocookie)?\.com)/embed/[\w-]+#i', $m[0]) ? $m[0] : '';
+        }, $html);
+        return $html;
     }
 
     private function rules($postId = null): array
