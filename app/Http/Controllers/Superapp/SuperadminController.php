@@ -48,13 +48,13 @@ class SuperadminController extends Controller
         $q = trim((string) $request->query('q', ''));
         $role = $request->query('role');
         $users = User::whereIn('role', User::APP_ROLES)
-            ->when($q !== '', fn ($w) => $w->where(fn ($x) => $x->where('name', 'like', "%$q%")->orWhere('email', 'like', "%$q%")))
+            ->when($q !== '', fn ($w) => $w->where(fn ($x) => $x->where('name', 'like', "%$q%")->orWhere('email', 'like', "%$q%")->orWhere('nis', 'like', "$q%")))
             ->when(in_array($role, User::APP_ROLES, true), fn ($w) => $w->where('role', $role))
             ->orderByRaw("FIELD(role,'superadmin','guru','siswa')")->orderBy('name')
             ->paginate(25)->withQueryString();
         $plots = DB::table('feature_user')->whereIn('user_id', $users->pluck('id'))->get(['user_id', 'feature', 'role'])->groupBy('user_id');
         $users->getCollection()->transform(fn ($u) => [
-            'id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role, 'is_active' => $u->is_active,
+            'id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'nis' => $u->nis, 'kelas' => $u->kelas, 'role' => $u->role, 'is_active' => $u->is_active,
             'last_login_at' => $u->last_login_at?->toDateTimeString(),
             'plots' => ($plots[$u->id] ?? collect())->map(fn ($p) => $p->feature . ':' . $p->role)->values(),
         ]);
@@ -65,9 +65,9 @@ class SuperadminController extends Controller
     {
         return [
             'name' => 'required|string|max:150',
-            'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user?->id)],
+            'email' => ['required_unless:role,siswa', 'nullable', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user?->id)],
             'role' => ['required', Rule::in(User::APP_ROLES)],
-            'password' => [$user ? 'nullable' : 'required', 'string', 'min:8', 'max:100'],
+            'password' => [$user ? 'nullable' : 'required_unless:role,siswa', 'nullable', 'string', 'min:8', 'max:100'],
             'is_active' => 'boolean',
             'plots' => 'array',
             'plots.*' => 'string|max:61',
@@ -90,7 +90,7 @@ class SuperadminController extends Controller
     public function usersStore(Request $request)
     {
         $d = $request->validate($this->rules());
-        $user = User::create(['name' => $d['name'], 'email' => $d['email'], 'role' => $d['role'], 'password' => $d['password'], 'is_active' => $d['is_active'] ?? true]);
+        $user = User::create(['name' => $d['name'], 'email' => $d['email'], 'role' => $d['role'], 'password' => $d['password'] ?: \Illuminate\Support\Str::random(40), 'is_active' => $d['is_active'] ?? true]);
         $this->syncPlots($user, $d['plots'] ?? []);
         return back()->with('success', "Akun {$user->name} dibuat.");
     }

@@ -53,7 +53,7 @@ function search() { router.get('/superadmin/pengguna', { q: q.value || undefined
         <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">TSM Superapp · Superadmin</span>Pengguna & Akses</h1>
         <button v-if="!showForm" @click="openCreate" class="btn-primary text-sm py-2.5">+ Tambah Akun</button>
       </div>
-      <p class="text-sm text-slate-500 -mt-3">Buat akun guru/siswa dan tentukan fitur yang bisa mereka akses. Card fitur di portal hanya muncul untuk fitur yang di-plot. Akun Admin CMS (/admin) dikelola terpisah.</p>
+      <p class="text-sm text-slate-500 -mt-3">Buat akun guru/siswa dan tentukan fitur yang bisa mereka akses. Card fitur di portal hanya muncul untuk fitur yang di-plot. Akun siswa dibuat dari menu Data Siswa (tarik dari Data Induk). Akun Admin CMS (/admin) dikelola terpisah.</p>
 
       <!-- Form -->
       <div v-if="showForm" class="card p-6">
@@ -69,8 +69,8 @@ function search() { router.get('/superadmin/pengguna', { q: q.value || undefined
               <p v-if="form.errors.name" class="text-xs text-red-600 mt-1">{{ form.errors.name }}</p>
             </div>
             <div>
-              <label class="form-label">Email (untuk login)</label>
-              <input v-model="form.email" type="email" class="form-input text-sm" required />
+              <label class="form-label">Email {{ form.role === 'siswa' ? '(opsional)' : '(untuk login)' }}</label>
+              <input v-model="form.email" type="email" class="form-input text-sm" :required="form.role !== 'siswa'" />
               <p v-if="form.errors.email" class="text-xs text-red-600 mt-1">{{ form.errors.email }}</p>
             </div>
             <div>
@@ -83,7 +83,7 @@ function search() { router.get('/superadmin/pengguna', { q: q.value || undefined
             </div>
             <div>
               <label class="form-label">Password {{ editing ? '(kosongkan bila tetap)' : '' }}</label>
-              <input v-model="form.password" type="password" autocomplete="new-password" minlength="8" class="form-input text-sm" :required="!editing" />
+              <input v-model="form.password" type="password" autocomplete="new-password" minlength="8" class="form-input text-sm" :required="!editing && form.role !== 'siswa'" :disabled="form.role === 'siswa'" :placeholder="form.role === 'siswa' ? 'Siswa login pakai NIS + tgl lahir' : ''" />
               <p v-if="form.errors.password" class="text-xs text-red-600 mt-1">{{ form.errors.password }}</p>
             </div>
           </div>
@@ -117,7 +117,7 @@ function search() { router.get('/superadmin/pengguna', { q: q.value || undefined
       <!-- Daftar -->
       <div class="card p-6">
         <form @submit.prevent="search" class="flex flex-wrap gap-3 mb-5">
-          <input v-model="q" placeholder="Cari nama / email" class="form-input text-sm flex-1 min-w-[200px]" />
+          <input v-model="q" placeholder="Cari nama / email / NIS" class="form-input text-sm flex-1 min-w-[200px]" />
           <select v-model="roleFilter" @change="search" class="form-input text-sm w-auto">
             <option value="">Semua peran</option>
             <option value="superadmin">Superadmin</option>
@@ -135,7 +135,7 @@ function search() { router.get('/superadmin/pengguna', { q: q.value || undefined
                 <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" :class="roleClass[u.role]">{{ roleLabel[u.role] }}</span>
                 <span v-if="!u.is_active" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Nonaktif</span>
               </div>
-              <div class="text-xs text-slate-500">{{ u.email }}<template v-if="u.last_login_at"> · login terakhir {{ new Date(u.last_login_at).toLocaleString('id-ID') }}</template></div>
+              <div class="text-xs text-slate-500"><template v-if="u.nis">NIS {{ u.nis }}<template v-if="u.kelas"> · {{ u.kelas }}</template><template v-if="u.email"> · </template></template>{{ u.email }}<template v-if="u.last_login_at"> · login terakhir {{ new Date(u.last_login_at).toLocaleString('id-ID') }}</template></div>
               <div class="flex flex-wrap gap-1.5">
                 <span v-if="u.role === 'superadmin'" class="text-[11px] px-2 py-0.5 rounded-full bg-white border border-line text-slate-600">Semua fitur</span>
                 <span v-for="p in u.plots" :key="p" class="text-[11px] px-2 py-0.5 rounded-full bg-white border border-line text-slate-600">{{ plotLabel(p) }}</span>

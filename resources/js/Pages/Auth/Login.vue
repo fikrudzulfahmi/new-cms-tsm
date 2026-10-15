@@ -1,9 +1,11 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useForm, usePage } from '@inertiajs/vue3'
 import GearRatio from '@/Components/Landing/GearRatio.vue'
+import StudentLogin from '@/Components/Superapp/StudentLogin.vue'
 
-const props = defineProps({ mode: { type: String, default: 'cms' } })
+const props = defineProps({ mode: { type: String, default: 'cms' }, recaptchaKey: String })
+const tab = ref('siswa')
 const isApp = computed(() => props.mode === 'app')
 const form = useForm({ 
   email: '', 
@@ -41,10 +43,16 @@ const submit = () => {
 
       <div class="bg-white rounded-[24px] border border-accent/30 p-8">
         <span class="mono-label mb-2">MASUK</span>
-        <h2 class="font-display text-2xl font-bold text-navy mb-6">{{ isApp ? 'Masuk Guru & Siswa' : 'Masuk ke Panel Admin' }}</h2>
+        <h2 class="font-display text-2xl font-bold text-navy mb-6">{{ isApp ? 'Masuk TSM Superapp' : 'Masuk ke Panel Admin' }}</h2>
+
+        <div v-if="isApp" class="grid grid-cols-2 gap-1 p-1 rounded-full bg-slate-100 mb-6 text-sm font-semibold" role="tablist">
+          <button type="button" role="tab" :aria-selected="tab === 'siswa'" @click="tab = 'siswa'" :class="['py-2 rounded-full transition', tab === 'siswa' ? 'bg-navy text-white' : 'text-slate-500']">Siswa</button>
+          <button type="button" role="tab" :aria-selected="tab === 'staf'" @click="tab = 'staf'" :class="['py-2 rounded-full transition', tab === 'staf' ? 'bg-navy text-white' : 'text-slate-500']">Guru / Staf</button>
+        </div>
+        <StudentLogin v-if="isApp && tab === 'siswa'" :recaptcha-key="recaptchaKey" />
         
         <!-- Login Form -->
-        <form @submit.prevent="submit" class="space-y-5">
+        <form v-else @submit.prevent="submit" class="space-y-5">
           <!-- Email Field -->
           <div>
             <label class="form-label">Alamat Email</label>
@@ -106,7 +114,7 @@ const submit = () => {
         </div>
       </div>
 
-      <p v-if="isApp" class="mt-6 text-center text-on-navy-subtle text-xs">Belum punya akun? Akun guru dan siswa dibuat oleh superadmin jurusan.</p>
+      <p v-if="isApp" class="mt-6 text-center text-on-navy-subtle text-xs">Siswa: masuk dengan NIS (atau scan kartu) + tanggal lahir. Akun guru dibuat oleh superadmin jurusan.</p>
     </div>
   </div>
   </div>

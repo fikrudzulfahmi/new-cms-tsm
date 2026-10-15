@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Superapp\PortalController;
 use App\Http\Controllers\Superapp\SuperadminController;
+use App\Http\Controllers\Superapp\StudentController;
 use Illuminate\Support\Facades\Route;
 
 // ===================== PUBLIC =====================
@@ -32,6 +33,7 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middl
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 Route::get('/masuk', [AuthController::class, 'showMasuk'])->name('masuk')->middleware('guest');
 Route::post('/masuk', [AuthController::class, 'login'])->middleware(['guest', 'throttle:10,1']);
+Route::post('/masuk/siswa', [AuthController::class, 'loginSiswa'])->middleware(['guest', 'throttle:20,1']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // ===================== ADMIN =====================
@@ -129,7 +131,12 @@ Route::prefix('superadmin')->middleware(['auth', 'role:superadmin'])->group(func
     Route::put('/pengguna/{user}', [SuperadminController::class, 'usersUpdate']);
     Route::delete('/pengguna/{user}', [SuperadminController::class, 'usersDestroy']);
     Route::get('/fitur/{feature}', [SuperadminController::class, 'feature'])->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus']);
-    Route::get('/{page}', [SuperadminController::class, 'comingSoon'])->whereIn('page', ['siswa', 'guru']);
+    Route::get('/siswa', [StudentController::class, 'index'])->name('superadmin.students');
+    Route::get('/siswa/api/kelas', [StudentController::class, 'kelas']);
+    Route::post('/siswa/api/pratinjau', [StudentController::class, 'preview'])->middleware('throttle:30,1');
+    Route::post('/siswa/impor', [StudentController::class, 'import'])->middleware('throttle:20,1');
+    Route::put('/siswa/{user}', [StudentController::class, 'update']);
+    Route::get('/{page}', [SuperadminController::class, 'comingSoon'])->whereIn('page', ['guru']);
 });
 
 // Guru & siswa: card fitur sesuai plotting; admin fitur -> /app/{fitur}/admin
