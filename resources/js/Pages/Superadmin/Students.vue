@@ -237,7 +237,7 @@ const fmtDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('id-ID',
             </tbody>
           </table>
         </div>
-        <p class="text-xs text-slate-500 mt-3">Plotting fitur siswa (LMS, UKK, dll.) diatur di menu <Link href="/superadmin/pengguna?role=siswa" class="text-label font-semibold">Pengguna & Akses</Link>.</p>
+        <p class="text-xs text-slate-500 mt-3">Siswa dimasukkan ke fitur (LMS, PKL, UKK, Perpus) oleh admin fitur masing-masing.</p>
 
         <div v-if="students.last_page > 1" class="flex flex-wrap gap-1 mt-5">
           <template v-for="l in students.links" :key="l.label">

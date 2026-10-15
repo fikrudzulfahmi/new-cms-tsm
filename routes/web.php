@@ -12,6 +12,8 @@ use App\Http\Controllers\Superapp\PortalController;
 use App\Http\Controllers\Superapp\SuperadminController;
 use App\Http\Controllers\Superapp\StudentController;
 use App\Http\Controllers\Superapp\TeacherController;
+use App\Http\Controllers\Superapp\FeatureAdminController;
+use App\Http\Controllers\Superapp\FeatureMemberController;
 use Illuminate\Support\Facades\Route;
 
 // ===================== PUBLIC =====================
@@ -127,10 +129,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 // Superadmin: mengatur data siswa/guru, akun & plotting fitur
 Route::prefix('superadmin')->middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('/', [SuperadminController::class, 'dashboard'])->name('superadmin');
-    Route::get('/pengguna', [SuperadminController::class, 'users'])->name('superadmin.users');
-    Route::post('/pengguna', [SuperadminController::class, 'usersStore']);
-    Route::put('/pengguna/{user}', [SuperadminController::class, 'usersUpdate']);
-    Route::delete('/pengguna/{user}', [SuperadminController::class, 'usersDestroy']);
+    // Superadmin hanya menunjuk admin fitur; anggota fitur diatur oleh admin fitur masing-masing
+    Route::get('/admin-fitur', [FeatureAdminController::class, 'index'])->name('superadmin.feature-admins');
+    Route::post('/admin-fitur', [FeatureAdminController::class, 'store']);
+    Route::delete('/admin-fitur/{feature}/{user}', [FeatureAdminController::class, 'destroy'])->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus']);
+    Route::put('/admin-fitur/akun/{user}', [FeatureAdminController::class, 'updateStaf']);
+    Route::redirect('/pengguna', '/superadmin/admin-fitur', 301);
     Route::get('/fitur/{feature}', [SuperadminController::class, 'feature'])->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus']);
     Route::get('/siswa', [StudentController::class, 'index'])->name('superadmin.students');
     Route::get('/siswa/api/kelas', [StudentController::class, 'kelas']);
@@ -146,9 +150,13 @@ Route::prefix('superadmin')->middleware(['auth', 'role:superadmin'])->group(func
 });
 
 // Guru & siswa: card fitur sesuai plotting; admin fitur -> /app/{fitur}/admin
-Route::middleware(['auth', 'role:superadmin,guru,siswa'])->group(function () {
+Route::middleware(['auth', 'role:superadmin,guru,siswa,staf'])->group(function () {
     Route::get('/portal', [PortalController::class, 'index'])->name('portal');
+    // Admin fitur: kelola anggota (siapa saja yang bisa mengakses fitur)
+    Route::get('/app/{feature}/admin', [FeatureMemberController::class, 'index'])->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus']);
+    Route::post('/app/{feature}/admin/anggota', [FeatureMemberController::class, 'store'])->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus']);
+    Route::delete('/app/{feature}/admin/anggota', [FeatureMemberController::class, 'destroy'])->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus']);
     Route::get('/app/{feature}/{area?}', [PortalController::class, 'feature'])
-        ->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus'])->whereIn('area', ['admin']);
+        ->whereIn('feature', ['lms', 'pkl', 'ukk', 'perpus'])->whereIn('area', ['rencana']);
 });
 

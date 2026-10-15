@@ -18,7 +18,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const CMS_ROLES = ['admin', 'editor'];
-    public const APP_ROLES = ['superadmin', 'guru', 'siswa'];
+    // staf = akun khusus admin fitur yang bukan guru (dibuat superadmin di menu Admin Fitur)
+    public const APP_ROLES = ['superadmin', 'guru', 'siswa', 'staf'];
 
     protected function casts(): array
     {

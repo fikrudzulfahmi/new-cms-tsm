@@ -33,7 +33,7 @@ class PortalController extends Controller
         $f = config("superapp.features.$feature") ?? abort(404);
         $user = $request->user();
         $isSuper = $user->role === 'superadmin';
-        if ($area === 'admin') {
+        if ($area === 'rencana') {
             if (!$isSuper && !$user->hasFeature($feature, 'admin')) return redirect('/portal')->with('error', "Anda bukan admin {$f['name']}.");
             $roles = ['admin'];
         } else {
@@ -45,10 +45,10 @@ class PortalController extends Controller
         }
         $plan = collect($roles)->map(fn ($r) => ['label' => $f['roles'][$r]['label'], 'items' => $f['roles'][$r]['plan']])->values();
         return Inertia::render('Superapp/ComingSoon', [
-            'title' => ($area === 'admin' ? 'Admin ' : '') . $f['name'],
+            'title' => ($area === 'rencana' ? 'Admin ' : '') . $f['name'],
             'desc' => $f['full'] . ' — ' . $f['desc'],
             'plan' => $plan, 'layout' => $isSuper ? 'superadmin' : 'portal', 'feature' => $feature,
-            'adminUrl' => $area !== 'admin' && ($isSuper || $user->hasFeature($feature, 'admin')) ? "/app/$feature/admin" : null,
+            'adminUrl' => $area !== 'rencana' && ($isSuper || $user->hasFeature($feature, 'admin')) ? "/app/$feature/admin" : null,
         ]);
     }
 }

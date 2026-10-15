@@ -11,7 +11,7 @@ const sidebarOpen = ref(false)
 const path = computed(() => (page.url || '').split('?')[0])
 const isActive = (href) => href === '/superadmin' ? path.value === '/superadmin' : path.value.startsWith(href)
 const logout = () => router.post('/logout')
-const roleLabel = { superadmin: 'Superadmin', guru: 'Guru', siswa: 'Siswa' }
+const roleLabel = { superadmin: 'Superadmin', guru: 'Guru', siswa: 'Siswa', staf: 'Admin Fitur' }
 
 const I = {
   home: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
@@ -28,13 +28,13 @@ const menuGroups = [
   { label: 'Data Master', items: [
     { label: 'Data Siswa', href: '/superadmin/siswa', icon: I.siswa },
     { label: 'Data Guru', href: '/superadmin/guru', icon: I.guru },
-    { label: 'Pengguna & Akses', href: '/superadmin/pengguna', icon: I.akun },
+    { label: 'Admin Fitur', href: '/superadmin/admin-fitur', icon: I.akun },
   ] },
   { label: 'Fitur', items: [
-    { label: 'LMS', href: '/superadmin/fitur/lms', icon: I.lms, soon: true },
-    { label: 'PKL', href: '/superadmin/fitur/pkl', icon: I.pkl, soon: true },
-    { label: 'UKK', href: '/superadmin/fitur/ukk', icon: I.ukk, soon: true },
-    { label: 'Perpustakaan Digital', href: '/superadmin/fitur/perpus', icon: I.perpus, soon: true },
+    { label: 'LMS', href: '/app/lms/admin', icon: I.lms },
+    { label: 'PKL', href: '/app/pkl/admin', icon: I.pkl },
+    { label: 'UKK', href: '/app/ukk/admin', icon: I.ukk },
+    { label: 'Perpustakaan Digital', href: '/app/perpus/admin', icon: I.perpus },
   ] },
 ]
 </script>

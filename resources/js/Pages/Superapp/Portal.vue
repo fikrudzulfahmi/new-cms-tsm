@@ -44,7 +44,7 @@ const greeting = (() => {
 
       <div v-else class="card p-10 text-center">
         <div class="font-display text-xl font-bold text-navy mb-2">Belum ada fitur untuk akun Anda</div>
-        <p class="text-slate-500 text-sm max-w-md mx-auto">Akun Anda belum di-plot ke fitur apa pun (LMS, PKL, UKK, atau Perpustakaan Digital). Silakan hubungi superadmin jurusan.</p>
+        <p class="text-slate-500 text-sm max-w-md mx-auto">Akun Anda belum ditambahkan ke fitur apa pun (LMS, PKL, UKK, atau Perpustakaan Digital). Silakan hubungi admin fitur terkait.</p>
       </div>
     </div>
   </SuperappLayout>

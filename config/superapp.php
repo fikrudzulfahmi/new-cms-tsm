@@ -1,7 +1,7 @@
 <?php
 
-// Katalog fitur TSM Superapp. Card di portal hanya muncul jika user sudah di-plot
-// ke fitur tsb (tabel feature_user). "admin" = admin fitur; peran lain = pengguna fitur.
+// Katalog fitur TSM Superapp. Card di portal hanya muncul jika user terdaftar di fitur tsb (tabel feature_user).
+// "admin" ditunjuk superadmin (menu Admin Fitur); peran lain = anggota, ditambahkan oleh admin fitur.
 return [
     'features' => [
         'lms' => [
