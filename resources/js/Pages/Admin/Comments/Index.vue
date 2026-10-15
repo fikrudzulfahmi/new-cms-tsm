@@ -4,7 +4,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps(['comments'])
 
-const approve = (id) => router.put(`/admin/komentar/${id}/approve`, {}, { preserveScroll: true })
+const approve = (id) => router.patch(`/admin/komentar/${id}/approve`, {}, { preserveScroll: true })
 const destroy = (id) => {
   if (confirm('Hapus komentar ini?')) router.delete(`/admin/komentar/${id}`, { preserveScroll: true })
 }

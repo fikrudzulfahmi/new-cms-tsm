@@ -3,8 +3,7 @@ import { useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps(['title', 'routeName', 'items', 'fields'])
-const form = useForm(props.fields.reduce((acc, f) => ({ ...acc, [f.name]: f.default || '' }), {}))
-form.image = null
+const form = useForm(props.fields.reduce((acc, f) => ({ ...acc, [f.name]: f.default ?? '' }), {}))
 
 const submit = () => {
   form.post(`/admin/${props.routeName}`, {
@@ -27,7 +26,7 @@ const destroy = (id) => {
 
       <div class="grid lg:grid-cols-3 gap-6">
         <!-- Form Add -->
-        <div class="card p-6 h-fit space-y-4">
+        <div v-if="fields?.length" class="card p-6 h-fit space-y-4">
           <h2 class="font-bold text-slate-800">Tambah Baru</h2>
           <form @submit.prevent="submit" class="space-y-4">
             <div v-for="f in fields" :key="f.name">
@@ -44,15 +43,15 @@ const destroy = (id) => {
         </div>
 
         <!-- List Items -->
-        <div class="lg:col-span-2 card p-6">
+        <div :class="[fields?.length ? 'lg:col-span-2' : 'lg:col-span-3', 'card p-6']">
           <h2 class="font-bold text-slate-800 mb-4">Daftar {{ title }}</h2>
           <div class="space-y-3">
             <div v-for="item in items" :key="item.id" class="flex items-center justify-between p-3 rounded-xl bg-slate-50">
               <div class="flex items-center gap-3 min-w-0 pr-4">
                 <img v-if="item.image || item.photo || item.logo || item.file" :src="`/storage/${item.image || item.photo || item.logo || item.file}`" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                 <div class="min-w-0">
-                  <div class="font-bold text-sm text-slate-800 truncate">{{ item.title || item.name }}</div>
-                  <div class="text-xs text-slate-500 truncate">{{ item.subtitle || item.short_description || item.position || item.category || item.level || '' }}</div>
+                  <div class="font-bold text-sm text-slate-800 truncate">{{ item.title || item.name || item.full_name }}</div>
+                  <div class="text-xs text-slate-500 truncate">{{ item.subtitle || item.short_description || item.position || item.category || item.level || item.message || item.registration_number || '' }}<span v-if="item.status" class="ml-2 badge-status">{{ item.status }}</span></div>
                 </div>
               </div>
               <button @click="destroy(item.id)" class="text-red-600 text-xs font-semibold hover:underline flex-shrink-0">Hapus</button>

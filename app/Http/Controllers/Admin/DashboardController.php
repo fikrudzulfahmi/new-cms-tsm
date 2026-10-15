@@ -49,8 +49,13 @@ class DashboardController extends Controller
             ->whereNotNull('device')
             ->groupBy('device')->get();
 
-        return Inertia::render('Admin/Dashboard', [
+        return Inertia::render('Admin/Dashboard/Index', [
+            'recentPosts' => Post::latest()->take(5)->get(['id','title','status','views_count','published_at']),
             'stats' => [
+                'total_visits' => Visit::count(),
+                'total_posts' => Post::count(),
+                'total_achievements' => Achievement::count(),
+                'total_ppdb' => Registration::count(),
                 'posts_total' => Post::count(),
                 'posts_published' => Post::where('status', 'published')->count(),
                 'posts_draft' => Post::where('status', 'draft')->count(),

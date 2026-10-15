@@ -40,6 +40,13 @@ class ReportController extends Controller
             ->groupBy('date')->orderBy('date')->get();
 
         return Inertia::render('Admin/Reports/Index', [
+            'stats' => [
+                'total_visits' => Visit::count(),
+                'total_posts' => Post::count(),
+                'total_comments' => \App\Models\Comment::count(),
+                'total_ppdb' => \App\Models\Registration::count(),
+            ],
+            'categoryStats' => \App\Models\Category::withCount('posts')->orderByDesc('posts_count')->get(),
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
             'summary' => [

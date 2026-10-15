@@ -22,7 +22,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
           <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>Kelola Berita</h1>
           <p class="text-slate-500 text-sm">Buat dan kelola berita dengan analisis SEO ketat</p>
         </div>
-        <a href="/admin/berita/create" class="btn-primary text-sm flex items-center gap-2">
+        <a href="/admin/berita/buat" class="btn-primary text-sm flex items-center gap-2">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           Tambah Berita
         </a>

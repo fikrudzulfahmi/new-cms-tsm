@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
+import axios from 'axios'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps(['post', 'relatedPosts'])
@@ -10,14 +11,18 @@ const replyingTo = ref(null)
 
 const submitComment = () => {
   commentForm.parent_id = replyingTo.value
-  commentForm.post(`/berita/${props.post.slug}/komentar`, {
+  commentForm.post(`/berita/${props.post.id}/comment`, {
     preserveScroll: true,
     onSuccess: () => { commentForm.reset(); replyingTo.value = null }
   })
 }
 
-const react = (type) => {
-  router.post(`/berita/${props.post.slug}/reaksi`, { type }, { preserveScroll: true })
+const likes = ref(props.post.likes_count || 0)
+const dislikes = ref(props.post.dislikes_count || 0)
+const shareUrl = typeof window !== 'undefined' ? shareUrl : ''
+const react = async (type) => {
+  const { data } = await axios.post(`/berita/${props.post.id}/react`, { value: type === 'like' ? 1 : -1 })
+  likes.value = data.likes; dislikes.value = data.dislikes
 }
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }) : ''
@@ -41,7 +46,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
       <div v-if="post.category" class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3" :style="`background:${post.category.color}20;color:${post.category.color}`">{{ post.category.name }}</div>
       <h1 class="font-display text-3xl sm:text-[44px] font-extrabold text-navy mb-5 leading-[1.1] tracking-[-1px]">{{ post.title }}</h1>
       <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500 pb-6 border-b border-slate-200 mb-8">
-        <span>Oleh <strong>{{ post.author?.name || 'Admin' }}</strong></span>
+        <span>Oleh <strong>{{ post.user?.name || 'Admin' }}</strong></span>
         <span>·</span>
         <span>{{ formatDate(post.published_at) }}</span>
         <span>·</span>
@@ -63,17 +68,17 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
         <div class="flex items-center gap-3">
           <button @click="react('like')" class="flex items-center gap-2 px-4 py-2 rounded-full border border-line bg-ice text-blue-900 font-semibold text-sm hover:bg-blue-100 transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
-            Suka ({{ post.likes_count }})
+            Suka ({{ likes }})
           </button>
           <button @click="react('unlike')" class="flex items-center gap-2 px-4 py-2 rounded-full border border-line bg-white text-slate-700 font-semibold text-sm hover:bg-slate-200 transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v5a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/></svg>
-            Tidak Suka ({{ post.unlikes_count }})
+            Tidak Suka ({{ dislikes }})
           </button>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-sm text-slate-500 font-medium">Bagikan:</span>
-          <a :href="`https://wa.me/?text=${encodeURIComponent(post.title + ' ' + window.location.href)}`" target="_blank" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-green-600 transition">WA</a>
-          <a :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`" target="_blank" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-blue-700 transition">FB</a>
+          <a :href="`https://wa.me/?text=${encodeURIComponent(post.title + ' ' + shareUrl)}`" target="_blank" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-green-600 transition">WA</a>
+          <a :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`" target="_blank" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-blue-700 transition">FB</a>
         </div>
       </div>
 
@@ -92,8 +97,8 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
             <button @click="replyingTo = c.id" class="text-xs text-blue-700 font-semibold hover:underline">Balas</button>
 
             <!-- Replies -->
-            <div v-if="c.children?.length" class="mt-4 pl-4 border-l-2 border-slate-200 space-y-3">
-              <div v-for="reply in c.children" :key="reply.id" class="bg-slate-50 p-3 rounded-xl">
+            <div v-if="c.replies?.length" class="mt-4 pl-4 border-l-2 border-slate-200 space-y-3">
+              <div v-for="reply in c.replies" :key="reply.id" class="bg-slate-50 p-3 rounded-xl">
                 <div class="flex items-center justify-between mb-1">
                   <div class="font-bold text-xs text-slate-800">{{ reply.name }}</div>
                   <div class="text-xs text-slate-400">{{ formatDate(reply.created_at) }}</div>

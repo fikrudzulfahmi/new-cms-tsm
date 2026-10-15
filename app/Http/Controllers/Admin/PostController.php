@@ -30,7 +30,7 @@ class PostController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Posts/Create', [
+        return Inertia::render('Admin/Posts/Form', [
             'categories' => Category::active()->get(['id', 'name', 'slug']),
             'tags' => Tag::all(['id', 'name', 'slug']),
         ]);
@@ -38,8 +38,8 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        $data = $this->validate($request, $this->rules());
-        $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+        $data = $request->validate($this->rules());
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['title']);
         $data['user_id'] = auth()->id();
         $data['reading_time'] = max(1, round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
         $data['seo_score'] = $this->calcSeoScore($data);
@@ -64,7 +64,7 @@ class PostController extends Controller
     public function edit(Post $post)
     {
         $post->load('tags');
-        return Inertia::render('Admin/Posts/Edit', [
+        return Inertia::render('Admin/Posts/Form', [
             'post' => $post,
             'categories' => Category::active()->get(['id', 'name', 'slug']),
             'tags' => Tag::all(['id', 'name', 'slug']),
@@ -78,8 +78,8 @@ class PostController extends Controller
 
     public function update(Request $request, Post $post)
     {
-        $data = $this->validate($request, $this->rules($post->id));
-        if (!$data['slug']) $data['slug'] = Str::slug($data['title']);
+        $data = $request->validate($this->rules($post->id));
+        if (empty($data['slug'])) $data['slug'] = Str::slug($data['title']);
         $data['reading_time'] = max(1, round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
         $data['seo_score'] = $this->calcSeoScore($data);
         $data['seo_report'] = json_encode($this->buildSeoReport($data));

@@ -55,7 +55,8 @@ class HomeController extends Controller
     public function posts(Request $request)
     {
         $this->trackVisit($request, null);
-        $category = $request->get('kategori');
+        $category = $request->get('kategori') ?: $request->get('category');
+        if ($request->get('search') && !$request->get('q')) $request->merge(['q' => $request->get('search')]);
         $query = Post::published()->with(['category', 'user'])->orderByDesc('published_at');
         if ($category) {
             $query->whereHas('category', fn($q) => $q->where('slug', $category));
@@ -66,7 +67,8 @@ class HomeController extends Controller
                   ->orWhere('excerpt', 'like', '%' . $request->q . '%');
             });
         }
-        return Inertia::render('Home/Posts', [
+        return Inertia::render('Post/Index', [
+            'filters' => ['search' => $request->get('q'), 'category' => $category],
             'posts' => $query->paginate(9)->withQueryString(),
             'categories' => Category::active()->withCount(['posts' => fn($q) => $q->published()])->get(),
             'currentCategory' => $category,
@@ -95,8 +97,11 @@ class HomeController extends Controller
             ->whereNull('parent_id')
             ->orderByDesc('created_at')
             ->get();
+        $post->setRelation('comments', $comments);
+        $post->setAttribute('rating', $post->ratioLikeDislike());
 
-        return Inertia::render('Home/PostShow', [
+        return Inertia::render('Post/Show', [
+            'relatedPosts' => $related,
             'post' => $post,
             'related' => $related,
             'comments' => $comments,
@@ -195,7 +200,7 @@ class HomeController extends Controller
 
     public function ppdb(Request $request)
     {
-        return Inertia::render('Home/Ppdb', [
+        return Inertia::render('PPDB/Index', [
             'ppdb_open' => Setting::get('ppdb_open', '0') == '1',
             'ppdb_info' => Setting::get('ppdb_info'),
         ]);
@@ -203,6 +208,13 @@ class HomeController extends Controller
 
     public function ppdbStore(Request $request)
     {
+        $request->merge(array_filter([
+            'nisn' => $request->input('nisn') ?? $request->input('nik'),
+            'origin_school' => $request->input('origin_school') ?? $request->input('school_origin'),
+            'phone' => $request->input('phone') ?? $request->input('student_phone'),
+            'parent_phone' => $request->input('parent_phone') ?? $request->input('father_phone'),
+            'parent_name' => $request->input('parent_name') ?? 'Orang Tua / Wali',
+        ], fn($v) => $v !== null));
         $request->validate([
             'full_name' => 'required|string|max:200',
             'nisn' => 'nullable|string|max:20',

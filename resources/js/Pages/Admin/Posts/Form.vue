@@ -78,7 +78,7 @@ const seoAnalysis = computed(() => {
 
 const submit = () => {
   if (isEdit) {
-    form.post(`/admin/berita/${props.post.id}`, { _method: 'put' })
+    form.transform(d => ({ ...d, _method: 'put' })).post(`/admin/berita/${props.post.id}`)
   } else {
     form.post('/admin/berita')
   }

@@ -28,7 +28,7 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
             'settings' => cache()->remember('site_settings', 3600, function () {
-                return Setting::pluck('value', 'key');
+                return Setting::pluck('value', 'key')->toArray();
             }),
             'flash' => [
                 'success' => $request->session()->get('success'),
