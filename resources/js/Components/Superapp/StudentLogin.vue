@@ -43,7 +43,7 @@ let scanner = null
 function applyScan(text) {
   const digits = (String(text).match(/\d+/) || [''])[0]
   if (digits.length < 5) { scanError.value = 'Kode tidak dikenali (butuh minimal 5 angka).'; return false }
-  form.nis = digits.slice(0, 20)
+  form.nis = digits.slice(0, 5)
   scanned.value = true
   form.clearErrors('nis')
   nextTick(() => dayInput.value?.focus())
@@ -72,7 +72,8 @@ async function stopScan() {
 onBeforeUnmount(stopScan)
 
 function onNisEnter() { if (form.nis.length >= 5) { scanned.value = false; dayInput.value?.focus() } }
-function onNisInput(e) { form.nis = e.target.value.replace(/\D/g, '').slice(0, 20); scanned.value = false }
+// NIS di Data Induk berbentuk 31577/1582/004; yang dipakai login = 5 angka pertama, jadi tanda / tetap diterima.
+function onNisInput(e) { form.nis = e.target.value.replace(/[^0-9/.\-]/g, '').slice(0, 20); scanned.value = false }
 
 function submit() {
   form.birth_date = birthDate.value
@@ -89,10 +90,10 @@ function submit() {
 <template>
   <form @submit.prevent="submit" class="space-y-5">
     <div>
-      <label class="form-label">NIS</label>
+      <label class="form-label">NIS <span class="font-normal text-slate-400">— 5 angka pertama pada kartu siswa</span></label>
       <div class="flex gap-2">
         <input ref="nisInput" :value="form.nis" @input="onNisInput" @keydown.enter.prevent="onNisEnter"
-          inputmode="numeric" autocomplete="username" placeholder="Ketik NIS atau scan kartu" class="form-input flex-1 font-mono tracking-wider"
+          inputmode="text" autocomplete="username" placeholder="5 angka NIS atau scan kartu" class="form-input flex-1 font-mono tracking-wider"
           :class="{ 'border-red-400 ring-red-200': form.errors.nis }" required autofocus />
         <button type="button" @click="scanning ? stopScan() : startScan()" class="shrink-0 px-3 rounded-xl border border-line text-slate-600 hover:border-label hover:text-label" :aria-label="scanning ? 'Tutup kamera' : 'Scan kartu'" title="Scan kartu dengan kamera">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7V5a1 1 0 011-1h2M17 4h2a1 1 0 011 1v2M20 17v2a1 1 0 01-1 1h-2M7 20H5a1 1 0 01-1-1v-2M7 12h10M8 8h1M8 16h1m6-8h1m-1 8h1" /></svg>

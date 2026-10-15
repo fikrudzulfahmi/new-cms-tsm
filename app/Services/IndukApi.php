@@ -9,6 +9,8 @@ use RuntimeException;
  * Klien API aplikasi Data Induk Siswa (read-only).
  *   GET {url}/kelas              -> {"data":[{"id":..,"nama":"XI TSM 1","tingkat":11,"jurusan":"TSM","jumlah_siswa":32}]}
  *   GET {url}/siswa/{id_rombel}  -> {"kelas":{..},"data":[{"id":..,"nis":"..","nisn":"..","nama":"..","jk":"L","tgl_lahir":"2009-05-21","status":"aktif"}]}
+ * NIS di aplikasi induk berbentuk "31577/1582/004"; yang dipakai siswa untuk login adalah
+ * 5 angka pertamanya ("31577", sesuai kartu siswa). Bentuk lengkap disimpan di nis_lengkap.
  * Header: Authorization: Bearer {INDUK_API_TOKEN} (+ X-Api-Token, karena Apache/cPanel kadang membuang header Authorization)
  * Repo aplikasi induk: github.com/fikrudzulfahmi/induk-smekisa (PHP native MVC) - file API ada di docs/induk-api/
  */
@@ -33,15 +35,21 @@ class IndukApi
 
     public function siswa(string $kelasId): array
     {
-        return collect($this->get('siswa/' . rawurlencode($kelasId)))->map(fn ($s) => [
-            'induk_id' => (string) ($s['id'] ?? ''),
-            'nis' => preg_replace('/\D/', '', (string) ($s['nis'] ?? '')),
-            'nisn' => preg_replace('/\D/', '', (string) ($s['nisn'] ?? '')) ?: null,
-            'name' => trim((string) ($s['nama'] ?? '')),
-            'gender' => in_array(strtoupper((string) ($s['jk'] ?? '')), ['L', 'P'], true) ? strtoupper($s['jk']) : null,
-            'birth_date' => self::date($s['tgl_lahir'] ?? null),
-            'status' => strtolower((string) ($s['status'] ?? 'aktif')),
-        ])->values()->all();
+        return collect($this->get('siswa/' . rawurlencode($kelasId)))->map(function ($s) {
+            $lengkap = trim((string) ($s['nis'] ?? ''));
+            $angka = preg_replace('/\D/', '', $lengkap);
+
+            return [
+                'induk_id' => (string) ($s['id'] ?? ''),
+                'nis' => substr($angka, 0, 5), // kunci login siswa: 5 angka pertama
+                'nis_lengkap' => ($lengkap !== '' && $lengkap !== $angka) ? $lengkap : null,
+                'nisn' => preg_replace('/\D/', '', (string) ($s['nisn'] ?? '')) ?: null,
+                'name' => trim((string) ($s['nama'] ?? '')),
+                'gender' => in_array(strtoupper((string) ($s['jk'] ?? '')), ['L', 'P'], true) ? strtoupper($s['jk']) : null,
+                'birth_date' => self::date($s['tgl_lahir'] ?? null),
+                'status' => strtolower((string) ($s['status'] ?? 'aktif')),
+            ];
+        })->filter(fn ($s) => $s['nis'] !== '')->values()->all();
     }
 
     private function get(string $path): array

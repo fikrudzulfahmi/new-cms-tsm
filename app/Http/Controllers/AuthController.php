@@ -32,9 +32,9 @@ class AuthController extends Controller
     public function loginSiswa(Request $request)
     {
         $d = $request->validate([
-            'nis' => ['required', 'string', 'regex:/^\d{5,20}$/'],
+            'nis' => ['required', 'string', 'regex:/^[0-9][0-9\/\-\.\s]{3,29}$/'],
             'birth_date' => 'required|date_format:Y-m-d',
-        ], ['nis.regex' => 'NIS hanya angka (minimal 5 digit).']);
+        ], ['nis.regex' => 'NIS harus angka (boleh memuat tanda / seperti di kartu), minimal 5 karakter.']);
 
         $key = 'siswa-login:' . $request->ip() . ':' . $d['nis'];
         if (RateLimiter::tooManyAttempts($key, 5)) {
@@ -44,15 +44,22 @@ class AuthController extends Controller
             return back()->withErrors(['captcha' => 'Verifikasi reCAPTCHA gagal, silakan centang ulang.']);
         }
 
+        // NIS di kartu siswa = 5 angka pertama. Kalau siswa mengetik NIS lengkap (31577/1582/004),
+        // yang dicocokkan tetap 5 angka pertamanya.
+        $angka = preg_replace('/\D/', '', $d['nis']);
+        $kunci = strlen($angka) >= 5 ? substr($angka, 0, 5) : $angka;
+
         $q = User::where('role', 'siswa')->whereDate('birth_date', $d['birth_date']);
-        $exact = (clone $q)->where('nis', $d['nis'])->get();
-        $found = $exact->isNotEmpty() ? $exact
-            : (strlen($d['nis']) === 5 ? (clone $q)->where('nis', 'like', $d['nis'] . '%')->limit(2)->get() : collect());
+        $found = $kunci === '' ? collect() : (clone $q)->where('nis', $kunci)->get();
+        if ($found->isEmpty() && strlen($angka) >= 5) {
+            // cadangan untuk data yang NIS-nya masih tersimpan utuh (315771582004)
+            $found = (clone $q)->where(fn ($w) => $w->where('nis', 'like', $angka . '%')->orWhere('nis_lengkap', $d['nis']))->limit(2)->get();
+        }
 
         if ($found->count() !== 1) {
             RateLimiter::hit($key, 300);
             return back()->withErrors(['nis' => $found->count() > 1
-                ? 'Data cocok dengan lebih dari satu siswa. Masukkan NIS lengkap.'
+                ? 'Data cocok dengan lebih dari satu siswa. Hubungi wali kelas/superadmin.'
                 : 'NIS atau tanggal lahir tidak cocok.'])->withInput($request->only('nis'));
         }
         $user = $found->first();

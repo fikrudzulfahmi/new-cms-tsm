@@ -135,6 +135,8 @@ Route::prefix('superadmin')->middleware(['auth', 'role:superadmin'])->group(func
     Route::get('/siswa/api/kelas', [StudentController::class, 'kelas']);
     Route::post('/siswa/api/pratinjau', [StudentController::class, 'preview'])->middleware('throttle:30,1');
     Route::post('/siswa/impor', [StudentController::class, 'import'])->middleware('throttle:20,1');
+    Route::post('/siswa/sinkron', [StudentController::class, 'sync'])->middleware('throttle:30,1');
+    Route::post('/siswa/sinkron-semua', [StudentController::class, 'syncAll'])->middleware('throttle:6,1');
     Route::put('/siswa/{user}', [StudentController::class, 'update']);
     Route::get('/{page}', [SuperadminController::class, 'comingSoon'])->whereIn('page', ['guru']);
 });

@@ -2,6 +2,7 @@
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
@@ -22,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+    })
+    ->withSchedule(function (Schedule $schedule): void {
+        // Selaraskan data siswa dengan aplikasi Data Induk setiap malam.
+        $schedule->command('siswa:sync')->dailyAt('02:30')->withoutOverlapping();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
