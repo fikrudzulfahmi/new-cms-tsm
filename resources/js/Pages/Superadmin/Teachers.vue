@@ -50,7 +50,7 @@ const fmtPhone = (p) => (p ? p.replace(/^(\d{4})(\d{4})(\d+)$/, '$1-$2-$3') : ''
         <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">TSM Superapp · Superadmin</span>Data Guru</h1>
         <button v-if="!showForm" @click="openCreate" class="btn-primary text-sm py-2.5">+ Tambah Guru</button>
       </div>
-      <p class="text-sm text-slate-500 -mt-3">Data guru diisi manual. Guru masuk di halaman <b>/masuk</b> tab <b>Guru / Staf</b> memakai <b>email atau no HP</b> dan password yang dibuat di sini. Guru bisa dijadikan admin fitur di menu <Link href="/superadmin/admin-fitur" class="text-label font-semibold">Admin Fitur</Link>; anggota tiap fitur ditambahkan oleh admin fiturnya.</p>
+      <p class="text-sm text-slate-500 -mt-3">Data guru diisi manual. Guru masuk di halaman <b>/masuk</b> tab <b>Guru / Staf</b> memakai <b>email atau no HP</b> dan password yang dibuat di sini. Guru dimasukkan ke fitur (LMS, PKL, UKK, Perpus) oleh admin fitur masing-masing. Akun admin fitur dibuat terpisah di menu <Link href="/superadmin/admin-fitur" class="text-label font-semibold">Admin Fitur</Link>.</p>
 
       <div v-if="flash().success" class="rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-3">{{ flash().success }}</div>
 
