@@ -52,6 +52,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('/komentar/{comment}/spam', [CommentController::class, 'spam'])->name('comments.spam');
     Route::delete('/komentar/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
+    // ===== Khusus admin (editor tidak boleh) =====
+    Route::middleware('role:admin')->group(function () {
+
     // Reports
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
 
@@ -113,5 +116,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/pesan', [ContentController::class, 'messages'])->name('messages.index');
     Route::patch('/pesan/{message}/read', [ContentController::class, 'messagesRead'])->name('messages.read');
     Route::delete('/pesan/{message}', [ContentController::class, 'messagesDestroy'])->name('messages.destroy');
+
+    }); // end role:admin
 
 });

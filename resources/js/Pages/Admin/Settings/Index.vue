@@ -4,7 +4,17 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps(['settings'])
 
+const imgUrl = (p) => (p ? (/^https?:\/\//.test(p) ? p : `/storage/${p}`) : null)
+const current = (k) => props.settings?.[k] || ''
+
 const form = useForm({
+  site_name: props.settings?.site_name || '',
+  site_tagline: props.settings?.site_tagline || '',
+  hero_title: props.settings?.hero_title || '',
+  hero_subtitle: props.settings?.hero_subtitle || '',
+  site_logo: null,
+  site_favicon: null,
+  hero_bg: null,
   school_name: props.settings?.school_name || '',
   address: props.settings?.address || '',
   phone: props.settings?.phone || '',
@@ -56,6 +66,56 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
         <div>
           <label class="form-label">Teks Tentang Kami (Tentang Jurusan)</label>
           <textarea v-model="form.about_text" rows="4" class="form-input resize-none"></textarea>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 p-6 space-y-5">
+          <div>
+            <h2 class="font-bold text-slate-800">Identitas Situs & Hero</h2>
+            <p class="text-xs text-slate-500">Nama yang tampil di navbar, judul besar halaman depan, logo, dan favicon.</p>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-6">
+            <div>
+              <label class="form-label">Nama Jurusan (navbar)</label>
+              <input v-model="form.site_name" type="text" class="form-input" placeholder="Teknik Sepeda Motor" />
+              <p class="text-xs text-slate-500 mt-1">Kosongkan untuk memakai "Teknik Sepeda Motor".</p>
+            </div>
+            <div>
+              <label class="form-label">Tagline (bawah judul hero)</label>
+              <input v-model="form.site_tagline" type="text" class="form-input" />
+            </div>
+            <div>
+              <label class="form-label">Judul Hero</label>
+              <input v-model="form.hero_title" type="text" class="form-input" placeholder="Teknik Sepeda Motor" />
+              <p class="text-xs text-slate-500 mt-1">Dipakai bila belum ada slider hero aktif.</p>
+            </div>
+            <div>
+              <label class="form-label">Subjudul Hero (kata berwarna)</label>
+              <input v-model="form.hero_subtitle" type="text" class="form-input" />
+            </div>
+          </div>
+          <div class="grid sm:grid-cols-3 gap-6">
+            <div>
+              <label class="form-label">Logo Sekolah</label>
+              <img v-if="current('site_logo')" :src="imgUrl(current('site_logo'))" alt="Logo saat ini" class="h-14 w-auto mb-2 rounded-lg border border-slate-200 p-1 bg-white" />
+              <input type="file" accept="image/*" @input="form.site_logo = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
+              <p class="text-xs text-slate-500 mt-1">Tampil di navbar publik. PNG transparan, maks 5 MB.</p>
+              <p v-if="form.errors.site_logo" class="text-xs text-red-600 mt-1">{{ form.errors.site_logo }}</p>
+            </div>
+            <div>
+              <label class="form-label">Favicon</label>
+              <img v-if="current('site_favicon')" :src="imgUrl(current('site_favicon'))" alt="Favicon saat ini" class="h-10 w-10 mb-2 rounded border border-slate-200 p-1 bg-white" />
+              <input type="file" accept="image/*" @input="form.site_favicon = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
+              <p class="text-xs text-slate-500 mt-1">Ikon tab browser, maks 1 MB.</p>
+              <p v-if="form.errors.site_favicon" class="text-xs text-red-600 mt-1">{{ form.errors.site_favicon }}</p>
+            </div>
+            <div>
+              <label class="form-label">Gambar Latar Hero</label>
+              <img v-if="current('hero_bg')" :src="imgUrl(current('hero_bg'))" alt="Hero saat ini" class="h-14 w-full object-cover mb-2 rounded-lg border border-slate-200" />
+              <input type="file" accept="image/*" @input="form.hero_bg = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
+              <p class="text-xs text-slate-500 mt-1">Dipakai bila slider hero kosong. Maks 5 MB.</p>
+              <p v-if="form.errors.hero_bg" class="text-xs text-red-600 mt-1">{{ form.errors.hero_bg }}</p>
+            </div>
+          </div>
         </div>
 
         <div class="grid sm:grid-cols-2 gap-6">

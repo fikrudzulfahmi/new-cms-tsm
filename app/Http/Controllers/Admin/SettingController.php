@@ -21,17 +21,26 @@ class SettingController extends Controller
             'spmb_url' => ['nullable', 'url', 'max:500', 'regex:#^https?://#i'],
             'email' => ['nullable', 'email', 'max:150'],
             'about_image' => ['nullable', 'image', 'max:5120'],
+            'site_logo' => ['nullable', 'image', 'max:5120'],
+            'site_favicon' => ['nullable', 'image', 'max:1024'],
+            'hero_bg' => ['nullable', 'image', 'max:5120'],
         ], ['spmb_url.url' => 'Link SPMB harus berupa URL lengkap, contoh: https://spmb.sekolah.sch.id', 'spmb_url.regex' => 'Link SPMB harus diawali http:// atau https://']);
 
         // Form mengirim field datar (school_name, phone, ...); format lama "settings[key]" tetap didukung
-        $input = array_merge($request->except(['_token', '_method', 'settings', 'about_image']), (array) $request->input('settings', []));
+        $imageKeys = ['about_image', 'site_logo', 'site_favicon', 'hero_bg'];
+        $input = array_merge($request->except(array_merge(['_token', '_method', 'settings'], $imageKeys)), (array) $request->input('settings', []));
         foreach ($input as $key => $value) {
             $setting = Setting::where('key', $key)->first();
             if (!$setting || $setting->type === 'image') continue;
             $setting->update(['value' => $value ?? '']);
         }
-        if ($request->hasFile('about_image')) {
-            Setting::where('key', 'about_image')->update(['value' => $request->file('about_image')->store('settings', 'public')]);
+        foreach ($imageKeys as $key) {
+            if (! $request->hasFile($key)) continue;
+            $old = Setting::where('key', $key)->value('value');
+            if ($old && ! str_starts_with($old, 'dummy/') && Storage::disk('public')->exists($old)) {
+                Storage::disk('public')->delete($old);
+            }
+            Setting::where('key', $key)->update(['value' => $request->file($key)->store('settings', 'public')]);
         }
         cache()->forget('site_settings');
         return back()->with('success', 'Pengaturan berhasil disimpan!');

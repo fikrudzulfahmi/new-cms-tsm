@@ -11,6 +11,10 @@ const user = computed(() => page.props.auth?.user)
 // Tombol akun: tamu -> /login; sudah login -> panel admin
 const account = computed(() => user.value ? { href: '/admin', label: 'Admin' } : { href: '/login', label: 'Masuk' })
 const path = computed(() => (page.url || '/').split('#')[0].split('?')[0])
+const logo = computed(() => {
+  const p = s.value.site_logo
+  return p ? (/^https?:\/\//.test(p) ? p : `/storage/${p}`) : null
+})
 
 const links = [
   { label: 'Beranda', href: '/' },
@@ -35,13 +39,14 @@ onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
     :class="[scrolled || open ? 'top-2.5 bg-navy/90 shadow-[0_10px_40px_rgba(10,26,58,.35)]' : 'top-4 bg-navy/60', open ? 'rounded-3xl' : 'rounded-[28px]']">
     <div class="flex items-center justify-between gap-4 px-4 sm:px-5 py-2.5">
       <a href="/" class="flex items-center gap-3 min-w-0" aria-label="Beranda TSM">
-        <svg class="text-accent flex-shrink-0" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <img v-if="logo" :src="logo" alt="" class="w-10 h-10 object-contain flex-shrink-0" />
+        <svg v-else class="text-accent flex-shrink-0" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
           <circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="2"/>
           <circle cx="20" cy="20" r="6" fill="currentColor"/>
           <path d="M20 3v8M20 29v8M3 20h8M29 20h8M8 8l5.5 5.5M26.5 26.5L32 32M32 8l-5.5 5.5M13.5 26.5L8 32" stroke="currentColor" stroke-width="1.6"/>
         </svg>
         <span class="flex flex-col leading-tight min-w-0">
-          <span class="font-display font-bold text-white text-[15px] truncate">{{ s.department_name || 'Teknik Sepeda Motor' }}</span>
+          <span class="font-display font-bold text-white text-[15px] truncate">{{ s.site_name || s.department_name || 'Teknik Sepeda Motor' }}</span>
           <span class="font-mono text-[11px] tracking-wider uppercase text-on-navy-subtle truncate">{{ s.school_name || 'SMKS Islam 1 Blitar' }}</span>
         </span>
       </a>
