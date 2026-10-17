@@ -19,6 +19,11 @@ function startEdit(item) {
   editing.value = item
   const values = emptyValues()
   for (const f of props.fields || []) {
+    if (f.type === 'file') {
+      // Jangan kirim path lama sebagai file: biarkan kosong bila tidak diganti.
+      values[f.name] = null
+      continue
+    }
     const v = item[f.name]
     values[f.name] = (v === null || v === undefined) ? '' : v
   }
@@ -28,31 +33,29 @@ function startEdit(item) {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-function cancelEdit() {
+function resetForm() {
   editing.value = null
-  form.transform((d) => d)
+  form.defaults(emptyValues())
   form.reset()
+  form.clearErrors()
 }
 
-// Kolom angka tidak boleh kosong (kolom database NOT NULL): isi 0 bila dikosongkan
-function payload(d) {
-  const out = { ...d }
-  for (const f of props.fields || []) {
-    if (f.type === 'number' && (out[f.name] === '' || out[f.name] === null || out[f.name] === undefined)) out[f.name] = 0
-  }
-  return out
+function cancelEdit() {
+  resetForm()
 }
 
 function submit() {
   const opts = {
     forceFormData: true,
     preserveScroll: true,
-    onSuccess: () => { editing.value = null; form.reset() },
+    onSuccess: () => resetForm(),
   }
   if (editingId.value) {
-    form.transform((d) => ({ ...payload(d), _method: 'put' })).post(`/admin/${props.routeName}/${editingId.value}`, opts)
+    // Testimoni memakai PATCH, modul lain PUT.
+    const method = props.routeName === 'testimoni' ? 'patch' : 'put'
+    form.transform((d) => ({ ...d, _method: method })).post(`/admin/${props.routeName}/${editingId.value}`, opts)
   } else {
-    form.transform((d) => payload(d)).post(`/admin/${props.routeName}`, { ...opts, onSuccess: () => form.reset() })
+    form.post(`/admin/${props.routeName}`, opts)
   }
 }
 
@@ -90,14 +93,14 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
           <form @submit.prevent="submit" class="space-y-4">
             <div v-for="f in fields" :key="f.name">
               <label class="form-label">{{ f.label }}</label>
-              <input v-if="f.type==='text' || f.type==='number'" v-model="form[f.name]" :type="f.type" :placeholder="f.label" class="form-input text-sm" />
+              <input v-if="f.type==='text' || f.type==='number' || f.type==='date'" v-model="form[f.name]" :type="f.type" :placeholder="f.label" class="form-input text-sm" />
               <textarea v-else-if="f.type==='textarea'" v-model="form[f.name]" rows="3" :placeholder="f.label" class="form-input text-sm"></textarea>
               <select v-else-if="f.type==='select'" v-model="form[f.name]" class="form-input text-sm">
                 <option v-for="opt in f.options" :key="opt" :value="opt">{{ opt }}</option>
               </select>
               <template v-else-if="f.type==='file'">
-                <input type="file" @input="form[f.name] = $event.target.files[0]" class="form-input text-sm" />
-                <p v-if="editingId && editing[f.name] && typeof form[f.name] === 'string'" class="text-xs text-slate-500 mt-1">
+                <input type="file" @change="form[f.name] = $event.target.files[0] || null" class="form-input text-sm" />
+                <p v-if="editingId && editing[f.name]" class="text-xs text-slate-500 mt-1">
                   File sekarang: <a :href="`/storage/${editing[f.name]}`" target="_blank" class="text-blue-700 hover:underline">lihat</a> — biarkan kosong bila tidak diganti.
                 </p>
               </template>

@@ -54,6 +54,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('/komentar/{comment}/spam', [CommentController::class, 'spam'])->name('comments.spam');
     Route::delete('/komentar/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
+    // Upload gambar editor (dipakai RichEditor) — editor juga butuh, jadi di luar grup role:admin.
+    Route::post('/pengaturan/upload', [SettingController::class, 'uploadImage'])->name('settings.upload');
+
     // ===== Khusus admin (editor tidak boleh) =====
     Route::middleware('role:admin')->group(function () {
 
@@ -63,8 +66,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Settings
     Route::get('/pengaturan', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/pengaturan', [SettingController::class, 'update'])->name('settings.update');
-    Route::post('/pengaturan/upload', [SettingController::class, 'uploadImage'])->name('settings.upload');
-
     // Content
     Route::get('/slider', [ContentController::class, 'sliders'])->name('sliders.index');
     Route::post('/slider', [ContentController::class, 'slidersStore'])->name('sliders.store');
@@ -92,7 +93,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::delete('/prestasi/{achievement}', [ContentController::class, 'achievementsDestroy'])->name('achievements.destroy');
 
     Route::get('/testimoni', [ContentController::class, 'testimonials'])->name('testimonials.index');
-    Route::patch('/testimoni/{testimonial}', [ContentController::class, 'testimonialsUpdate'])->name('testimonials.update');
+    Route::match(['put', 'patch'], '/testimoni/{testimonial}', [ContentController::class, 'testimonialsUpdate'])->name('testimonials.update');
     Route::delete('/testimoni/{testimonial}', [ContentController::class, 'testimonialsDestroy'])->name('testimonials.destroy');
 
     Route::get('/guru', [ContentController::class, 'teachers'])->name('teachers.index');

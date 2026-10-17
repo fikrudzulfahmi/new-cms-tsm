@@ -11,8 +11,22 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $from = $request->from ? Carbon::parse($request->from) : now()->subDays(29);
-        $to   = $request->to   ? Carbon::parse($request->to)   : now();
+        $validated = $request->validate([
+            'from' => 'nullable|date',
+            'to' => 'nullable|date|after_or_equal:from',
+        ], [
+            'from.date' => 'Tanggal awal tidak valid.',
+            'to.date' => 'Tanggal akhir tidak valid.',
+            'to.after_or_equal' => 'Tanggal akhir tidak boleh lebih awal dari tanggal awal.',
+        ]);
+
+        $from = ! empty($validated['from']) ? Carbon::parse($validated['from'])->startOfDay() : now()->subDays(29)->startOfDay();
+        $to   = ! empty($validated['to'])   ? Carbon::parse($validated['to'])->endOfDay()     : now()->endOfDay();
+
+        // Batasi rentang agar laporan tidak membebani database.
+        if ($from->diffInDays($to) > 366) {
+            $from = $to->copy()->subDays(366);
+        }
 
         $visitChart = Visit::selectRaw('DATE(visited_on) as date, COUNT(*) as total, SUM(is_unique) as unique_v')
             ->whereBetween('visited_on', [$from->toDateString(), $to->toDateString()])

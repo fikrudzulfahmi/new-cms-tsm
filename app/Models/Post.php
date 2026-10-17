@@ -68,11 +68,4 @@ class Post extends Model
         return $total > 0 ? round(($this->likes_count / $total) * 100) : 0;
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            $model->reading_time = max(1, round(str_word_count($model->body) / 200));
-        });
-    }
 }

@@ -24,8 +24,13 @@ class AuthController extends Controller
         ], ['email.required' => 'Isi email.', 'email.email' => 'Format email tidak valid.']);
 
         $key = 'login:' . $request->ip() . ':' . strtolower($d['email']);
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            return back()->withErrors(['email' => 'Terlalu banyak percobaan. Coba lagi dalam ' . RateLimiter::availableIn($key) . ' detik.'])
+        $ipKey = 'login-ip:' . $request->ip();
+
+        // Batas per akun (cegah tebak password satu email) + batas per IP
+        // (cegah credential stuffing ke banyak email dari satu mesin).
+        if (RateLimiter::tooManyAttempts($key, 5) || RateLimiter::tooManyAttempts($ipKey, 30)) {
+            $wait = RateLimiter::tooManyAttempts($ipKey, 30) ? RateLimiter::availableIn($ipKey) : RateLimiter::availableIn($key);
+            return back()->withErrors(['email' => 'Terlalu banyak percobaan. Coba lagi dalam ' . $wait . ' detik.'])
                 ->withInput($request->only('email', 'remember'));
         }
 
@@ -36,6 +41,7 @@ class AuthController extends Controller
                 return back()->withErrors(['email' => 'Akun Anda dinonaktifkan.']);
             }
             RateLimiter::clear($key);
+            RateLimiter::clear($ipKey);
             $user->forceFill(['last_login_at' => now()])->save();
             $request->session()->regenerate();
 
@@ -43,6 +49,7 @@ class AuthController extends Controller
         }
 
         RateLimiter::hit($key, 300);
+        RateLimiter::hit($ipKey, 600);
         return back()->withErrors(['email' => 'Email atau password salah.'])->withInput($request->only('email', 'remember'));
     }
 

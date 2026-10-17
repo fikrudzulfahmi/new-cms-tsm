@@ -44,10 +44,13 @@ class PostController extends Controller
         $data['slug'] = Slug::unique('posts', ($data['slug'] ?? null) ?: $data['title']);
         $data['user_id'] = auth()->id();
         $data['body'] = $this->cleanBody($data['body'] ?? null);
-        $data['reading_time'] = max(1, round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
+        $data['reading_time'] = max(1, (int) round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
+        $data['published_at'] = $this->resolvePublishedAt($data, null);
         $data['seo_score'] = $this->calcSeoScore($data);
-        $data['seo_report'] = json_encode($this->buildSeoReport($data));
+        $data['seo_report'] = $this->buildSeoReport($data);
 
+        // File hanya ditimpa kalau benar-benar ada upload baru.
+        unset($data['cover_image'], $data['og_image']);
         if ($request->hasFile('cover_image')) {
             $data['cover_image'] = $request->file('cover_image')->store('posts', 'public');
         }
@@ -81,13 +84,17 @@ class PostController extends Controller
 
     public function update(Request $request, Post $post)
     {
+        $this->authorizePost($post);
+
         $data = $request->validate($this->rules($post->id));
         if (empty($data['slug'])) $data['slug'] = Slug::unique('posts', $data['title'], $post->id);
         $data['body'] = $this->cleanBody($data['body'] ?? null);
-        $data['reading_time'] = max(1, round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
+        $data['reading_time'] = max(1, (int) round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
+        $data['published_at'] = $this->resolvePublishedAt($data, $post);
         $data['seo_score'] = $this->calcSeoScore($data);
-        $data['seo_report'] = json_encode($this->buildSeoReport($data));
+        $data['seo_report'] = $this->buildSeoReport($data);
 
+        unset($data['cover_image'], $data['og_image']);
         if ($request->hasFile('cover_image')) {
             $this->dropFile($post->cover_image);
             $data['cover_image'] = $request->file('cover_image')->store('posts', 'public');
@@ -98,20 +105,38 @@ class PostController extends Controller
         }
 
         $post->update($data);
-        if (isset($data['tags'])) {
+        if (! empty($data['tags'])) {
             $post->tags()->sync($this->syncTags($data['tags']));
         }
-        cache()->forget('site_settings');
 
         return redirect()->route('admin.posts.index')->with('success', 'Berita berhasil diperbarui!');
     }
 
     public function destroy(Post $post)
     {
+        $this->authorizePost($post);
         $this->dropFile($post->cover_image);
         $this->dropFile($post->og_image);
         $post->delete();
         return back()->with('success', 'Berita berhasil dihapus.');
+    }
+
+    /** Editor hanya boleh mengubah/menghapus berita miliknya sendiri. */
+    private function authorizePost(Post $post): void
+    {
+        $user = auth()->user();
+        if ($user && $user->isAdmin()) return;
+        abort_if((int) $post->user_id !== (int) optional($user)->id, 403, 'Anda hanya bisa mengubah berita milik Anda sendiri.');
+    }
+
+    /** Status published tanpa tanggal → pakai tanggal lama atau waktu sekarang. */
+    private function resolvePublishedAt(array $data, ?Post $post): ?\Carbon\Carbon
+    {
+        $status = $data['status'] ?? 'draft';
+        $at = $data['published_at'] ?? null;
+        if ($at) return \Carbon\Carbon::parse($at);
+        if ($status === 'published') return $post?->published_at ?? now();
+        return $post?->published_at;
     }
 
     private function dropFile(?string $path): void
@@ -153,10 +178,20 @@ class PostController extends Controller
     private function cleanBody(?string $html): ?string
     {
         if ($html === null) return null;
-        $html = preg_replace('#<(script|style|object|embed|form)\b[^>]*>.*?</\1>#is', '', $html);
-        $html = preg_replace('#<(script|style|object|embed|form|input|button)\b[^>]*/?>#i', '', $html);
-        $html = preg_replace('#\s+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $html);
-        $html = preg_replace('#(href|src)\s*=\s*(["\'])\s*(javascript|vbscript|data):[^"\']*\2#i', '$1="#"', $html);
+        $blocked = 'script|style|object|embed|form|input|button|svg|math|base|link|meta';
+        $html = preg_replace('#<('.$blocked.')\b[^>]*>.*?</\1>#is', '', $html);
+        $html = preg_replace('#<('.$blocked.')\b[^>]*/?>#i', '', $html);
+        // Pemisah boleh spasi ATAU garis miring: <img/onerror=...> juga harus bersih.
+        $html = preg_replace('#(?:\s|/)+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $html);
+        // Cek skema URL setelah entity di-decode; spasi/control char di dalam skema diabaikan browser.
+        $html = preg_replace_callback('#(href|src)\s*=\s*("|\')([^"\']*)\2#i', function ($m) {
+            $value = html_entity_decode($m[3], ENT_QUOTES);
+            $clean = preg_replace('#[\x00-\x20]+#', '', $value);
+            if (preg_match('#^(javascript|vbscript|data|file|blob):#i', $clean)) {
+                return $m[1].'="#"';
+            }
+            return $m[0];
+        }, $html);
         $html = preg_replace_callback('#<iframe\b[^>]*>.*?</iframe>#is', function ($m) {
             return preg_match('#src=["\']https://(www\.)?(youtube(-nocookie)?\.com)/embed/[\w-]+#i', $m[0]) ? $m[0] : '';
         }, $html);
@@ -172,7 +207,7 @@ class PostController extends Controller
             'excerpt' => 'nullable|string|max:500',
             'body' => 'nullable|string',
             'status' => 'required|in:draft,published,scheduled,archived',
-            'published_at' => 'nullable|date',
+            'published_at' => 'nullable|date|required_if:status,scheduled',
             'is_featured' => 'boolean',
             'allow_comments' => 'boolean',
             'meta_title' => 'nullable|string|max:255',
@@ -180,7 +215,10 @@ class PostController extends Controller
             'focus_keyword' => 'nullable|string|max:100',
             'canonical_url' => 'nullable|url',
             'cover_alt' => 'nullable|string|max:255',
+            'cover_image' => 'nullable|image|mimes:jpg,jpeg,png,webp,avif|max:5120',
+            'og_image' => 'nullable|image|mimes:jpg,jpeg,png,webp,avif|max:5120',
             'tags' => 'nullable|array',
+            'tags.*' => 'nullable|string|max:100',
         ];
     }
 
@@ -191,7 +229,9 @@ class PostController extends Controller
             if (is_numeric($tag)) {
                 $ids[] = (int)$tag;
             } else {
-                $t = Tag::firstOrCreate(['slug' => Str::slug($tag)], ['name' => $tag]);
+                $slug = Str::slug((string) $tag);
+                if ($slug === '') continue;
+                $t = Tag::firstOrCreate(['slug' => $slug], ['name' => trim((string) $tag)]);
                 $ids[] = $t->id;
             }
         }

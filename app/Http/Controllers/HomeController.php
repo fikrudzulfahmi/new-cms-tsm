@@ -69,14 +69,15 @@ class HomeController extends Controller
         $this->trackVisit($request, null);
         $category = $request->get('kategori') ?: $request->get('category');
         if ($request->get('search') && !$request->get('q')) $request->merge(['q' => $request->get('search')]);
-        $query = Post::published()->with(['category', 'user'])->orderByDesc('published_at');
+        $query = Post::published()->with(['category', 'user:id,name,avatar'])->orderByDesc('published_at');
         if ($category) {
             $query->whereHas('category', fn($q) => $q->where('slug', $category));
         }
         if ($request->get('q')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->q . '%')
-                  ->orWhere('excerpt', 'like', '%' . $request->q . '%');
+            $term = '%' . addcslashes((string) $request->q, '%_\\') . '%';
+            $query->where(function ($q) use ($term) {
+                $q->where('title', 'like', $term)
+                  ->orWhere('excerpt', 'like', $term);
             });
         }
         return Inertia::render('Post/Index', [
@@ -90,7 +91,7 @@ class HomeController extends Controller
 
     public function post(Request $request, $slug)
     {
-        $post = Post::published()->where('slug', $slug)->with(['category', 'user', 'tags'])->firstOrFail();
+        $post = Post::published()->where('slug', $slug)->with(['category', 'user:id,name,avatar', 'tags'])->firstOrFail();
         $this->trackVisit($request, $post->id);
         if (! $this->isBot($request)) {
             $post->increment('views_count');
