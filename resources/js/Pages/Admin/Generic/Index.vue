@@ -1,9 +1,33 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useForm, router } from '@inertiajs/vue3'
+import { useForm, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import SectionTabs from '@/Components/Admin/SectionTabs.vue'
 
 const props = defineProps(['title', 'routeName', 'items', 'fields', 'canCreate', 'publicUrl'])
+
+// Halaman konten yang dikelola dengan formulir yang sama dikelompokkan
+// sebagai tab, supaya sidebar tidak penuh tombol serupa.
+const HALAMAN_TABS = [
+  { label: 'Guru', href: '/admin/guru' },
+  { label: 'Kompetensi', href: '/admin/kompetensi' },
+  { label: 'Program', href: '/admin/program' },
+  { label: 'Sarana', href: '/admin/sarana' },
+  { label: 'Prestasi', href: '/admin/prestasi' },
+  { label: 'Testimoni', href: '/admin/testimoni' },
+  { label: 'Mitra', href: '/admin/mitra' },
+]
+const MEDIA_TABS = [
+  { label: 'Galeri Foto & Video', href: '/admin/galeri' },
+  { label: 'Slider Hero', href: '/admin/slider' },
+]
+
+const pageUrl = computed(() => (usePage().url || '').split('?')[0])
+const tabs = computed(() => {
+  if (HALAMAN_TABS.some((t) => t.href === pageUrl.value)) return HALAMAN_TABS
+  if (MEDIA_TABS.some((t) => t.href === pageUrl.value)) return MEDIA_TABS
+  return null
+})
 
 const emptyValues = () => (props.fields || []).reduce((acc, f) => ({
   ...acc,
@@ -98,6 +122,8 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
     <div class="space-y-6">
       <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>{{ title }}</h1>
       <a v-if="publicUrl" :href="publicUrl" target="_blank" rel="noopener" class="inline-flex -mt-4 text-sm font-semibold text-label hover:underline">Lihat halaman {{ publicUrl }} di website ↗</a>
+
+      <SectionTabs v-if="tabs" :items="tabs" />
 
       <div class="grid lg:grid-cols-3 gap-6">
         <!-- Form tambah / ubah -->

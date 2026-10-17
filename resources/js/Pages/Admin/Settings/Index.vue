@@ -7,6 +7,13 @@ const props = defineProps(['settings'])
 const imgUrl = (p) => (p ? (/^https?:\/\//.test(p) ? p : `/storage/${p}`) : null)
 const current = (k) => props.settings?.[k] || ''
 
+const sections = [
+  { label: 'Identitas & Hero', href: '#identitas' },
+  { label: 'Profil Jurusan', href: '#profil' },
+  { label: 'SPMB', href: '#spmb' },
+  { label: 'Kontak & Statistik', href: '#kontak' },
+]
+
 const form = useForm({
   site_name: props.settings?.site_name || '',
   site_tagline: props.settings?.site_tagline || '',
@@ -62,6 +69,13 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
       </div>
 
       <form @submit.prevent="submit" class="card p-8 space-y-6">
+
+        <nav class="flex flex-wrap gap-2 border-b border-slate-100 pb-4" aria-label="Bagian pengaturan">
+          <a v-for="s in sections" :key="s.href" :href="s.href"
+             class="px-3.5 py-1.5 rounded-full border border-line text-xs font-semibold text-slate-600 hover:border-navy hover:text-navy transition-colors no-underline">
+            {{ s.label }}
+          </a>
+        </nav>
         <div v-if="Object.keys(form.errors).length" class="rounded-xl border border-red-200 bg-red-50 p-4">
           <p class="text-sm font-bold text-red-700">Ada isian yang belum benar ({{ Object.keys(form.errors).length }}):</p>
           <ul class="mt-2 list-disc pl-5 text-xs text-red-700 space-y-1">
@@ -92,7 +106,7 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
           <textarea v-model="form.about_text" rows="4" class="form-input resize-none"></textarea>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 p-6 space-y-5">
+        <div id="identitas" class="scroll-mt-24 rounded-2xl border border-slate-200 p-6 space-y-5">
           <div>
             <h2 class="font-bold text-slate-800">Identitas Situs & Hero</h2>
             <p class="text-xs text-slate-500">Nama yang tampil di navbar, judul besar halaman depan, logo, dan favicon.</p>
@@ -208,7 +222,7 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
           </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 p-6 space-y-5">
+        <div id="spmb" class="scroll-mt-24 rounded-2xl border border-slate-200 p-6 space-y-5">
           <div>
             <h2 class="font-bold text-slate-800">SPMB (Sistem Penerimaan Murid Baru)</h2>
             <p class="text-xs text-slate-500">Pendaftaran dilakukan di aplikasi SPMB sekolah. Semua tombol "Daftar SPMB" di website diarahkan ke link di bawah (dibuka di tab baru).</p>
@@ -233,7 +247,7 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
           </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 p-6 space-y-5">
+        <div id="kontak" class="scroll-mt-24 rounded-2xl border border-slate-200 p-6 space-y-5">
           <div>
             <h2 class="font-bold text-slate-800">Kontak &amp; Statistik Halaman Depan</h2>
             <p class="text-xs text-slate-500">Nomor WhatsApp dipakai tombol "Tanya via WhatsApp"; angka statistik tampil di bawah hero.</p>

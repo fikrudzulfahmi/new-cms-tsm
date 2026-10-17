@@ -1,9 +1,12 @@
 <script setup>
-import { ref, watch } from 'vue'
-import { router, Link } from '@inertiajs/vue3'
+import { ref, watch, computed } from 'vue'
+import { router, Link, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps(['posts', 'categories', 'filters'])
+
+const page = usePage()
+const isAdmin = computed(() => (page.props.auth?.user?.role || 'editor') === 'admin')
 
 const q = ref(props.filters?.q || '')
 const status = ref(props.filters?.status || '')
@@ -64,10 +67,16 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
           </h1>
           <p class="text-slate-500 text-sm">Buat dan kelola berita dengan analisis SEO ketat</p>
         </div>
-        <Link href="/admin/berita/buat" class="btn-primary text-sm flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          Tambah Berita
-        </Link>
+        <div class="flex flex-wrap items-center gap-2">
+          <Link v-if="isAdmin" href="/admin/kategori"
+            class="text-sm font-semibold px-4 py-2.5 rounded-full border border-line text-slate-600 hover:border-navy hover:text-navy transition-colors">
+            Kategori
+          </Link>
+          <Link href="/admin/berita/buat" class="btn-primary text-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Tambah Berita
+          </Link>
+        </div>
       </div>
 
       <!-- Search & Filters -->
