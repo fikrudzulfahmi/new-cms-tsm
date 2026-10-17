@@ -26,10 +26,12 @@
         $__imgUrl = $__img ? (str_starts_with($__img, 'http') ? $__img : url('/storage/'.$__img)) : null;
         $__fav = $__s['site_favicon'] ?? null;
         $__favUrl = $__fav ? (str_starts_with($__fav, 'http') ? $__fav : '/storage/'.$__fav) : '/favicon.ico';
+        // Halaman panel/login tidak boleh masuk mesin pencari.
+        $__noindex = request()->is('admin*') || request()->is('login') || request()->is('dashboard*');
     @endphp
     <title>{{ $__title }}</title>
     <meta name="description" content="{{ $__desc }}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="{{ $__noindex ? 'noindex, nofollow' : 'index, follow' }}">
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="icon" href="{{ $__favUrl }}">
     <meta property="og:type" content="website">
