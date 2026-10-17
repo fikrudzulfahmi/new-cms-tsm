@@ -5,10 +5,21 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps(['title', 'routeName', 'items', 'fields', 'canCreate', 'publicUrl'])
 
-const emptyValues = () => (props.fields || []).reduce((acc, f) => ({ ...acc, [f.name]: f.default ?? '' }), {})
+const emptyValues = () => (props.fields || []).reduce((acc, f) => ({
+  ...acc,
+  [f.name]: f.default ?? '',
+  ...(f.type === 'file' ? { ['remove_' + f.name]: false } : {}),
+}), {})
 const form = useForm(emptyValues())
 
 const editing = ref(null)
+const q = ref('')
+const visibleItems = computed(() => {
+  const needle = q.value.trim().toLowerCase()
+  if (!needle) return props.items || []
+  return (props.items || []).filter((i) => [i.title, i.name, i.subject, i.category, i.level, i.position]
+    .filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)))
+})
 const editingId = computed(() => editing.value?.id ?? null)
 const isTesti = computed(() => props.routeName === 'testimoni')
 const isPesan = computed(() => props.routeName === 'pesan')
@@ -25,7 +36,10 @@ function startEdit(item) {
       continue
     }
     const v = item[f.name]
-    values[f.name] = (v === null || v === undefined) ? '' : v
+    // Boolean dari API harus jadi string '1'/'0' agar <select> memilih opsi
+    // yang benar (kalau tidak, dropdown status tampak kosong saat mengubah).
+    if (typeof v === 'boolean') values[f.name] = v ? '1' : '0'
+    else values[f.name] = (v === null || v === undefined) ? '' : v
   }
   form.clearErrors()
   form.defaults(values)
@@ -59,9 +73,11 @@ function submit() {
   }
 }
 
-const destroy = (id) => {
-  if (confirm('Hapus item ini?')) {
-    router.delete(`/admin/${props.routeName}/${id}`, { preserveScroll: true })
+const destroy = (itemOrId) => {
+  const item = typeof itemOrId === 'object' ? itemOrId : (props.items || []).find(i => i.id === itemOrId)
+  const label = item ? (item.title || item.name || item.subject || `#${item.id}`) : `#${itemOrId}`
+  if (confirm(`Hapus "${label}"? Tindakan ini tidak bisa dibatalkan.`)) {
+    router.delete(`/admin/${props.routeName}/${item ? item.id : itemOrId}`, { preserveScroll: true })
   }
 }
 
@@ -93,10 +109,10 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
           <p v-if="editingId" class="text-xs text-slate-500 -mt-2">Sedang mengubah: <b>{{ editing.name || editing.title }}</b></p>
           <form @submit.prevent="submit" class="space-y-4">
             <div v-for="f in fields" :key="f.name">
-              <label class="form-label">{{ f.label }}</label>
-              <input v-if="f.type==='text' || f.type==='number' || f.type==='date'" v-model="form[f.name]" :type="f.type" :placeholder="f.label" class="form-input text-sm" />
-              <textarea v-else-if="f.type==='textarea'" v-model="form[f.name]" rows="3" :placeholder="f.label" class="form-input text-sm"></textarea>
-              <select v-else-if="f.type==='select'" v-model="form[f.name]" class="form-input text-sm">
+              <label :for="`f-${f.name}`" class="form-label">{{ f.label }}</label>
+              <input v-if="f.type==='text' || f.type==='number' || f.type==='date'" :id="`f-${f.name}`" v-model="form[f.name]" :type="f.type" :placeholder="f.label" class="form-input text-sm" />
+              <textarea v-else-if="f.type==='textarea'" :id="`f-${f.name}`" v-model="form[f.name]" rows="3" :placeholder="f.label" class="form-input text-sm"></textarea>
+              <select v-else-if="f.type==='select'" :id="`f-${f.name}`" v-model="form[f.name]" class="form-input text-sm">
                 <option v-for="opt in f.options" :key="opt" :value="opt">{{ opt }}</option>
               </select>
               <template v-else-if="f.type==='file'">
@@ -104,6 +120,9 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
                 <p v-if="editingId && editing[f.name]" class="text-xs text-slate-500 mt-1">
                   File sekarang: <a :href="`/storage/${editing[f.name]}`" target="_blank" class="text-blue-700 hover:underline">lihat</a> — biarkan kosong bila tidak diganti.
                 </p>
+                <label v-if="editingId && editing[f.name]" class="flex items-center gap-2 text-xs text-slate-500 mt-2">
+                  <input type="checkbox" v-model="form['remove_' + f.name]" /> Hapus file ini
+                </label>
               </template>
               <p v-if="f.hint" class="text-xs text-slate-400 mt-1">{{ f.hint }}</p>
               <p v-if="form.errors[f.name]" class="text-xs text-red-600 mt-1">{{ form.errors[f.name] }}</p>
@@ -117,13 +136,17 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
 
         <!-- Daftar -->
         <div :class="[showForm ? 'lg:col-span-2' : 'lg:col-span-3', 'card p-6']">
-          <h2 class="font-bold text-slate-800 mb-4">Daftar {{ title }}</h2>
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h2 class="font-bold text-slate-800">Daftar {{ title }}</h2>
+            <input v-if="(items?.length || 0) > 8" v-model="q" type="search" placeholder="Cari…" class="form-input text-sm w-48 py-1.5" />
+          </div>
+          <p v-if="q && !visibleItems.length" class="text-xs text-slate-500 -mt-2 mb-3">Tidak ada yang cocok dengan "{{ q }}".</p>
           <p v-if="isTesti" class="text-xs text-slate-500 -mt-2 mb-4">Testimoni kiriman alumni baru tampil di website setelah disetujui. <b v-if="pendingCount" class="text-amber-700">{{ pendingCount }} menunggu persetujuan.</b></p>
           <p v-if="isPesan && unreadCount" class="text-xs text-slate-500 -mt-2 mb-4"><b class="text-amber-700">{{ unreadCount }} pesan belum dibaca.</b></p>
 
           <div class="space-y-3">
             <!-- Testimoni -->
-            <div v-for="item in items" :key="'t'+item.id" v-show="isTesti" class="p-4 rounded-xl bg-slate-50 space-y-2" :class="[item.status === 'pending' ? 'ring-1 ring-amber-300' : '', editingId === item.id ? 'ring-2 ring-blue-400' : '']">
+            <div v-for="item in visibleItems" :key="'t'+item.id" v-show="isTesti" class="p-4 rounded-xl bg-slate-50 space-y-2" :class="[item.status === 'pending' ? 'ring-1 ring-amber-300' : '', editingId === item.id ? 'ring-2 ring-blue-400' : '']">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="font-bold text-sm text-slate-800">{{ item.name }} <span class="font-normal text-slate-500">· Lulusan {{ item.graduation_year }}<template v-if="item.occupation"> · {{ item.occupation }}</template><template v-if="item.workplace">, {{ item.workplace }}</template></span></div>
                 <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" :class="statusClass[item.status]">{{ statusLabel[item.status] || item.status }}</span>
@@ -135,12 +158,12 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
                 <button v-if="item.status === 'approved'" @click="setStatus(item, 'pending')" class="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300">Sembunyikan</button>
                 <button v-if="item.status !== 'rejected'" @click="setStatus(item, 'rejected')" class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200">Tolak</button>
                 <button v-if="fields?.length" @click="startEdit(item)" class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100">Ubah</button>
-                <button @click="destroy(item.id)" class="px-3 py-1.5 text-red-600 hover:underline">Hapus</button>
+                <button @click="destroy(item)" class="px-3 py-1.5 text-red-600 hover:underline">Hapus</button>
               </div>
             </div>
 
             <!-- Pesan masuk -->
-            <div v-for="item in items" :key="'m'+item.id" v-show="isPesan" class="p-4 rounded-xl bg-slate-50 space-y-2" :class="!item.is_read ? 'ring-1 ring-amber-300' : ''">
+            <div v-for="item in visibleItems" :key="'m'+item.id" v-show="isPesan" class="p-4 rounded-xl bg-slate-50 space-y-2" :class="!item.is_read ? 'ring-1 ring-amber-300' : ''">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="font-bold text-sm text-slate-800">{{ item.name }}<span class="font-normal text-slate-500"><template v-if="item.email"> · {{ item.email }}</template><template v-if="item.phone"> · {{ item.phone }}</template></span></div>
                 <span class="text-[11px] text-slate-500">{{ new Date(item.created_at).toLocaleString('id-ID') }}</span>
@@ -152,12 +175,12 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
                 <a v-if="item.phone" :href="`https://wa.me/${waNumber(item.phone)}`" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-green-50 text-green-800 hover:bg-green-100">Balas lewat WhatsApp</a>
                 <button v-if="!item.is_read" @click="markRead(item)" class="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300">Tandai sudah dibaca</button>
                 <span v-else class="px-3 py-1.5 text-slate-400">Sudah dibaca</span>
-                <button @click="destroy(item.id)" class="px-3 py-1.5 text-red-600 hover:underline">Hapus</button>
+                <button @click="destroy(item)" class="px-3 py-1.5 text-red-600 hover:underline">Hapus</button>
               </div>
             </div>
 
             <!-- Item umum -->
-            <div v-for="item in items" :key="item.id" v-show="!isTesti && !isPesan" class="flex items-start justify-between gap-3 p-3 rounded-xl bg-slate-50" :class="editingId === item.id ? 'ring-2 ring-blue-400' : ''">
+            <div v-for="item in visibleItems" :key="item.id" v-show="!isTesti && !isPesan" class="flex items-start justify-between gap-3 p-3 rounded-xl bg-slate-50" :class="editingId === item.id ? 'ring-2 ring-blue-400' : ''">
               <div class="flex items-center gap-3 min-w-0 pr-2">
                 <img v-if="itemImage(item)" :src="`/storage/${itemImage(item)}`" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                 <div class="min-w-0">
@@ -166,13 +189,14 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
                     {{ itemSubtitle(item) }}
                     <span v-if="item.year" class="ml-2">{{ item.year }}</span>
                     <span v-if="item.quantity" class="ml-2">{{ item.quantity }} unit</span>
+                    <span v-if="item.sort_order !== undefined && item.sort_order !== null" class="ml-2 font-mono text-slate-400">#{{ item.sort_order }}</span>
                     <span v-if="item.is_active !== undefined" class="ml-2" :class="item.is_active ? 'text-green-700' : 'text-slate-400'">{{ item.is_active ? 'Aktif' : 'Nonaktif' }}</span>
                   </div>
                 </div>
               </div>
               <div class="flex items-center gap-2 flex-shrink-0 text-xs font-semibold">
                 <button v-if="fields?.length" @click="startEdit(item)" class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100">Ubah</button>
-                <button @click="destroy(item.id)" class="text-red-600 hover:underline px-1">Hapus</button>
+                <button @click="destroy(item)" class="text-red-600 hover:underline px-1">Hapus</button>
               </div>
             </div>
 

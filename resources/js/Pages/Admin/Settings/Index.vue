@@ -24,7 +24,9 @@ const form = useForm({
   spmb_info: props.settings?.spmb_info || '',
   spmb_url: props.settings?.spmb_url || '',
   footer_text: props.settings?.footer_text || '',
+  department_name: props.settings?.department_name || '',
   instagram_url: props.settings?.instagram_url || '',
+  tiktok_url: props.settings?.tiktok_url || '',
   facebook_url: props.settings?.facebook_url || '',
   youtube_url: props.settings?.youtube_url || '',
   maps_embed: props.settings?.maps_embed || '',
@@ -60,6 +62,12 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
       </div>
 
       <form @submit.prevent="submit" class="card p-8 space-y-6">
+        <div v-if="Object.keys(form.errors).length" class="rounded-xl border border-red-200 bg-red-50 p-4">
+          <p class="text-sm font-bold text-red-700">Ada isian yang belum benar ({{ Object.keys(form.errors).length }}):</p>
+          <ul class="mt-2 list-disc pl-5 text-xs text-red-700 space-y-1">
+            <li v-for="(msg, key) in form.errors" :key="key"><span class="font-mono">{{ key }}</span> — {{ msg }}</li>
+          </ul>
+        </div>
         <div class="grid sm:grid-cols-2 gap-6">
           <div>
             <label class="form-label">Nama Sekolah / Jurusan</label>
@@ -96,6 +104,11 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
               <p class="text-xs text-slate-500 mt-1">Kosongkan untuk memakai "Teknik Sepeda Motor".</p>
             </div>
             <div>
+              <label class="form-label">Nama Jurusan (footer, hero & meta)</label>
+              <input v-model="form.department_name" type="text" maxlength="200" class="form-input" placeholder="Teknik Sepeda Motor" />
+              <p class="text-xs text-slate-500 mt-1">Teks cadangan bila "Nama Jurusan (navbar)" dikosongkan; dipakai juga di footer dan judul halaman.</p>
+            </div>
+            <div>
               <label class="form-label">Tagline (bawah judul hero)</label>
               <input v-model="form.site_tagline" type="text" class="form-input" />
             </div>
@@ -112,21 +125,24 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
           <div class="grid sm:grid-cols-3 gap-6">
             <div>
               <label class="form-label">Logo Sekolah</label>
-              <img v-if="current('site_logo')" :src="imgUrl(current('site_logo'))" alt="Logo saat ini" class="h-14 w-auto mb-2 rounded-lg border border-slate-200 p-1 bg-white" />
+              <img v-if="current('site_logo') && !form.remove_images.includes('site_logo')" :src="imgUrl(current('site_logo'))" alt="Logo saat ini" class="h-14 w-auto mb-2 rounded-lg border border-slate-200 p-1 bg-white" />
+              <label v-if="current('site_logo')" class="flex items-center gap-2 text-xs text-slate-500 mt-2"><input v-model="form.remove_images" type="checkbox" value="site_logo" /> Hapus logo</label>
               <input type="file" accept="image/*" @input="form.site_logo = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
               <p class="text-xs text-slate-500 mt-1">Tampil di navbar publik. PNG transparan, maks 5 MB.</p>
               <p v-if="form.errors.site_logo" class="text-xs text-red-600 mt-1">{{ form.errors.site_logo }}</p>
             </div>
             <div>
               <label class="form-label">Favicon</label>
-              <img v-if="current('site_favicon')" :src="imgUrl(current('site_favicon'))" alt="Favicon saat ini" class="h-10 w-10 mb-2 rounded border border-slate-200 p-1 bg-white" />
+              <img v-if="current('site_favicon') && !form.remove_images.includes('site_favicon')" :src="imgUrl(current('site_favicon'))" alt="Favicon saat ini" class="h-10 w-10 mb-2 rounded border border-slate-200 p-1 bg-white" />
+              <label v-if="current('site_favicon')" class="flex items-center gap-2 text-xs text-slate-500 mt-2"><input v-model="form.remove_images" type="checkbox" value="site_favicon" /> Hapus favicon</label>
               <input type="file" accept="image/*" @input="form.site_favicon = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
               <p class="text-xs text-slate-500 mt-1">Ikon tab browser, maks 1 MB.</p>
               <p v-if="form.errors.site_favicon" class="text-xs text-red-600 mt-1">{{ form.errors.site_favicon }}</p>
             </div>
             <div>
               <label class="form-label">Gambar Latar Hero</label>
-              <img v-if="current('hero_bg')" :src="imgUrl(current('hero_bg'))" alt="Hero saat ini" class="h-14 w-full object-cover mb-2 rounded-lg border border-slate-200" />
+              <img v-if="current('hero_bg') && !form.remove_images.includes('hero_bg')" :src="imgUrl(current('hero_bg'))" alt="Hero saat ini" class="h-14 w-full object-cover mb-2 rounded-lg border border-slate-200" />
+              <label v-if="current('hero_bg')" class="flex items-center gap-2 text-xs text-slate-500 mt-2"><input v-model="form.remove_images" type="checkbox" value="hero_bg" /> Hapus gambar hero</label>
               <input type="file" accept="image/*" @input="form.hero_bg = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
               <p class="text-xs text-slate-500 mt-1">Dipakai bila slider hero kosong. Maks 5 MB.</p>
               <p v-if="form.errors.hero_bg" class="text-xs text-red-600 mt-1">{{ form.errors.hero_bg }}</p>
@@ -138,6 +154,9 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
           <div>
             <label class="form-label">Foto Tentang Kami</label>
             <input type="file" @input="form.about_image = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
+            <img v-if="current('about_image') && !form.remove_images.includes('about_image')" :src="imgUrl(current('about_image'))" alt="Foto saat ini" class="mt-2 h-24 rounded-xl object-cover" />
+            <label v-if="current('about_image')" class="flex items-center gap-2 text-xs text-slate-500 mt-2"><input v-model="form.remove_images" type="checkbox" value="about_image" /> Hapus foto</label>
+            <p v-if="form.errors.about_image" class="text-xs text-red-600 mt-1">{{ form.errors.about_image }}</p>
           </div>
         </div>
 
@@ -252,6 +271,11 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
           <div>
             <label class="form-label">URL YouTube</label>
             <input v-model="form.youtube_url" type="text" class="form-input" />
+          </div>
+          <div>
+            <label class="form-label">URL TikTok</label>
+            <input v-model="form.tiktok_url" type="text" class="form-input" placeholder="https://tiktok.com/@..." />
+            <p v-if="form.errors.tiktok_url" class="text-xs text-red-600 mt-1">{{ form.errors.tiktok_url }}</p>
           </div>
         </div>
 

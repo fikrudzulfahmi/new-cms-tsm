@@ -100,7 +100,7 @@ const menuGroups = computed(() =>
         <div v-for="group in menuGroups" :key="group.label || 'main'">
           <div v-if="group.label" class="font-mono text-on-navy-subtle text-[11px] uppercase tracking-[2px] px-3 mb-2">{{ group.label }}</div>
           <div class="space-y-0.5">
-            <Link v-for="item in group.items" :key="item.href" :href="item.href"
+            <Link v-for="item in group.items" :key="item.href" :href="item.href" @click="sidebarOpen = false"
               :class="['flex items-center gap-3 px-3 py-2.5 rounded-full text-sm font-semibold transition-all', isActive(item.href) ? 'bg-accent text-navy' : 'text-on-navy-muted hover:bg-white/5 hover:text-white']">
               <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" :d="item.icon"/>
