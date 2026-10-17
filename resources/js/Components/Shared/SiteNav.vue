@@ -8,8 +8,8 @@ const s = computed(() => page.props.settings || {})
 const open = ref(false)
 const scrolled = ref(false)
 const user = computed(() => page.props.auth?.user)
-// Tombol akun: tamu -> /masuk; sudah login -> halaman sesuai peran
-const account = computed(() => user.value ? { href: user.value.home || '/portal', label: user.value.role === 'superadmin' ? 'Superadmin' : (['admin','editor'].includes(user.value.role) ? 'Admin' : 'Portal') } : { href: '/masuk', label: 'Masuk' })
+// Tombol akun: tamu -> /login; sudah login -> panel admin
+const account = computed(() => user.value ? { href: '/admin', label: 'Admin' } : { href: '/login', label: 'Masuk' })
 const path = computed(() => (page.url || '/').split('#')[0].split('?')[0])
 
 const links = [

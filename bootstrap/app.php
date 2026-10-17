@@ -18,10 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->homeUrl() ?? '/');
-        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*') ? '/login' : '/masuk');
+        $middleware->redirectGuestsTo('/login');
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {

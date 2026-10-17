@@ -18,20 +18,6 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
-    // TSM Superapp: API aplikasi Data Induk Siswa (token diisi di .env, jangan di-commit)
-    'induk' => [
-        'url' => env('INDUK_API_URL'),
-        'token' => env('INDUK_API_TOKEN'),
-        'timeout' => (int) env('INDUK_API_TIMEOUT', 20),
-        'jurusan' => env('INDUK_API_JURUSAN'), // opsional: saring kelas, mis. "Sepeda Motor"
-    ],
-
-    // Google reCAPTCHA v2 (checkbox) untuk login siswa. Kosong = captcha dimatikan.
-    'recaptcha' => [
-        'site_key' => env('RECAPTCHA_SITE_KEY'),
-        'secret' => env('RECAPTCHA_SECRET_KEY'),
-    ],
-
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

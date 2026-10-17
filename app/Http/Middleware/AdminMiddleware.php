@@ -14,8 +14,7 @@ class AdminMiddleware
             return redirect()->route('login');
         }
         if (!$request->user()->isCmsUser()) {
-            // Akun Superapp (superadmin/guru/siswa) tidak punya akses Admin CMS
-            return redirect($request->user()->homeUrl())->with('error', 'Akun Anda tidak punya akses ke Admin CMS.');
+            abort(403, 'Akun Anda tidak punya akses ke Admin CMS.');
         }
         if (!$request->user()->is_active) {
             auth()->logout();
