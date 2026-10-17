@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Support\Slug;
 use Illuminate\Support\Facades\Storage;
+use Stevebauman\Purify\Facades\Purify;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -178,28 +179,18 @@ class PostController extends Controller
         ]);
     }
 
-    /** Bersihkan HTML editor: buang script/style/event handler, iframe hanya YouTube. */
+    /**
+     * Bersihkan HTML editor dengan HTMLPurifier (bukan regex): menangani atribut
+     * tanpa tanda kutip, entity, dan skema URL berbahaya sekaligus.
+     * Iframe hanya diizinkan untuk YouTube/Vimeo lewat config/purify.php.
+     */
     private function cleanBody(?string $html): ?string
     {
-        if ($html === null) return null;
-        $blocked = 'script|style|object|embed|form|input|button|svg|math|base|link|meta';
-        $html = preg_replace('#<('.$blocked.')\b[^>]*>.*?</\1>#is', '', $html);
-        $html = preg_replace('#<('.$blocked.')\b[^>]*/?>#i', '', $html);
-        // Pemisah boleh spasi ATAU garis miring: <img/onerror=...> juga harus bersih.
-        $html = preg_replace('#(?:\s|/)+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $html);
-        // Cek skema URL setelah entity di-decode; spasi/control char di dalam skema diabaikan browser.
-        $html = preg_replace_callback('#(href|src)\s*=\s*("|\')([^"\']*)\2#i', function ($m) {
-            $value = html_entity_decode($m[3], ENT_QUOTES);
-            $clean = preg_replace('#[\x00-\x20]+#', '', $value);
-            if (preg_match('#^(javascript|vbscript|data|file|blob):#i', $clean)) {
-                return $m[1].'="#"';
-            }
-            return $m[0];
-        }, $html);
-        $html = preg_replace_callback('#<iframe\b[^>]*>.*?</iframe>#is', function ($m) {
-            return preg_match('#src=["\']https://(www\.)?(youtube(-nocookie)?\.com)/embed/[\w-]+#i', $m[0]) ? $m[0] : '';
-        }, $html);
-        return $html;
+        if ($html === null || trim($html) === '') return null;
+
+        $clean = Purify::clean($html);
+
+        return trim($clean) === '' ? null : trim($clean);
     }
 
     private function rules($postId = null): array

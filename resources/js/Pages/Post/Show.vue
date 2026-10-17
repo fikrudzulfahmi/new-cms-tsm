@@ -6,7 +6,7 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps(['post', 'relatedPosts'])
 
-const commentForm = useForm({ name: '', email: '', body: '', parent_id: null })
+const commentForm = useForm({ name: '', email: '', body: '', parent_id: null, website: '' })
 const replyingTo = ref(null)
 
 const submitComment = () => {
@@ -132,6 +132,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
           <h4 class="font-bold text-slate-800 mb-4">{{ replyingTo ? 'Balas Komentar' : 'Tinggalkan Komentar' }}</h4>
           <button v-if="replyingTo" @click="replyingTo=null" class="text-xs text-red-500 mb-3 block">Batalkan balasan</button>
           <form @submit.prevent="submitComment" class="space-y-4">
+            <input v-model="commentForm.website" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden" />
             <div class="grid sm:grid-cols-2 gap-4">
               <div>
                 <label class="form-label">Nama *</label>

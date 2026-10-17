@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CommentReaction extends Model
 {
+    protected $hidden = ['visitor_hash'];
+
     protected $fillable = ['comment_id', 'visitor_hash'];
     public $timestamps = true;
 

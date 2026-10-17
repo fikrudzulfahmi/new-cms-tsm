@@ -12,7 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->trustProxies(at: '*');
+        // Jangan percaya header proxy apa pun: X-Forwarded-For bisa dipalsukan klien
+        // untuk mem-bypass rate limit dan memalsukan kunjungan unik.
+        // IP asli diambil dari CF-Connecting-IP (diisi Cloudflare) oleh ClientIp.
+        $middleware->trustProxies(at: []);
+        $middleware->prepend(\App\Http\Middleware\ClientIp::class);
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);

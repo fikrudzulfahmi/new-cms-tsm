@@ -35,6 +35,8 @@ const headlines = computed(() => {
   return [{ title: s.value.hero_title || 'Teknik Sepeda Motor', subtitle: s.value.hero_subtitle || '', image: s.value.hero_bg }]
 })
 const current = computed(() => headlines.value[slideIdx.value % headlines.value.length])
+// Jangan pernah merender javascript:/data: dari isian admin sebagai href.
+const safeHref = (url) => (/^(https?:\/\/|\/|#)/i.test(String(url || '')) ? url : '#kompetensi')
 let slideTimer = null
 function goSlide(i) { slideIdx.value = (i + headlines.value.length) % headlines.value.length }
 
@@ -101,12 +103,12 @@ const openFaq = ref(0)
 const lightbox = ref(null)
 
 /* ---------- Form ---------- */
-const testiForm = useForm({ name: '', graduation_year: '', occupation: '', workplace: '', message: '', rating: 5 })
+const testiForm = useForm({ name: '', graduation_year: '', occupation: '', workplace: '', message: '', rating: 5, website: '' })
 const showTesti = ref(false)
 function submitTesti() {
   testiForm.post('/testimoni', { preserveScroll: true, onSuccess: () => { testiForm.reset(); showTesti.value = false } })
 }
-const contactForm = useForm({ name: '', email: '', phone: '', subject: '', message: '' })
+const contactForm = useForm({ name: '', email: '', phone: '', subject: '', message: '', website: '' })
 function submitContact() {
   contactForm.post('/kontak', { preserveScroll: true, onSuccess: () => contactForm.reset() })
 }
@@ -241,7 +243,7 @@ onBeforeUnmount(() => {
               Gabung Bersama Kami
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </a>
-            <a :href="current.button_url || '#kompetensi'" class="btn btn-ghost btn-lg">{{ current.button_text || 'Lihat Kompetensi' }}</a>
+            <a :href="safeHref(current.button_url)" class="btn btn-ghost btn-lg">{{ current.button_text || 'Lihat Kompetensi' }}</a>
           </div>
           <div v-if="headlines.length > 1" class="hero-dots" aria-label="Pilih headline">
             <button v-for="(h, i) in headlines" :key="i" type="button" :class="{ on: i === slideIdx }" :aria-label="`Headline ${i + 1}`" @click="goSlide(i)"></button>
@@ -535,6 +537,7 @@ onBeforeUnmount(() => {
 
           <p v-if="flash.success && !showTesti" class="form-ok" role="status">{{ flash.success }}</p>
           <form v-if="showTesti" class="lp-form testi-form" @submit.prevent="submitTesti">
+          <input v-model="testiForm.website" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden" />
             <div class="form-grid">
               <label>Nama lengkap<input v-model="testiForm.name" required maxlength="150" /></label>
               <label>Tahun lulus<input v-model="testiForm.graduation_year" type="number" min="2000" :max="new Date().getFullYear()" required /></label>
@@ -617,6 +620,7 @@ onBeforeUnmount(() => {
             <div v-if="s.maps_embed" class="map" v-html="s.maps_embed"></div>
           </div>
           <form class="lp-form contact-form reveal" @submit.prevent="submitContact">
+          <input v-model="contactForm.website" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden" />
             <div class="form-grid">
               <label>Nama<input v-model="contactForm.name" required maxlength="150" /></label>
               <label>No. WhatsApp<input v-model="contactForm.phone" type="tel" maxlength="20" /></label>

@@ -19,6 +19,12 @@ class SettingController extends Controller
     {
         $request->validate([
             'spmb_url' => ['nullable', 'url', 'max:500', 'regex:#^https?://#i'],
+            // Tautan ini dirender sebagai href di footer; wajib http(s) agar tidak
+            // bisa diisi javascript: (XSS berbasis klik).
+            'instagram_url' => ['nullable', 'url', 'max:255', 'regex:#^https?://#i'],
+            'facebook_url' => ['nullable', 'url', 'max:255', 'regex:#^https?://#i'],
+            'youtube_url' => ['nullable', 'url', 'max:255', 'regex:#^https?://#i'],
+            'tiktok_url' => ['nullable', 'url', 'max:255', 'regex:#^https?://#i'],
             'email' => ['nullable', 'email', 'max:150'],
             'about_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:5120'],
             'site_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:5120'],
@@ -49,6 +55,7 @@ class SettingController extends Controller
             Setting::where('key', $key)->update(['value' => $request->file($key)->store('settings', 'public')]);
         }
         cache()->forget('site_settings');
+        cache()->forget('public_settings');
         return back()->with('success', 'Pengaturan berhasil disimpan!');
     }
 
@@ -59,7 +66,15 @@ class SettingController extends Controller
             return '';
         }
         $src = html_entity_decode($m[1], ENT_QUOTES);
-        if (! preg_match('#^https://(www\.)?(google\.[a-z.]+/maps|maps\.google\.[a-z.]+|www\.google\.com/maps)#i', $src)) {
+        $parts = parse_url($src);
+        $host = strtolower($parts['host'] ?? '');
+        // Whitelist host Google Maps yang sebenarnya: google.com, maps.google.com,
+        // dan domain negara seperti google.co.id. Pola lama bisa ditembus
+        // "google.evil.com".
+        $allowed = in_array($host, ['google.com', 'www.google.com', 'maps.google.com'], true)
+            || preg_match('#^(www\.)?google\.[a-z]{2,3}(\.[a-z]{2})?$#', $host)
+            || preg_match('#^maps\.google\.[a-z]{2,3}(\.[a-z]{2})?$#', $host);
+        if (($parts['scheme'] ?? '') !== 'https' || ! $allowed) {
             return '';
         }
         return '<iframe src="'.e($src).'" width="100%" height="450" style="border:0" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>';

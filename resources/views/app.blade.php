@@ -23,7 +23,12 @@
             }
         }
 
-        $__imgUrl = $__img ? (str_starts_with($__img, 'http') ? $__img : url('/storage/'.$__img)) : null;
+        // URL absolut selalu memakai APP_URL, bukan Host header request, supaya
+        // header Host/X-Forwarded-Host palsu tidak bisa meracuni canonical/OG/aset.
+        $__base = rtrim((string) config('app.url'), '/') ?: url('/');
+        $__path = request()->getPathInfo() ?: '/';
+        $__canonical = rtrim($__base, '/') . ($__path === '/' ? '/' : $__path);
+        $__imgUrl = $__img ? (str_starts_with($__img, 'http') ? $__img : rtrim($__base, '/').'/storage/'.$__img) : null;
         $__fav = $__s['site_favicon'] ?? null;
         $__favUrl = $__fav ? (str_starts_with($__fav, 'http') ? $__fav : '/storage/'.$__fav) : '/favicon.ico';
         // Halaman panel/login tidak boleh masuk mesin pencari.
@@ -32,14 +37,14 @@
     <title>{{ $__title }}</title>
     <meta name="description" content="{{ $__desc }}">
     <meta name="robots" content="{{ $__noindex ? 'noindex, nofollow' : 'index, follow' }}">
-    <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="canonical" href="{{ $__canonical }}">
     <link rel="icon" href="{{ $__favUrl }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="{{ $__school }}">
     <meta property="og:locale" content="id_ID">
     <meta property="og:title" content="{{ $__title }}">
     <meta property="og:description" content="{{ $__desc }}">
-    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:url" content="{{ $__canonical }}">
     @if($__imgUrl)
         <meta property="og:image" content="{{ $__imgUrl }}">
         <meta name="twitter:image" content="{{ $__imgUrl }}">

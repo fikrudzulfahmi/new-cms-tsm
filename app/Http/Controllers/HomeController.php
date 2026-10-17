@@ -16,6 +16,7 @@ use App\Models\Teacher;
 use App\Models\Testimonial;
 use App\Models\Visit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class HomeController extends Controller
@@ -30,28 +31,32 @@ class HomeController extends Controller
 
         // Berita terbaru + 4 terbaru per kategori, agar tab kategori selalu terisi.
         $postCols = ['id', 'category_id', 'title', 'slug', 'excerpt', 'cover_image', 'cover_alt', 'published_at', 'reading_time', 'views_count', 'is_featured'];
-        $posts = Post::published()->with('category:id,name,slug,color')
-            ->orderByDesc('published_at')->take(8)->get($postCols);
-        foreach ($categories as $cat) {
-            $posts = $posts->merge(
-                Post::published()->with('category:id,name,slug,color')
-                    ->where('category_id', $cat->id)
-                    ->orderByDesc('published_at')->take(4)->get($postCols)
-            );
-        }
-        $posts = $posts->unique('id')->sortByDesc('published_at')->values();
+        // Satu query berjendela (ROW_NUMBER) untuk 4 berita terbaru per kategori,
+        // menggantikan N+1 query di dalam loop kategori.
+        $ranked = DB::table('posts')
+            ->select('id')
+            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY category_id ORDER BY published_at DESC, id DESC) as rn')
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->whereIn('category_id', $categories->pluck('id')->all());
+        $ids = DB::query()->fromSub($ranked, 'ranked')->where('rn', '<=', 4)->pluck('id')->all();
+        $posts = Post::with('category:id,name,slug,color')
+            ->whereIn('id', $ids)
+            ->orderByDesc('published_at')
+            ->get($postCols);
 
         return Inertia::render('Landing/Index', [
-            'sliders' => Slider::active()->get(),
-            'competencies' => Competency::active()->get(),
-            'programs' => Program::active()->get(),
+            'sliders' => Slider::active()->take(8)->get(),
+            'competencies' => Competency::active()->take(12)->get(),
+            'programs' => Program::active()->take(12)->get(),
             'facilities' => Facility::active()->take(9)->get(),
             'achievements' => Achievement::active()->orderByDesc('is_featured')->orderByDesc('achieved_at')->take(6)->get(),
             'posts' => $posts,
             'categories' => $categories,
             'testimonials' => Testimonial::approved()->orderByDesc('is_featured')->latest()->take(6)->get(),
             'teachers' => Teacher::active()->take(8)->get(),
-            'partners' => Partner::active()->get(),
+            'partners' => Partner::active()->take(12)->get(),
             'gallery' => Gallery::active()->images()->take(8)->get(),
             'stats' => [
                 'students' => (Setting::get('stat_students') ?: '150+'),
@@ -74,7 +79,7 @@ class HomeController extends Controller
             $query->whereHas('category', fn($q) => $q->where('slug', $category));
         }
         if ($request->get('q')) {
-            $term = '%' . addcslashes((string) $request->q, '%_\\') . '%';
+            $term = '%' . addcslashes(mb_substr((string) $request->q, 0, 100), '%_\\') . '%';
             $query->where(function ($q) use ($term) {
                 $q->where('title', 'like', $term)
                   ->orWhere('excerpt', 'like', $term);
@@ -109,7 +114,7 @@ class HomeController extends Controller
 
         $comments = $post->comments()
             ->approved()
-            ->with('replies.reactions')
+            ->with('replies')
             ->whereNull('parent_id')
             ->orderByDesc('created_at')
             ->get();
@@ -132,28 +137,36 @@ class HomeController extends Controller
         $hash = $this->getVisitorHash($request);
         $value = (int) $validated['value']; // 1 or -1
 
-        $existing = $post->reactions()->where('visitor_hash', $hash)->first();
+        // lockForUpdate mencegah dua request paralel sama-sama menambah counter
+        // (race condition yang membuat likes_count tidak sinkron).
+        $myReaction = DB::transaction(function () use ($post, $hash, $value) {
+            $post = Post::whereKey($post->getKey())->lockForUpdate()->firstOrFail();
+            $existing = $post->reactions()->where('visitor_hash', $hash)->first();
 
-        if ($existing) {
-            if ($existing->value === $value) {
-                // Toggle off
-                if ($value == 1) $post->decrement('likes_count');
-                else $post->decrement('dislikes_count');
-                $existing->delete();
-                $myReaction = 0;
-            } else {
-                // Switch
-                if ($value == 1) { $post->increment('likes_count'); $post->decrement('dislikes_count'); }
-                else { $post->decrement('likes_count'); $post->increment('dislikes_count'); }
+            if ($existing) {
+                if ((int) $existing->value === $value) {
+                    $post->reactions()->whereKey($existing->getKey())->delete();
+                    $this->safeDecrement($post, $value === 1 ? 'likes_count' : 'dislikes_count');
+                    return 0;
+                }
+
                 $existing->update(['value' => $value]);
-                $myReaction = $value;
+                if ($value === 1) {
+                    $post->increment('likes_count');
+                    $this->safeDecrement($post, 'dislikes_count');
+                } else {
+                    $post->increment('dislikes_count');
+                    $this->safeDecrement($post, 'likes_count');
+                }
+
+                return $value;
             }
-        } else {
-            if ($value == 1) $post->increment('likes_count');
-            else $post->increment('dislikes_count');
+
             $post->reactions()->create(['visitor_hash' => $hash, 'value' => $value]);
-            $myReaction = $value;
-        }
+            $post->increment($value === 1 ? 'likes_count' : 'dislikes_count');
+
+            return $value;
+        });
 
         $post->refresh();
         return response()->json([
@@ -166,11 +179,22 @@ class HomeController extends Controller
 
     public function comment(Request $request, $postId)
     {
+        if ($this->isSpam($request)) {
+            return back()->with('success', 'Komentar terkirim, menunggu moderasi. Terima kasih!');
+        }
+
+        // Bersihkan tag SEBELUM validasi supaya isian yang hanya berisi tag
+        // tidak lolos "required" lalu tersimpan kosong.
+        $request->merge([
+            'name' => trim(strip_tags((string) $request->input('name'))),
+            'body' => trim(strip_tags((string) $request->input('body'))),
+        ]);
+
         $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'nullable|email|max:150',
             'body' => 'required|string|max:2000',
-            'parent_id' => 'nullable|exists:comments,id',
+            'parent_id' => 'nullable|integer',
         ]);
 
         $post = Post::published()->findOrFail($postId);
@@ -179,20 +203,19 @@ class HomeController extends Controller
         }
 
         if ($request->parent_id) {
-            $parent = \App\Models\Comment::find($request->parent_id);
-            if (! $parent || (int) $parent->post_id !== (int) $post->id) {
+            // Hanya boleh membalas komentar utama yang sudah disetujui; ID komentar
+            // pending/spam tidak boleh bisa ditebak lewat balasan.
+            $parent = $post->comments()->approved()->whereNull('parent_id')->whereKey($request->parent_id)->first();
+            if (! $parent) {
                 return back()->withErrors(['body' => 'Komentar yang dibalas tidak ditemukan.']);
-            }
-            if ($parent->parent_id) {
-                return back()->withErrors(['body' => 'Balasan hanya bisa ditujukan ke komentar utama.']);
             }
         }
 
         $comment = $post->comments()->create([
             'parent_id' => $request->parent_id,
-            'name' => strip_tags($request->name),
+            'name' => $request->name,
             'email' => $request->email,
-            'body' => strip_tags($request->body),
+            'body' => $request->body,
             'status' => 'pending',
             'ip_hash' => hash('sha256', $request->ip()),
             'user_agent' => substr($request->userAgent() ?? '', 0, 255),
@@ -205,20 +228,28 @@ class HomeController extends Controller
     {
         $comment = \App\Models\Comment::approved()->findOrFail($commentId);
         $hash = $this->getVisitorHash($request);
-        $existing = $comment->reactions()->where('visitor_hash', $hash)->first();
-        if ($existing) {
-            $comment->decrement('likes_count');
-            $existing->delete();
-        } else {
-            $comment->increment('likes_count');
-            $comment->reactions()->create(['visitor_hash' => $hash]);
-        }
+        DB::transaction(function () use ($comment, $hash) {
+            $comment = \App\Models\Comment::whereKey($comment->getKey())->lockForUpdate()->firstOrFail();
+            $existing = $comment->reactions()->where('visitor_hash', $hash)->first();
+            if ($existing) {
+                $existing->delete();
+                $this->safeDecrement($comment, 'likes_count');
+            } else {
+                $comment->reactions()->create(['visitor_hash' => $hash]);
+                $comment->increment('likes_count');
+            }
+        });
         return response()->json(['likes' => $comment->fresh()->likes_count]);
     }
 
     public function share(Request $request, $postId)
     {
-        Post::published()->findOrFail($postId)->increment('shares_count');
+        $post = Post::published()->findOrFail($postId);
+        // Satu pengunjung hanya menambah angka bagikan sekali per hari.
+        $key = 'share:'.$post->id.':'.$this->getVisitorHash($request).':'.now('Asia/Jakarta')->toDateString();
+        if (cache()->add($key, 1, now()->addDay())) {
+            $post->increment('shares_count');
+        }
         return response()->json(['ok' => true]);
     }
 
@@ -233,19 +264,30 @@ class HomeController extends Controller
 
     public function contact(Request $request)
     {
+        if ($this->isSpam($request)) {
+            return back()->with('success', 'Pesan berhasil terkirim! Kami akan segera menghubungi Anda.');
+        }
+
+        foreach (['name', 'subject', 'message', 'phone'] as $field) {
+            $request->merge([$field => trim(strip_tags((string) $request->input($field)))]);
+        }
+
         $request->validate([
             'name' => 'required|string|max:150',
-            'email' => 'nullable|email|max:150',
-            'phone' => 'nullable|string|max:20',
+            'email' => 'required_without:phone|nullable|email|max:150',
+            'phone' => 'required_without:email|nullable|string|max:20',
             'subject' => 'nullable|string|max:200',
             'message' => 'required|string|max:2000',
+        ], [
+            'email.required_without' => 'Isi email atau nomor HP agar kami bisa membalas.',
+            'phone.required_without' => 'Isi email atau nomor HP agar kami bisa membalas.',
         ]);
         \App\Models\ContactMessage::create([
-            'name' => strip_tags($request->name),
+            'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'subject' => $request->subject,
-            'message' => strip_tags($request->message),
+            'message' => $request->message,
             'ip_hash' => hash('sha256', $request->ip()),
         ]);
         return back()->with('success', 'Pesan berhasil terkirim! Kami akan segera menghubungi Anda.');
@@ -253,6 +295,14 @@ class HomeController extends Controller
 
     public function testimonialStore(Request $request)
     {
+        if ($this->isSpam($request)) {
+            return back()->with('success', 'Terima kasih! Testimoni Anda sudah terkirim dan akan tampil setelah disetujui admin.');
+        }
+
+        foreach (['name', 'occupation', 'workplace', 'message'] as $field) {
+            $request->merge([$field => trim(strip_tags((string) $request->input($field)))]);
+        }
+
         $request->validate([
             'name' => 'required|string|max:150',
             'graduation_year' => 'required|integer|min:2000|max:' . (date('Y')),
@@ -262,11 +312,11 @@ class HomeController extends Controller
             'rating' => 'required|integer|min:1|max:5',
         ]);
         Testimonial::create([
-            'name' => strip_tags($request->name),
+            'name' => $request->name,
             'graduation_year' => $request->graduation_year,
             'occupation' => $request->occupation,
             'workplace' => $request->workplace,
-            'message' => strip_tags($request->message),
+            'message' => $request->message,
             'rating' => $request->rating,
             'status' => 'pending',
         ]);
@@ -288,8 +338,8 @@ class HomeController extends Controller
         $unique = !Visit::where('visitor_hash', $hash)->whereDate('visited_on', $today)->exists();
 
         Visit::create([
-            'url' => $request->url(),
-            'path' => '/' . $path,
+            'url' => mb_substr($request->url(), 0, 500),
+            'path' => mb_substr('/' . $path, 0, 255),
             'post_id' => $postId,
             'visitor_hash' => $hash,
             'ip_hash' => hash('sha256', $request->ip()),
@@ -299,6 +349,21 @@ class HomeController extends Controller
             'is_unique' => $unique,
             'visited_on' => $today,
         ]);
+    }
+
+    /** Honeypot: field tersembunyi yang hanya diisi bot. */
+    private function isSpam(Request $request): bool
+    {
+        return filled($request->input('website')) || filled($request->input('hp_field'));
+    }
+
+    /** Kurangi counter tanpa pernah menghasilkan angka negatif (kolom unsigned). */
+    private function safeDecrement($model, string $column): void
+    {
+        $model->newQuery()->whereKey($model->getKey())->update([
+            $column => DB::raw('GREATEST('.$column.', 1) - 1'),
+        ]);
+        $model->setAttribute($column, max(0, (int) $model->getAttribute($column) - 1));
     }
 
     private function isBot(Request $request): bool
