@@ -8,10 +8,16 @@ use Inertia\Inertia;
 
 class SettingController extends Controller
 {
+    /** Kunci yang tidak boleh dikirim ke browser, dibaca, atau ditimpa lewat form. */
+    private const SECRET_KEYS = ['app_key', 'api_token', 'induk_api_token', 'wa_token', 'mail_password'];
+
+    /** Gambar yang bisa diunggah lewat form pengaturan. */
+    private const IMAGE_KEYS = ['about_image', 'site_logo', 'site_favicon', 'hero_bg', 'profile_head_photo', 'profile_structure_image'];
+
     public function index()
     {
         return Inertia::render('Admin/Settings/Index', [
-            'settings' => Setting::pluck('value', 'key'),
+            'settings' => Setting::whereNotIn('key', self::SECRET_KEYS)->pluck('value', 'key'),
         ]);
     }
 
@@ -39,13 +45,25 @@ class SettingController extends Controller
             'profile_head_name' => ['nullable', 'string', 'max:150'],
             'profile_head_position' => ['nullable', 'string', 'max:150'],
             'remove_images' => ['nullable', 'array'],
-            'remove_images.*' => ['string', 'in:profile_head_photo,profile_structure_image'],
+            'remove_images.*' => ['string', 'in:about_image,site_logo,site_favicon,hero_bg,profile_head_photo,profile_structure_image'],
         ], ['spmb_url.url' => 'Link SPMB harus berupa URL lengkap, contoh: https://spmb.sekolah.sch.id', 'spmb_url.regex' => 'Link SPMB harus diawali http:// atau https://']);
 
         // Form mengirim field datar (school_name, phone, ...); format lama "settings[key]" tetap didukung
-        $imageKeys = ['about_image', 'site_logo', 'site_favicon', 'hero_bg', 'profile_head_photo', 'profile_structure_image'];
+        $imageKeys = self::IMAGE_KEYS;
+
+        // Batasi panjang isian teks supaya tidak ada kolom yang bisa diisi
+        // jutaan karakter (form publik/admin bisa disalahgunakan).
+        $lengthRules = [];
+        foreach (Setting::whereNotIn('key', self::SECRET_KEYS)->get(['key', 'type']) as $row) {
+            if (in_array($row->key, $imageKeys, true) || ! preg_match('/^[a-z0-9_]+$/i', (string) $row->key)) {
+                continue;
+            }
+            $lengthRules[$row->key] = ['nullable', 'string', 'max:' . (in_array($row->type, ['textarea', 'html'], true) ? 20000 : 1000)];
+        }
+        $request->validate($lengthRules);
+
         $input = array_merge($request->except(array_merge(['_token', '_method', 'settings', 'remove_images'], $imageKeys)), (array) $request->input('settings', []));
-        $blocked = ['app_key', 'api_token', 'induk_api_token', 'wa_token', 'mail_password'];
+        $blocked = self::SECRET_KEYS;
         $changed = [];
         foreach ($input as $key => $value) {
             if (in_array($key, $blocked, true) || str_starts_with((string) $key, '_')) continue;

@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    | Proxy yang boleh mengisi CF-Connecting-IP (IP tunggal atau CIDR).
+    | Default hanya loopback, karena Cloudflare Tunnel (cloudflared) berjalan
+    | di server yang sama. Isi dengan rentang Cloudflare bila memakai
+    | cloudflared/nginx di mesin lain.
+    */
+
+    'trusted_proxies' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('TRUSTED_PROXY_IPS', '127.0.0.1,::1'))
+    ))),
+
 ];

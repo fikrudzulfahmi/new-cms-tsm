@@ -73,6 +73,7 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
+        $this->authorizePost($post);
         $post->load('tags');
         return Inertia::render('Admin/Posts/Form', [
             'post' => $post,
@@ -162,6 +163,7 @@ class PostController extends Controller
 
     public function analytics(Post $post)
     {
+        $this->authorizePost($post);
         $chart = Visit::selectRaw('DATE(visited_on) as date, COUNT(*) as total')
             ->where('post_id', $post->id)
             ->where('visited_on', '>=', now()->subDays(29))

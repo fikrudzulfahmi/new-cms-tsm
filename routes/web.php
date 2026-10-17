@@ -66,7 +66,7 @@ Route::prefix('admin')->name('admin.')->middleware(['activity.log', 'auth', 'adm
     Route::delete('/komentar/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
     // Upload gambar editor (dipakai RichEditor) — editor juga butuh, jadi di luar grup role:admin.
-    Route::post('/pengaturan/upload', [SettingController::class, 'uploadImage'])->name('settings.upload');
+    Route::post('/pengaturan/upload', [SettingController::class, 'uploadImage'])->name('settings.upload')->middleware('throttle:20,1');
 
     // ===== Khusus admin (editor tidak boleh) =====
     Route::middleware('role:admin')->group(function () {

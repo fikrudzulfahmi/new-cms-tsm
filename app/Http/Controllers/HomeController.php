@@ -55,7 +55,7 @@ class HomeController extends Controller
             'posts' => $posts,
             'categories' => $categories,
             'testimonials' => Testimonial::approved()->orderByDesc('is_featured')->latest()->take(3)->get(),
-            'teachers' => Teacher::active()->take(4)->get(),
+            'teachers' => Teacher::active()->take(4)->get(['id', 'name', 'position', 'subject', 'photo']),
             'partners' => Partner::active()->take(12)->get(),
             'gallery' => Gallery::active()->images()->take(8)->get(),
             'stats' => [
@@ -88,7 +88,7 @@ class HomeController extends Controller
     {
         $this->trackVisit($request, null);
         return Inertia::render('Teacher/Index', [
-            'teachers' => Teacher::active()->get(['id', 'name', 'position', 'subject', 'education', 'photo', 'bio']),
+            'teachers' => Teacher::active()->get(['id', 'name', 'position', 'subject', 'education', 'photo']),
         ]);
     }
 
@@ -130,7 +130,9 @@ class HomeController extends Controller
     {
         $this->trackVisit($request, null);
         $level = mb_substr((string) $request->get('tingkat'), 0, 50);
-        $query = Achievement::active()->reorder()->orderByDesc('is_featured')->orderByDesc('achieved_at')->orderByDesc('id');
+        // Prestasi tanpa tanggal (hanya tahun) jangan terlempar ke bawah: nulls last.
+        $query = Achievement::active()->reorder()->orderByDesc('is_featured')
+            ->orderByRaw('achieved_at IS NULL')->orderByDesc('achieved_at')->orderByDesc('year')->orderByDesc('id');
         if ($level !== '') {
             $query->where('level', $level);
         }
