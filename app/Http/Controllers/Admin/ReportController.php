@@ -20,8 +20,8 @@ class ReportController extends Controller
             'to.after_or_equal' => 'Tanggal akhir tidak boleh lebih awal dari tanggal awal.',
         ]);
 
-        $from = ! empty($validated['from']) ? Carbon::parse($validated['from'])->startOfDay() : now()->subDays(29)->startOfDay();
-        $to   = ! empty($validated['to'])   ? Carbon::parse($validated['to'])->endOfDay()     : now()->endOfDay();
+        $from = ! empty($validated['from']) ? Carbon::parse($validated['from'], 'Asia/Jakarta')->startOfDay() : now('Asia/Jakarta')->subDays(29)->startOfDay();
+        $to   = ! empty($validated['to'])   ? Carbon::parse($validated['to'], 'Asia/Jakarta')->endOfDay()     : now('Asia/Jakarta')->endOfDay();
 
         // Batasi rentang agar laporan tidak membebani database.
         if ($from->diffInDays($to) > 366) {

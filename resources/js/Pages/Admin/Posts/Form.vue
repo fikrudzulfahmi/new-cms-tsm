@@ -2,11 +2,29 @@
 import { computed, ref } from 'vue'
 import RichEditor from '@/Components/RichEditor.vue'
 import { analyzeSeo, slugify } from '@/seo-analyzer.js'
-import { useForm } from '@inertiajs/vue3'
+import { useForm, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
-const props = defineProps(['post', 'categories'])
+const props = defineProps(['post', 'categories', 'tags', 'postTags', 'visitStats'])
 const isEdit = !!props.post
+
+const formatDatetimeForInput = (val) => {
+  if (!val) return ''
+  // Nilai dari server berupa ISO/UTC; datetime-local butuh waktu lokal perangkat.
+  const d = new Date(val)
+  if (isNaN(d.getTime())) {
+    const match = String(val).match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/)
+    return match ? `${match[1]}T${match[2]}` : ''
+  }
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+const initialTags = props.post?.tags && Array.isArray(props.post.tags)
+  ? props.post.tags.map(t => (typeof t === 'object' && t !== null ? t.name : t)).filter(Boolean).join(', ')
+  : ''
+
+const tagsInput = ref(initialTags)
 
 const form = useForm({
   title: props.post?.title || '',
@@ -17,15 +35,52 @@ const form = useForm({
   meta_title: props.post?.meta_title || '',
   meta_description: props.post?.meta_description || '',
   focus_keyword: props.post?.focus_keyword || '',
+  canonical_url: props.post?.canonical_url || '',
   status: props.post?.status || 'published',
+  published_at: formatDatetimeForInput(props.post?.published_at),
+  is_featured: props.post ? Boolean(props.post.is_featured) : false,
+  allow_comments: props.post ? Boolean(props.post.allow_comments) : true,
+  tags: [],
   cover_image: null,
   cover_alt: props.post?.cover_alt || '',
+  og_image: null,
 })
 
 const coverPreview = ref(props.post?.cover_image ? `/storage/${props.post.cover_image}` : null)
-const onCover = (ev) => { const file = ev.target.files[0]; form.cover_image = file; if (file) coverPreview.value = URL.createObjectURL(file) }
+const onCover = (ev) => {
+  const file = ev.target.files?.[0]
+  form.cover_image = file || null
+  if (file) coverPreview.value = URL.createObjectURL(file)
+}
+
+const ogPreview = ref(props.post?.og_image ? `/storage/${props.post.og_image}` : null)
+const onOg = (ev) => {
+  const file = ev.target.files?.[0]
+  form.og_image = file || null
+  if (file) ogPreview.value = URL.createObjectURL(file)
+}
+
+const parseTags = (str) => {
+  if (!str) return []
+  return str
+    .split(',')
+    .map(t => t.trim())
+    .filter((t, i, arr) => t.length > 0 && arr.indexOf(t) === i)
+}
+
+// Input datetime-local berisi waktu lokal perangkat; kirim ISO/UTC agar tidak bergeser 7 jam.
+const toIsoOrNull = (v) => {
+  if (!v) return null
+  const d = new Date(v)
+  return isNaN(d.getTime()) ? v : d.toISOString()
+}
+
 const tab = ref('seo')
-const seoAnalysis = computed(() => analyzeSeo({ ...form.data(), slug: form.slug || slugify(form.title), has_cover: !!coverPreview.value }))
+const seoAnalysis = computed(() => analyzeSeo({
+  ...form.data(),
+  slug: form.slug || slugify(form.title),
+  has_cover: !!coverPreview.value
+}))
 const light = (s) => s >= 80 ? 'good' : s >= 50 ? 'ok' : 'bad'
 const dot = { good: 'bg-green-500', ok: 'bg-orange-400', bad: 'bg-red-500' }
 const lightText = { good: 'Bagus', ok: 'Cukup', bad: 'Perlu diperbaiki' }
@@ -38,10 +93,30 @@ const snippetTitle = computed(() => { const t = seoAnalysis.value.seoTitle || 'J
 const snippetDesc = computed(() => { const d = seoAnalysis.value.desc || 'Isi meta deskripsi agar tampil di hasil pencarian Google.'; return d.length > 156 ? d.slice(0, 153) + '…' : d })
 
 const submit = () => {
+  const tagsArray = parseTags(tagsInput.value)
+  form.tags = tagsArray
+
   if (isEdit) {
-    form.transform(d => ({ ...d, _method: 'put' })).post(`/admin/berita/${props.post.id}`)
+    form.transform(d => ({
+      ...d,
+      _method: 'put',
+      tags: tagsArray,
+      published_at: toIsoOrNull(d.published_at),
+      is_featured: d.is_featured ? 1 : 0,
+      allow_comments: d.allow_comments ? 1 : 0,
+    })).post(`/admin/berita/${props.post.id}`, {
+      forceFormData: true,
+    })
   } else {
-    form.post('/admin/berita')
+    form.transform(d => ({
+      ...d,
+      tags: tagsArray,
+      published_at: toIsoOrNull(d.published_at),
+      is_featured: d.is_featured ? 1 : 0,
+      allow_comments: d.allow_comments ? 1 : 0,
+    })).post('/admin/berita', {
+      forceFormData: true,
+    })
   }
 }
 </script>
@@ -52,10 +127,13 @@ const submit = () => {
     <div class="max-w-7xl mx-auto space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>{{ isEdit ? 'Edit Berita' : 'Tambah Berita Baru' }}</h1>
+          <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]">
+            <span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>
+            {{ isEdit ? 'Edit Berita' : 'Tambah Berita Baru' }}
+          </h1>
           <p class="text-slate-500 text-sm">Tulis dengan editor, sisipkan video YouTube, dan ikuti saran SEO & keterbacaan</p>
         </div>
-        <a href="/admin/berita" class="text-sm text-slate-600 hover:text-blue-900">← Kembali</a>
+        <Link href="/admin/berita" class="text-sm text-slate-600 hover:text-blue-900">← Kembali</Link>
       </div>
 
       <form @submit.prevent="submit" class="grid lg:grid-cols-3 gap-6">
@@ -74,14 +152,45 @@ const submit = () => {
                 <select v-model="form.category_id" class="form-input">
                   <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
                 </select>
+                <p v-if="form.errors.category_id" class="text-red-500 text-xs mt-1">{{ form.errors.category_id }}</p>
               </div>
               <div>
                 <label class="form-label">Status Publikasi *</label>
                 <select v-model="form.status" class="form-input">
-                  <option value="published">Published (Tayang)</option>
+                  <option value="published">Tayang (Published)</option>
                   <option value="draft">Draft</option>
+                  <option value="scheduled">Terjadwal (Scheduled)</option>
+                  <option value="archived">Arsip (Archived)</option>
                 </select>
+                <p v-if="form.errors.status" class="text-red-500 text-xs mt-1">{{ form.errors.status }}</p>
               </div>
+            </div>
+
+            <div>
+              <label class="form-label">Waktu Publikasi (Published At)</label>
+              <input v-model="form.published_at" type="datetime-local" class="form-input text-sm" />
+              <p class="text-xs text-slate-500 mt-1">Kosongkan untuk otomatis sekarang saat status Published</p>
+              <p v-if="form.errors.published_at" class="text-red-500 text-xs mt-1">{{ form.errors.published_at }}</p>
+            </div>
+
+            <div class="flex flex-wrap gap-6 pt-1">
+              <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                <input v-model="form.is_featured" type="checkbox" class="rounded border-slate-300 text-navy focus:ring-navy h-4 w-4" />
+                <span class="font-medium">Berita unggulan</span>
+              </label>
+              <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                <input v-model="form.allow_comments" type="checkbox" class="rounded border-slate-300 text-navy focus:ring-navy h-4 w-4" />
+                <span class="font-medium">Izinkan komentar</span>
+              </label>
+            </div>
+            <p v-if="form.errors.is_featured" class="text-red-500 text-xs mt-1">{{ form.errors.is_featured }}</p>
+            <p v-if="form.errors.allow_comments" class="text-red-500 text-xs mt-1">{{ form.errors.allow_comments }}</p>
+
+            <div>
+              <label class="form-label">Tag (pisahkan dengan koma)</label>
+              <input v-model="tagsInput" type="text" placeholder="misal: kurikulum, pkl, otomotif" class="form-input text-sm" />
+              <p class="text-xs text-slate-500 mt-1">Pisahkan tiap tag dengan tanda koma (,)</p>
+              <p v-if="form.errors.tags" class="text-red-500 text-xs mt-1">{{ form.errors.tags }}</p>
             </div>
 
             <div>
@@ -101,13 +210,25 @@ const submit = () => {
                 <div>
                   <label class="form-label">Gambar Utama (Cover)</label>
                   <input type="file" accept="image/*" @change="onCover" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-ice file:text-navy" />
+                  <p v-if="form.errors.cover_image" class="text-red-500 text-xs mt-1">{{ form.errors.cover_image }}</p>
                 </div>
                 <div>
                   <label class="form-label">Teks Alt Cover</label>
                   <input v-model="form.cover_alt" type="text" placeholder="Deskripsi gambar untuk SEO & aksesibilitas" class="form-input text-sm" />
+                  <p v-if="form.errors.cover_alt" class="text-red-500 text-xs mt-1">{{ form.errors.cover_alt }}</p>
                 </div>
               </div>
               <img v-if="coverPreview" :src="coverPreview" class="w-full aspect-video object-cover rounded-xl border border-line" alt="Pratinjau cover" />
+            </div>
+
+            <div class="grid sm:grid-cols-[1fr_200px] gap-4 items-start pt-4 border-t border-line">
+              <div class="space-y-1">
+                <label class="form-label">Gambar OG (Open Graph)</label>
+                <p class="text-xs text-slate-500">Gambar untuk pratinjau saat tautan dibagikan ke media sosial (opsional)</p>
+                <input type="file" accept="image/*" @change="onOg" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-ice file:text-navy" />
+                <p v-if="form.errors.og_image" class="text-red-500 text-xs mt-1">{{ form.errors.og_image }}</p>
+              </div>
+              <img v-if="ogPreview" :src="ogPreview" class="w-full aspect-video object-cover rounded-xl border border-line" alt="Pratinjau OG" />
             </div>
           </div>
         </div>
@@ -151,6 +272,7 @@ const submit = () => {
             <div>
               <label class="form-label">Kata Kunci Fokus (Focus Keyword)</label>
               <input v-model="form.focus_keyword" type="text" placeholder="misal: teknik sepeda motor" class="form-input text-sm" />
+              <p v-if="form.errors.focus_keyword" class="text-red-500 text-xs mt-1">{{ form.errors.focus_keyword }}</p>
             </div>
             <div>
               <label class="form-label">Slug URL</label>
@@ -160,10 +282,17 @@ const submit = () => {
             <div>
               <label class="form-label flex justify-between">Meta Title <span class="font-mono text-[11px] text-muted">{{ (form.meta_title || form.title).length }}/60</span></label>
               <input v-model="form.meta_title" type="text" :placeholder="form.title || 'Judul khusus SEO...'" class="form-input text-sm" />
+              <p v-if="form.errors.meta_title" class="text-red-500 text-xs mt-1">{{ form.errors.meta_title }}</p>
             </div>
             <div>
               <label class="form-label flex justify-between">Meta Description <span class="font-mono text-[11px] text-muted">{{ form.meta_description.length }}/156</span></label>
               <textarea v-model="form.meta_description" rows="3" placeholder="Deskripsi mesin pencari..." class="form-input text-sm resize-none"></textarea>
+              <p v-if="form.errors.meta_description" class="text-red-500 text-xs mt-1">{{ form.errors.meta_description }}</p>
+            </div>
+            <div>
+              <label class="form-label">URL Kanonik (Canonical URL)</label>
+              <input v-model="form.canonical_url" type="url" placeholder="https://..." class="form-input text-sm" />
+              <p v-if="form.errors.canonical_url" class="text-red-500 text-xs mt-1">{{ form.errors.canonical_url }}</p>
             </div>
             <button type="submit" :disabled="form.processing" class="w-full btn-primary justify-center py-3">
               {{ form.processing ? 'Menyimpan...' : 'Simpan Berita' }}

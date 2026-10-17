@@ -18,10 +18,13 @@ class PostController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Post::with(['category', 'user'])->orderByDesc('created_at');
+        $query = Post::with(['category', 'user:id,name'])->orderByDesc('created_at');
         if ($request->status) $query->where('status', $request->status);
         if ($request->category) $query->where('category_id', $request->category);
-        if ($request->q) $query->where('title', 'like', '%' . $request->q . '%');
+        if ($request->q) {
+            // Escape wildcard LIKE agar pencarian "100%" tidak cocok ke semua judul.
+            $query->where('title', 'like', '%' . addcslashes((string) $request->q, '%_\\') . '%');
+        }
 
         return Inertia::render('Admin/Posts/Index', [
             'posts' => $query->paginate(15)->withQueryString(),
@@ -105,8 +108,9 @@ class PostController extends Controller
         }
 
         $post->update($data);
-        if (! empty($data['tags'])) {
-            $post->tags()->sync($this->syncTags($data['tags']));
+        // array_key_exists: mengosongkan semua tag harus benar-benar menghapus relasinya.
+        if (array_key_exists('tags', $data)) {
+            $post->tags()->sync($this->syncTags((array) $data['tags']));
         }
 
         return redirect()->route('admin.posts.index')->with('success', 'Berita berhasil diperbarui!');

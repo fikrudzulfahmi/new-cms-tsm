@@ -281,7 +281,8 @@ class HomeController extends Controller
         }
 
         $hash = $this->getVisitorHash($request);
-        $today = today();
+        // Tanggal laporan pakai WIB, bukan UTC, supaya kunjungan malam tidak masuk hari sebelumnya.
+        $today = now('Asia/Jakarta')->toDateString();
         $path = $request->path();
 
         $unique = !Visit::where('visitor_hash', $hash)->whereDate('visited_on', $today)->exists();

@@ -17,12 +17,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $today = today();
-        $thisMonth = [now()->startOfMonth(), now()->endOfMonth()];
+        // Statistik kunjungan memakai tanggal WIB (data visits disimpan per tanggal WIB).
+        $tz = 'Asia/Jakarta';
+        $today = now($tz)->toDateString();
+        $thisMonth = [now($tz)->startOfMonth(), now($tz)->endOfMonth()];
 
         // Visit chart 30 hari
         $visitChart = Visit::selectRaw('DATE(visited_on) as date, COUNT(*) as total, SUM(is_unique) as unique_visitors')
-            ->where('visited_on', '>=', now()->subDays(29))
+            ->where('visited_on', '>=', now($tz)->subDays(29)->toDateString())
             ->groupBy('date')
             ->orderBy('date')
             ->get()
@@ -30,7 +32,7 @@ class DashboardController extends Controller
 
         $days = [];
         for ($i = 29; $i >= 0; $i--) {
-            $d = now()->subDays($i)->toDateString();
+            $d = now($tz)->subDays($i)->toDateString();
             $days[] = [
                 'date' => $d,
                 'label' => Carbon::parse($d)->isoFormat('D MMM'),
