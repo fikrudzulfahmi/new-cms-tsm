@@ -208,13 +208,23 @@ function injectJsonLd() {
   document.head.appendChild(el)
 }
 
+const showTop = ref(false)
+const onScroll = () => { showTop.value = window.scrollY > 480 }
+function toTop() {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
+}
+
 onMounted(() => {
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
   observeReveal()
   injectJsonLd()
   document.addEventListener('keydown', onKey)
   if (headlines.value.length > 1) slideTimer = setInterval(() => goSlide(slideIdx.value + 1), 6000)
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll)
   io?.disconnect()
   clearInterval(slideTimer)
   document.removeEventListener('keydown', onKey)
@@ -713,6 +723,11 @@ onBeforeUnmount(() => {
       <img :src="img(lightbox.file)" :alt="lightbox.title" />
       <p>{{ lightbox.caption || lightbox.title }}</p>
     </div>
+
+    <!-- Kembali ke atas -->
+    <button v-if="showTop" type="button" class="to-top" @click="toTop" aria-label="Kembali ke atas" title="Kembali ke atas">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+    </button>
 
     <!-- Tombol WA melayang -->
     <a v-if="waNumber" :href="waLink" class="wa-float" target="_blank" rel="noopener" aria-label="Chat WhatsApp">
