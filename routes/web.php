@@ -73,6 +73,7 @@ Route::prefix('admin')->name('admin.')->middleware(['activity.log', 'auth', 'adm
 
     // Reports
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/laporan/cetak', [ReportController::class, 'print'])->name('reports.print');
 
     // Log aktivitas + deteksi gangguan keamanan
     Route::get('/aktivitas', [ActivityController::class, 'index'])->name('activity.index');
