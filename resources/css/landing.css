@@ -508,6 +508,10 @@ html:has(.lp) { scroll-behavior: smooth; }
   transition: transform .2s, background .2s;
 }
 .lp .wa-float:hover { transform: scale(1.06); background: var(--navy-panel); }
+/* Ikon harus dipaksa putih: aturan .lp a:not(.site-nav a) { color: inherit }
+   spesifisitasnya lebih tinggi daripada .lp .wa-float, sehingga tanpa ini
+   ikon mewarisi navy dan hilang di atas latar navy. */
+.lp .wa-float svg { fill: var(--white); color: var(--white); }
 .lp .wa-float:focus-visible { outline: 2px solid var(--label-blue); outline-offset: 3px; }
 
 .lp .to-top {
