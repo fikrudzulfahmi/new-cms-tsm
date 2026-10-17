@@ -7,9 +7,7 @@ const page = usePage()
 const s = computed(() => page.props.settings || {})
 const open = ref(false)
 const scrolled = ref(false)
-const user = computed(() => page.props.auth?.user)
-// Tombol akun: tamu -> /login; sudah login -> panel admin
-const account = computed(() => user.value ? { href: '/admin', label: 'Admin' } : { href: '/login', label: 'Masuk' })
+// Tombol masuk admin sengaja tidak ditampilkan; admin akses manual lewat /admin.
 const path = computed(() => (page.url || '/').split('#')[0].split('?')[0])
 const logo = computed(() => {
   const p = s.value.site_logo
@@ -109,10 +107,6 @@ watch(path, () => { open.value = false; updateActiveHash() })
       </div>
 
       <div class="flex items-center gap-2 flex-shrink-0">
-        <a :href="account.href" class="hidden md:inline-flex items-center gap-2 h-11 px-5 rounded-full border border-accent/40 text-white text-sm font-semibold hover:border-accent transition">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 9a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          {{ account.label }}
-        </a>
         <component :is="navTag('/#spmb')" href="/#spmb" class="hidden md:inline-flex items-center h-11 px-5 rounded-full bg-accent text-navy text-sm font-bold hover:brightness-105 transition">Gabung Bersama Kami</component>
         <button type="button" @click="open = !open" :aria-expanded="open" :aria-label="open ? 'Tutup menu' : 'Buka menu'"
           class="xl:hidden w-11 h-11 rounded-full border border-accent/40 text-white flex items-center justify-center">
@@ -130,8 +124,7 @@ watch(path, () => { open.value = false; updateActiveHash() })
           class="block px-4 py-2.5 rounded-2xl text-sm font-semibold transition"
           :class="isActive(l.href) ? 'text-white bg-white/10' : 'text-on-navy-muted hover:text-white hover:bg-white/5'"
           :aria-current="isActive(l.href) ? 'page' : undefined">{{ l.label }}</component>
-        <div class="grid grid-cols-2 gap-2 pt-2 md:hidden">
-          <a :href="account.href" @click="open = false" class="inline-flex justify-center items-center h-11 rounded-full border border-accent/40 text-white text-sm font-semibold">{{ account.label }}</a>
+        <div class="grid gap-2 pt-2 md:hidden">
           <component :is="navTag('/#spmb')" href="/#spmb" @click="open = false" class="inline-flex justify-center items-center h-11 rounded-full bg-accent text-navy text-sm font-bold">Gabung Bersama Kami</component>
         </div>
       </div>
