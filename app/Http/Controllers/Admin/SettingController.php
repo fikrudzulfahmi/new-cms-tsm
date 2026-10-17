@@ -30,11 +30,21 @@ class SettingController extends Controller
             'site_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:5120'],
             'site_favicon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,avif,ico', 'max:1024'],
             'hero_bg' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:5120'],
+            'profile_head_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:5120'],
+            'profile_structure_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:8192'],
+            'profile_speech' => ['nullable', 'string', 'max:5000'],
+            'profile_history' => ['nullable', 'string', 'max:10000'],
+            'profile_vision' => ['nullable', 'string', 'max:1000'],
+            'profile_mission' => ['nullable', 'string', 'max:3000'],
+            'profile_head_name' => ['nullable', 'string', 'max:150'],
+            'profile_head_position' => ['nullable', 'string', 'max:150'],
+            'remove_images' => ['nullable', 'array'],
+            'remove_images.*' => ['string', 'in:profile_head_photo,profile_structure_image'],
         ], ['spmb_url.url' => 'Link SPMB harus berupa URL lengkap, contoh: https://spmb.sekolah.sch.id', 'spmb_url.regex' => 'Link SPMB harus diawali http:// atau https://']);
 
         // Form mengirim field datar (school_name, phone, ...); format lama "settings[key]" tetap didukung
-        $imageKeys = ['about_image', 'site_logo', 'site_favicon', 'hero_bg'];
-        $input = array_merge($request->except(array_merge(['_token', '_method', 'settings'], $imageKeys)), (array) $request->input('settings', []));
+        $imageKeys = ['about_image', 'site_logo', 'site_favicon', 'hero_bg', 'profile_head_photo', 'profile_structure_image'];
+        $input = array_merge($request->except(array_merge(['_token', '_method', 'settings', 'remove_images'], $imageKeys)), (array) $request->input('settings', []));
         $blocked = ['app_key', 'api_token', 'induk_api_token', 'wa_token', 'mail_password'];
         foreach ($input as $key => $value) {
             if (in_array($key, $blocked, true) || str_starts_with((string) $key, '_')) continue;
@@ -45,6 +55,13 @@ class SettingController extends Controller
                 $value = $this->cleanMapEmbed((string) $value);
             }
             $setting->update(['value' => (string) ($value ?? '')]);
+        }
+        foreach ((array) $request->input('remove_images', []) as $key) {
+            $old = Setting::where('key', $key)->value('value');
+            if ($old && ! str_starts_with($old, 'dummy/') && Storage::disk('public')->exists($old)) {
+                Storage::disk('public')->delete($old);
+            }
+            Setting::where('key', $key)->update(['value' => '']);
         }
         foreach ($imageKeys as $key) {
             if (! $request->hasFile($key)) continue;

@@ -33,9 +33,21 @@ const form = useForm({
   stat_graduates: props.settings?.stat_graduates || '',
   stat_absorption: props.settings?.stat_absorption || '',
   about_image: null,
+  profile_head_name: props.settings?.profile_head_name || '',
+  profile_head_position: props.settings?.profile_head_position || '',
+  profile_head_photo: null,
+  profile_speech: props.settings?.profile_speech || '',
+  profile_history: props.settings?.profile_history || '',
+  profile_vision: props.settings?.profile_vision || '',
+  profile_mission: props.settings?.profile_mission || '',
+  profile_structure_image: null,
+  remove_images: [],
 })
 
-const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' : '0' })).post('/admin/pengaturan', { preserveScroll: true })
+const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' : '0' })).post('/admin/pengaturan', {
+  preserveScroll: true,
+  onSuccess: () => { form.remove_images = []; form.profile_head_photo = null; form.profile_structure_image = null },
+})
 </script>
 
 <template>
@@ -126,6 +138,54 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
           <div>
             <label class="form-label">Foto Tentang Kami</label>
             <input type="file" @input="form.about_image = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 p-6 space-y-5">
+          <div>
+            <h2 class="font-bold text-slate-800">Halaman Profil Jurusan (/profil)</h2>
+            <p class="text-xs text-slate-500">Bagian yang dikosongkan tidak ditampilkan. Pisahkan paragraf dengan satu baris kosong. Data guru diatur di menu <b>Guru</b>.</p>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-6">
+            <div>
+              <label class="form-label">Nama Kepala Program / Kajur</label>
+              <input v-model="form.profile_head_name" type="text" maxlength="150" class="form-input" placeholder="Kosong = guru urutan pertama" />
+            </div>
+            <div>
+              <label class="form-label">Jabatan</label>
+              <input v-model="form.profile_head_position" type="text" maxlength="150" class="form-input" />
+            </div>
+            <div>
+              <label class="form-label">Foto Kepala Program</label>
+              <img v-if="current('profile_head_photo') && !form.remove_images.includes('profile_head_photo')" :src="imgUrl(current('profile_head_photo'))" alt="" class="h-24 rounded-xl mb-2 object-cover" />
+              <input type="file" accept="image/*" @input="form.profile_head_photo = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
+              <label v-if="current('profile_head_photo')" class="flex items-center gap-2 text-xs text-slate-500 mt-2"><input v-model="form.remove_images" type="checkbox" value="profile_head_photo" /> Hapus foto</label>
+              <p v-if="form.errors.profile_head_photo" class="text-xs text-red-600 mt-1">{{ form.errors.profile_head_photo }}</p>
+            </div>
+            <div>
+              <label class="form-label">Bagan Struktur Organisasi</label>
+              <img v-if="current('profile_structure_image') && !form.remove_images.includes('profile_structure_image')" :src="imgUrl(current('profile_structure_image'))" alt="" class="h-24 rounded-xl mb-2 object-contain bg-slate-50" />
+              <input type="file" accept="image/*" @input="form.profile_structure_image = $event.target.files[0]" class="form-input text-sm file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900" />
+              <label v-if="current('profile_structure_image')" class="flex items-center gap-2 text-xs text-slate-500 mt-2"><input v-model="form.remove_images" type="checkbox" value="profile_structure_image" /> Hapus gambar</label>
+              <p v-if="form.errors.profile_structure_image" class="text-xs text-red-600 mt-1">{{ form.errors.profile_structure_image }}</p>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Sambutan</label>
+            <textarea v-model="form.profile_speech" rows="6" maxlength="5000" class="form-input"></textarea>
+            <p class="text-xs text-slate-400 mt-1">Paragraf pertama setelah salam juga dikutip di Beranda.</p>
+          </div>
+          <div>
+            <label class="form-label">Sejarah Jurusan</label>
+            <textarea v-model="form.profile_history" rows="6" maxlength="10000" class="form-input" placeholder="Kosong = memakai teks Tentang Kami"></textarea>
+          </div>
+          <div>
+            <label class="form-label">Visi</label>
+            <textarea v-model="form.profile_vision" rows="2" maxlength="1000" class="form-input"></textarea>
+          </div>
+          <div>
+            <label class="form-label">Misi (satu poin per baris)</label>
+            <textarea v-model="form.profile_mission" rows="5" maxlength="3000" class="form-input"></textarea>
           </div>
         </div>
 
