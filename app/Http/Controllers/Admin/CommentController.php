@@ -12,7 +12,8 @@ class CommentController extends Controller
         $query = Comment::with('post:id,title,slug')->latest();
         if ($request->status) $query->where('status', $request->status);
         return Inertia::render('Admin/Comments/Index', [
-            'comments' => $query->paginate(20)->withQueryString(),
+            'comments' => $query->paginate(20)->withQueryString()
+                ->through(fn (Comment $comment) => $comment->makeVisible('email')),
             'filters' => $request->only(['status']),
             'counts' => [
                 'pending' => Comment::pending()->count(),

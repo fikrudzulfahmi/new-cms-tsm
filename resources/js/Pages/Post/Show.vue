@@ -19,10 +19,27 @@ const submitComment = () => {
 
 const likes = ref(props.post.likes_count || 0)
 const dislikes = ref(props.post.dislikes_count || 0)
-const shareUrl = typeof window !== 'undefined' ? shareUrl : ''
+const myReaction = ref(props.myReaction || 0)
+const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
+const reacting = ref(false)
+
 const react = async (type) => {
-  const { data } = await axios.post(`/berita/${props.post.id}/react`, { value: type === 'like' ? 1 : -1 })
-  likes.value = data.likes; dislikes.value = data.dislikes
+  if (reacting.value) return
+  reacting.value = true
+  try {
+    const { data } = await axios.post(`/berita/${props.post.id}/react`, { value: type === 'like' ? 1 : -1 })
+    likes.value = data.likes
+    dislikes.value = data.dislikes
+    myReaction.value = data.my_reaction
+  } catch (e) {
+    // Diamkan: pengunjung bisa mencoba lagi tanpa halaman error.
+  } finally {
+    reacting.value = false
+  }
+}
+
+const trackShare = () => {
+  axios.post(`/berita/${props.post.id}/share`).catch(() => {})
 }
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }) : ''
@@ -31,7 +48,6 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
 <template>
   <AppLayout>
     <Head><title>{{ post.title }} — TSM</title></Head>
-    <title>{{ post.title }} - TSM SMKS Islam 1 Blitar</title>
     <div class="grid-dark h-24 border-b border-accent/20"></div>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Breadcrumb -->
@@ -67,25 +83,25 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
       <!-- Reactions & Share -->
       <div class="flex flex-wrap items-center justify-between gap-4 py-6 border-y border-slate-200 mb-12">
         <div class="flex items-center gap-3">
-          <button @click="react('like')" class="flex items-center gap-2 px-4 py-2 rounded-full border border-line bg-ice text-blue-900 font-semibold text-sm hover:bg-blue-100 transition">
+          <button @click="react('like')" :disabled="reacting" :aria-pressed="myReaction === 1" :class="['flex items-center gap-2 px-4 py-2 rounded-full border font-semibold text-sm transition disabled:opacity-60', myReaction === 1 ? 'bg-blue-900 border-blue-900 text-white' : 'border-line bg-ice text-blue-900 hover:bg-blue-100']">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
             Suka ({{ likes }})
           </button>
-          <button @click="react('unlike')" class="flex items-center gap-2 px-4 py-2 rounded-full border border-line bg-white text-slate-700 font-semibold text-sm hover:bg-slate-200 transition">
+          <button @click="react('unlike')" :disabled="reacting" :aria-pressed="myReaction === -1" :class="['flex items-center gap-2 px-4 py-2 rounded-full border font-semibold text-sm transition disabled:opacity-60', myReaction === -1 ? 'bg-slate-800 border-slate-800 text-white' : 'border-line bg-white text-slate-700 hover:bg-slate-200']">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v5a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/></svg>
             Tidak Suka ({{ dislikes }})
           </button>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-sm text-slate-500 font-medium">Bagikan:</span>
-          <a :href="`https://wa.me/?text=${encodeURIComponent(post.title + ' ' + shareUrl)}`" target="_blank" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-green-600 transition">WA</a>
-          <a :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`" target="_blank" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-blue-700 transition">FB</a>
+          <a :href="`https://wa.me/?text=${encodeURIComponent(post.title + ' ' + shareUrl)}`" target="_blank" rel="noopener noreferrer" @click="trackShare" aria-label="Bagikan ke WhatsApp" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-green-600 transition">WA</a>
+          <a :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`" target="_blank" rel="noopener noreferrer" @click="trackShare" aria-label="Bagikan ke Facebook" class="w-9 h-9 bg-navy text-accent rounded-full flex items-center justify-center hover:bg-blue-700 transition">FB</a>
         </div>
       </div>
 
       <!-- Comments Section -->
       <div class="mb-16">
-        <h3 class="font-bold text-xl text-slate-800 mb-6">Komentar ({{ post.comments?.length || 0 }})</h3>
+        <h3 class="font-bold text-xl text-slate-800 mb-6">Komentar ({{ post.comments_count ?? post.comments?.length ?? 0 }})</h3>
         
         <!-- Comment List -->
         <div class="space-y-4 mb-8">
@@ -123,7 +139,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
                 <p v-if="commentForm.errors.name" class="text-red-500 text-xs mt-1">{{ commentForm.errors.name }}</p>
               </div>
               <div>
-                <label class="form-label">Email *</label>
+                <label class="form-label">Email <span class="text-slate-400 font-normal">(opsional, tidak ditampilkan)</span></label>
                 <input v-model="commentForm.email" type="email" placeholder="email@anda.com" class="form-input" />
                 <p v-if="commentForm.errors.email" class="text-red-500 text-xs mt-1">{{ commentForm.errors.email }}</p>
               </div>
@@ -146,7 +162,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
         <div class="grid sm:grid-cols-3 gap-6">
           <a v-for="rp in relatedPosts" :key="rp.id" :href="`/berita/${rp.slug}`" class="card hover:border-accent transition block group">
             <div class="h-36 overflow-hidden">
-              <img v-if="rp.cover_image" :src="`/storage/${rp.cover_image}`" class="w-full h-full object-cover group-hover:scale-105 transition" />
+              <img v-if="rp.cover_image" :src="`/storage/${rp.cover_image}`" :alt="rp.title" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition" />
               <div v-else class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">TSM</div>
             </div>
             <div class="p-4">

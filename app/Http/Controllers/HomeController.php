@@ -92,7 +92,9 @@ class HomeController extends Controller
     {
         $post = Post::published()->where('slug', $slug)->with(['category', 'user', 'tags'])->firstOrFail();
         $this->trackVisit($request, $post->id);
-        $post->increment('views_count');
+        if (! $this->isBot($request)) {
+            $post->increment('views_count');
+        }
 
         $visitorHash = $this->getVisitorHash($request);
         $reaction = $post->reactions()->where('visitor_hash', $visitorHash)->first();
@@ -105,6 +107,7 @@ class HomeController extends Controller
             ->take(3)->get();
 
         $comments = $post->comments()
+            ->approved()
             ->with('replies.reactions')
             ->whereNull('parent_id')
             ->orderByDesc('created_at')
@@ -118,15 +121,15 @@ class HomeController extends Controller
             'related' => $related,
             'comments' => $comments,
             'myReaction' => $reaction ? $reaction->value : 0,
-            'visitorHash' => $visitorHash,
         ]);
     }
 
     public function react(Request $request, $postId)
     {
-        $post = Post::findOrFail($postId);
+        $validated = $request->validate(['value' => 'required|in:1,-1']);
+        $post = Post::published()->findOrFail($postId);
         $hash = $this->getVisitorHash($request);
-        $value = $request->input('value'); // 1 or -1
+        $value = (int) $validated['value']; // 1 or -1
 
         $existing = $post->reactions()->where('visitor_hash', $hash)->first();
 
@@ -169,9 +172,19 @@ class HomeController extends Controller
             'parent_id' => 'nullable|exists:comments,id',
         ]);
 
-        $post = Post::findOrFail($postId);
+        $post = Post::published()->findOrFail($postId);
         if (!$post->allow_comments) {
             return back()->with('error', 'Komentar dinonaktifkan untuk berita ini.');
+        }
+
+        if ($request->parent_id) {
+            $parent = \App\Models\Comment::find($request->parent_id);
+            if (! $parent || (int) $parent->post_id !== (int) $post->id) {
+                return back()->withErrors(['body' => 'Komentar yang dibalas tidak ditemukan.']);
+            }
+            if ($parent->parent_id) {
+                return back()->withErrors(['body' => 'Balasan hanya bisa ditujukan ke komentar utama.']);
+            }
         }
 
         $comment = $post->comments()->create([
@@ -184,14 +197,12 @@ class HomeController extends Controller
             'user_agent' => substr($request->userAgent() ?? '', 0, 255),
         ]);
 
-        $post->increment('comments_count');
-
         return back()->with('success', 'Komentar terkirim, menunggu moderasi. Terima kasih!');
     }
 
     public function likeComment(Request $request, $commentId)
     {
-        $comment = \App\Models\Comment::findOrFail($commentId);
+        $comment = \App\Models\Comment::approved()->findOrFail($commentId);
         $hash = $this->getVisitorHash($request);
         $existing = $comment->reactions()->where('visitor_hash', $hash)->first();
         if ($existing) {
@@ -206,7 +217,7 @@ class HomeController extends Controller
 
     public function share(Request $request, $postId)
     {
-        Post::findOrFail($postId)->increment('shares_count');
+        Post::published()->findOrFail($postId)->increment('shares_count');
         return response()->json(['ok' => true]);
     }
 
@@ -264,8 +275,7 @@ class HomeController extends Controller
     private function trackVisit(Request $request, $postId)
     {
         // Jangan catat bot/mesin pencari/preview link agar statistik tidak menggelembung.
-        $ua = (string) $request->userAgent();
-        if ($ua === '' || preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|preview|curl|wget/i', $ua)) {
+        if ($this->isBot($request)) {
             return;
         }
 
@@ -289,6 +299,13 @@ class HomeController extends Controller
         ]);
     }
 
+    private function isBot(Request $request): bool
+    {
+        $ua = (string) $request->userAgent();
+
+        return $ua === '' || (bool) preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|preview|curl|wget|headless|monitor/i', $ua);
+    }
+
     private function getVisitorHash(Request $request): string
     {
         return hash('sha256', $request->ip() . $request->userAgent() . date('Y-m-d'));
@@ -296,8 +313,8 @@ class HomeController extends Controller
 
     private function detectDevice(string $ua): string
     {
-        if (preg_match('/Mobile|Android|iPhone|iPad/i', $ua)) return 'mobile';
-        if (preg_match('/Tablet|iPad/i', $ua)) return 'tablet';
+        if (preg_match('/iPad|Tablet/i', $ua)) return 'tablet';
+        if (preg_match('/Mobile|Android|iPhone/i', $ua)) return 'mobile';
         return 'desktop';
     }
 

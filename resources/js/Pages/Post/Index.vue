@@ -17,7 +17,6 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
 <template>
   <AppLayout>
     <Head><title>Berita &amp; Artikel — TSM</title></Head>
-    <title>Berita & Artikel - TSM SMKS Islam 1 Blitar</title>
     <div class="grid-dark page-hero border-b border-accent/20">
       <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <span class="badge-status mb-6">Kabar Jurusan</span>
@@ -32,14 +31,14 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
           <button v-for="c in categories" :key="c.id" @click="category=c.slug; filter()" :class="['px-4 py-2 rounded-full text-sm font-semibold transition', category===c.slug ? 'bg-navy text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50']">{{ c.name }}</button>
         </div>
         <form @submit.prevent="filter" class="flex gap-2">
-          <input v-model="search" type="text" placeholder="Cari berita..." class="form-input text-sm" />
+          <input v-model="search" type="search" aria-label="Cari berita" placeholder="Cari berita..." class="form-input text-sm" />
           <button type="submit" class="btn-primary text-sm px-4">Cari</button>
         </form>
       </div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <a v-for="post in posts.data" :key="post.id" :href="`/berita/${post.slug}`" class="card hover:border-accent transition-all hover:-translate-y-1 block group">
           <div class="h-48 overflow-hidden">
-            <img v-if="post.cover_image" :src="`/storage/${post.cover_image}`" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" :alt="post.title" />
+            <img v-if="post.cover_image" :src="`/storage/${post.cover_image}`" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" :alt="post.title" />
             <div v-else class="w-full h-full grid-light flex items-center justify-center text-slate-300">
               <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
             </div>
