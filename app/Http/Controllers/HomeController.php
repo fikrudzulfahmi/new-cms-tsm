@@ -69,6 +69,87 @@ class HomeController extends Controller
         ]);
     }
 
+    // ===================== HALAMAN PER BAGIAN =====================
+
+    public function profile(Request $request)
+    {
+        $this->trackVisit($request, null);
+        $mission = array_values(array_filter(array_map('trim', preg_split('/\R/', (string) Setting::get('profile_mission')))));
+
+        return Inertia::render('Profile/Index', [
+            'head' => Teacher::active()->first(['id', 'name', 'position', 'photo']),
+            'mission' => $mission,
+            'teachers' => Teacher::active()->take(8)->get(['id', 'name', 'position', 'subject', 'photo']),
+            'teacherCount' => Teacher::active()->count(),
+        ]);
+    }
+
+    public function teachers(Request $request)
+    {
+        $this->trackVisit($request, null);
+        return Inertia::render('Teacher/Index', [
+            'teachers' => Teacher::active()->get(['id', 'name', 'position', 'subject', 'education', 'photo', 'bio']),
+        ]);
+    }
+
+    public function competencies(Request $request)
+    {
+        $this->trackVisit($request, null);
+        return Inertia::render('Competency/Index', [
+            'competencies' => Competency::active()->get(['id', 'title', 'slug', 'icon', 'short_description', 'image']),
+        ]);
+    }
+
+    public function competency(Request $request, string $slug)
+    {
+        $competency = Competency::active()->where('slug', $slug)->firstOrFail();
+        $this->trackVisit($request, null);
+        return Inertia::render('Competency/Show', [
+            'competency' => $competency,
+            'others' => Competency::active()->whereKeyNot($competency->id)->get(['id', 'title', 'slug', 'icon', 'short_description']),
+        ]);
+    }
+
+    public function programs(Request $request)
+    {
+        $this->trackVisit($request, null);
+        return Inertia::render('Program/Index', [
+            'programs' => Program::active()->get(['id', 'title', 'subtitle', 'icon', 'description', 'image']),
+        ]);
+    }
+
+    public function facilities(Request $request)
+    {
+        $this->trackVisit($request, null);
+        return Inertia::render('Facility/Index', [
+            'facilities' => Facility::active()->get(['id', 'name', 'category', 'description', 'image', 'quantity', 'condition']),
+        ]);
+    }
+
+    public function achievements(Request $request)
+    {
+        $this->trackVisit($request, null);
+        $level = mb_substr((string) $request->get('tingkat'), 0, 50);
+        $query = Achievement::active()->reorder()->orderByDesc('is_featured')->orderByDesc('achieved_at')->orderByDesc('id');
+        if ($level !== '') {
+            $query->where('level', $level);
+        }
+        return Inertia::render('Achievement/Index', [
+            'achievements' => $query->paginate(12, ['id', 'title', 'student_name', 'level', 'rank', 'organizer', 'year', 'achieved_at', 'description', 'image', 'is_featured'])->withQueryString(),
+            'levels' => Achievement::active()->reorder()->whereNotNull('level')->where('level', '!=', '')->distinct()->orderBy('level')->pluck('level'),
+            'filters' => ['tingkat' => $level],
+        ]);
+    }
+
+    public function alumni(Request $request)
+    {
+        $this->trackVisit($request, null);
+        return Inertia::render('Alumni/Index', [
+            'testimonials' => Testimonial::approved()->orderByDesc('is_featured')->latest()
+                ->paginate(12, ['id', 'name', 'graduation_year', 'occupation', 'workplace', 'message', 'rating', 'photo', 'is_featured']),
+        ]);
+    }
+
     public function posts(Request $request)
     {
         $this->trackVisit($request, null);

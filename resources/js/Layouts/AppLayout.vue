@@ -66,10 +66,13 @@ const showFlash = ref(true)
           <div>
             <h4 class="font-mono text-xs tracking-[2px] uppercase text-accent mb-5">Tautan Cepat</h4>
             <ul class="space-y-2.5 text-on-navy-muted text-sm">
-              <li><Link href="/#tentang" class="hover:text-accent transition">Tentang Kami</Link></li>
-              <li><Link href="/#kompetensi" class="hover:text-accent transition">Kompetensi</Link></li>
-              <li><Link href="/#program" class="hover:text-accent transition">Program Unggulan</Link></li>
-              <li><Link href="/#prestasi" class="hover:text-accent transition">Prestasi</Link></li>
+              <li><Link href="/profil" class="hover:text-accent transition">Profil Jurusan</Link></li>
+              <li><Link href="/guru" class="hover:text-accent transition">Guru &amp; Instruktur</Link></li>
+              <li><Link href="/kompetensi" class="hover:text-accent transition">Kompetensi</Link></li>
+              <li><Link href="/program" class="hover:text-accent transition">Program Unggulan</Link></li>
+              <li><Link href="/sarana" class="hover:text-accent transition">Sarana</Link></li>
+              <li><Link href="/prestasi" class="hover:text-accent transition">Prestasi</Link></li>
+              <li><Link href="/alumni" class="hover:text-accent transition">Alumni</Link></li>
               <li><Link href="/berita" class="hover:text-accent transition">Berita</Link></li>
               <li><a href="/spmb" target="_blank" rel="noopener" class="hover:text-accent transition">SPMB</a></li>
             </ul>

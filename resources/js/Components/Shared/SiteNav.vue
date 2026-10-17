@@ -16,12 +16,13 @@ const logo = computed(() => {
 
 const links = [
   { label: 'Beranda', href: '/' },
-  { label: 'Kompetensi', href: '/#kompetensi' },
-  { label: 'Program', href: '/#program' },
-  { label: 'Sarana', href: '/#sarana' },
-  { label: 'Prestasi', href: '/#prestasi' },
+  { label: 'Profil', href: '/profil', also: ['/guru'] },
+  { label: 'Kompetensi', href: '/kompetensi' },
+  { label: 'Program', href: '/program' },
+  { label: 'Sarana', href: '/sarana' },
+  { label: 'Prestasi', href: '/prestasi' },
   { label: 'Berita', href: '/berita' },
-  { label: 'Alumni', href: '/#alumni' },
+  { label: 'Alumni', href: '/alumni' },
   { label: 'Kontak', href: '/#kontak' },
 ]
 // Anchor yang punya section di landing (untuk penanda menu aktif saat menggulir).
@@ -48,7 +49,8 @@ function updateActiveHash() {
 const isActive = (href) => {
   if (href.startsWith('/#')) return path.value === '/' && activeHash.value === href.slice(1)
   if (href === '/') return path.value === '/' && !activeHash.value
-  return path.value === href || path.value.startsWith(href + '/')
+  const l = links.find((x) => x.href === href)
+  return [href, ...(l?.also || [])].some((h) => path.value === h || path.value.startsWith(h + '/'))
 }
 
 // Di landing, anchor /#x cukup scroll native; dari halaman lain pakai Link (tanpa reload).

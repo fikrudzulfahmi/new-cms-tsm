@@ -81,7 +81,17 @@ const otherPosts = computed(() => postList.value.slice(1))
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
 
 /* ---------- Sambutan kepala jurusan ---------- */
-const kajur = computed(() => props.teachers.find(t => /kepala/i.test(t.position || '')) || props.teachers[0])
+const kajur = computed(() => {
+  const t = props.teachers.find(t => /kepala/i.test(t.position || '')) || props.teachers[0]
+  if (!s.value.profile_head_name) return t
+  return { name: s.value.profile_head_name, position: s.value.profile_head_position, photo: s.value.profile_head_photo || null }
+})
+// Kutipan sambutan: paragraf terakhir yang bukan salam pembuka, dari Pengaturan → Profil
+const sambutan = computed(() => {
+  const ps = String(s.value.profile_speech || '').split(/\n\s*\n/).map(p => p.trim()).filter(p => p && !/^assalamu/i.test(p))
+  const t = ps[0] || 'Kami berkomitmen membekali setiap siswa dengan keterampilan nyata, karakter Islami, dan kesiapan kerja agar mampu bersaing di dunia industri otomotif.'
+  return t.length > 260 ? t.slice(0, 257).replace(/\s+\S*$/, '') + '…' : t
+})
 
 const karier = [
   { no: '01', title: 'Mekanik Bengkel Resmi', desc: 'Di dealer dan AHASS/bengkel resmi merek.' },
@@ -309,12 +319,13 @@ onBeforeUnmount(() => {
             <h2>{{ s.department_name || 'Teknik Sepeda Motor' }}</h2>
             <p>{{ s.about_text }}</p>
             <blockquote v-if="kajur" class="sambutan">
-              <p>“Kami berkomitmen membekali setiap siswa dengan keterampilan nyata, karakter Islami, dan kesiapan kerja agar mampu bersaing di dunia industri otomotif.”</p>
+              <p>“{{ sambutan }}”</p>
               <footer>
                 <img v-if="kajur.photo" :src="img(kajur.photo)" :alt="kajur.name" loading="lazy" @error="hideImg" />
                 <span><b>{{ kajur.name }}</b><small>{{ kajur.position }}</small></span>
               </footer>
             </blockquote>
+            <Link href="/profil" class="btn btn-outline btn-sm">Profil lengkap jurusan →</Link>
           </div>
         </div>
       </section>
@@ -327,16 +338,16 @@ onBeforeUnmount(() => {
               <span class="mono-label">KOMPETENSI KEAHLIAN</span>
               <h2>Apa saja yang kamu pelajari di TSM?</h2>
             </div>
-            <p class="head-aside">Materi disusun bersama mitra industri, dengan porsi praktik yang besar di bengkel sekolah.</p>
+            <Link href="/kompetensi" class="btn btn-outline btn-sm">Semua kompetensi →</Link>
           </div>
           <div class="komp-grid">
-            <article v-for="(k, i) in competencies" :key="k.id" class="komp-card reveal" :class="{ dark: i === 1 }">
+            <Link v-for="(k, i) in competencies" :key="k.id" :href="`/kompetensi/${k.slug}`" class="komp-card reveal" :class="{ dark: i === 1 }">
               <div class="icon-box">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="iconFor(k.icon)"/></svg>
               </div>
               <h3>{{ k.title }}</h3>
               <p>{{ k.short_description }}</p>
-            </article>
+            </Link>
           </div>
         </div>
       </section>
@@ -362,9 +373,12 @@ onBeforeUnmount(() => {
       <!-- ================= PROGRAM UNGGULAN ================= -->
       <section id="program" class="section">
         <div class="container">
-          <div class="section-head reveal">
-            <span class="mono-label">PROGRAM UNGGULAN</span>
-            <h2>Lebih dari sekadar belajar di kelas.</h2>
+          <div class="section-head split reveal">
+            <div>
+              <span class="mono-label">PROGRAM UNGGULAN</span>
+              <h2>Lebih dari sekadar belajar di kelas.</h2>
+            </div>
+            <Link href="/program" class="btn btn-outline btn-sm">Semua program →</Link>
           </div>
           <div class="prog-grid">
             <article v-for="p in programs" :key="p.id" class="prog-card reveal">
@@ -389,6 +403,7 @@ onBeforeUnmount(() => {
             <span class="mono-label">SARANA &amp; PRASARANA</span>
             <h2>Bengkel praktik berstandar industri.</h2>
             <div class="chips">
+              <Link href="/sarana" class="chip">Lihat halaman sarana →</Link>
               <button v-for="c in facCats" :key="c" type="button" class="chip" :class="{ on: facCat === c }" @click="facCat = c">{{ c }}</button>
             </div>
           </div>
@@ -413,7 +428,7 @@ onBeforeUnmount(() => {
               <span class="mono-label accent">PRESTASI</span>
               <h2>Bukti kompetensi di ajang lomba.</h2>
             </div>
-            <p class="head-aside">{{ stats.achievements }} prestasi tercatat, dari tingkat sekolah hingga nasional.</p>
+            <Link href="/prestasi" class="btn btn-ghost btn-sm">Semua {{ stats.achievements }} prestasi →</Link>
           </div>
           <div class="ach-grid">
             <article v-for="a in achievements" :key="a.id" class="ach-card reveal">
@@ -492,9 +507,12 @@ onBeforeUnmount(() => {
       <!-- ================= GURU ================= -->
       <section v-if="teachers.length" id="guru" class="section">
         <div class="container">
-          <div class="section-head reveal">
-            <span class="mono-label">GURU &amp; INSTRUKTUR</span>
-            <h2>Dibimbing praktisi berpengalaman.</h2>
+          <div class="section-head split reveal">
+            <div>
+              <span class="mono-label">GURU &amp; INSTRUKTUR</span>
+              <h2>Dibimbing praktisi berpengalaman.</h2>
+            </div>
+            <Link href="/guru" class="btn btn-outline btn-sm">Semua guru →</Link>
           </div>
           <div class="teach-grid">
             <article v-for="t in teachers" :key="t.id" class="teach-card reveal">
@@ -532,7 +550,10 @@ onBeforeUnmount(() => {
               <span class="mono-label">UMPAN BALIK LULUSAN</span>
               <h2>Kata alumni tentang TSM.</h2>
             </div>
-            <button type="button" class="btn btn-outline btn-sm" @click="showTesti = !showTesti">{{ showTesti ? 'Tutup formulir' : 'Kirim testimoni' }}</button>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="btn btn-outline btn-sm" @click="showTesti = !showTesti">{{ showTesti ? 'Tutup formulir' : 'Kirim testimoni' }}</button>
+              <Link href="/alumni" class="btn btn-primary btn-sm">Semua testimoni →</Link>
+            </div>
           </div>
 
           <p v-if="flash.success && !showTesti" class="form-ok" role="status">{{ flash.success }}</p>

@@ -523,3 +523,6 @@ html:has(.lp) { scroll-behavior: smooth; }
   .lp .contact-form, .lp .testi-form { padding: 20px; }
   .lp .ticker-label { display: none; }
 }
+
+/* Kartu kompetensi kini tautan ke /kompetensi/{slug} */
+.lp a.komp-card { display: block; color: inherit; text-decoration: none; }
