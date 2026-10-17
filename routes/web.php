@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 // ===================== PUBLIC =====================
@@ -15,6 +16,7 @@ Route::get('/', [HomeController::class, 'landing'])->name('landing');
 Route::redirect('/beranda', '/', 301); // halaman beranda lama, digabung ke landing
 Route::get('/berita', [HomeController::class, 'posts'])->name('posts');
 Route::get('/berita/{slug}', [HomeController::class, 'post'])->name('post.show');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('post.react')->middleware('throttle:20,1');
 Route::post('/berita/{postId}/comment', [HomeController::class, 'comment'])->name('post.comment')->middleware('throttle:5,1');
 Route::post('/berita/{postId}/share', [HomeController::class, 'share'])->name('post.share')->middleware('throttle:20,1');

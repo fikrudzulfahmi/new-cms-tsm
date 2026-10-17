@@ -28,6 +28,10 @@ const form = useForm({
   facebook_url: props.settings?.facebook_url || '',
   youtube_url: props.settings?.youtube_url || '',
   maps_embed: props.settings?.maps_embed || '',
+  whatsapp: props.settings?.whatsapp || '',
+  stat_students: props.settings?.stat_students || '',
+  stat_graduates: props.settings?.stat_graduates || '',
+  stat_absorption: props.settings?.stat_absorption || '',
   about_image: null,
 })
 
@@ -146,6 +150,32 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
               <label class="form-label">Info / Pengumuman SPMB</label>
               <input v-model="form.spmb_info" type="text" placeholder="Pendaftaran SPMB Tahun Pelajaran 2026/2027 sudah dibuka!" class="form-input" />
               <p class="text-xs text-slate-500 mt-1">Ditampilkan di section SPMB halaman depan saat pendaftaran dibuka.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 p-6 space-y-5">
+          <div>
+            <h2 class="font-bold text-slate-800">Kontak &amp; Statistik Halaman Depan</h2>
+            <p class="text-xs text-slate-500">Nomor WhatsApp dipakai tombol "Tanya via WhatsApp"; angka statistik tampil di bawah hero.</p>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-6">
+            <div>
+              <label class="form-label">Nomor WhatsApp</label>
+              <input v-model="form.whatsapp" type="text" placeholder="081234567890" class="form-input" />
+              <p class="text-xs text-slate-500 mt-1">Boleh 08… atau 62…; otomatis dirapikan. Kosong = pakai No. Telepon.</p>
+            </div>
+            <div>
+              <label class="form-label">Jumlah Siswa Aktif</label>
+              <input v-model="form.stat_students" type="text" placeholder="150+" class="form-input" />
+            </div>
+            <div>
+              <label class="form-label">Jumlah Alumni</label>
+              <input v-model="form.stat_graduates" type="text" placeholder="500+" class="form-input" />
+            </div>
+            <div>
+              <label class="form-label">Lulusan Terserap Kerja</label>
+              <input v-model="form.stat_absorption" type="text" placeholder="85%" class="form-input" />
             </div>
           </div>
         </div>

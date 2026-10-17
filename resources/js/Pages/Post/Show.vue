@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { useForm, router } from '@inertiajs/vue3'
+import { Head, useForm, router } from '@inertiajs/vue3'
 import axios from 'axios'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
@@ -30,6 +30,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
 
 <template>
   <AppLayout>
+    <Head><title>{{ post.title }} — TSM</title></Head>
     <title>{{ post.title }} - TSM SMKS Islam 1 Blitar</title>
     <div class="grid-dark h-24 border-b border-accent/20"></div>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

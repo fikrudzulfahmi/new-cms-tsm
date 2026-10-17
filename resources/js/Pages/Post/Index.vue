@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps(['posts', 'categories', 'filters'])
@@ -16,6 +16,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
 
 <template>
   <AppLayout>
+    <Head><title>Berita &amp; Artikel — TSM</title></Head>
     <title>Berita & Artikel - TSM SMKS Islam 1 Blitar</title>
     <div class="grid-dark page-hero border-b border-accent/20">
       <div class="max-w-7xl mx-auto px-6 lg:px-8">

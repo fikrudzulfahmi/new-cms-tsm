@@ -112,11 +112,29 @@ function submitContact() {
 }
 
 const waNumber = computed(() => {
-  const raw = (s.value.whatsapp || CONFIG.nomorAdmin || '').replace(/\D/g, '')
-  if (!raw) return ''
+  const raw = (s.value.whatsapp || s.value.phone || CONFIG.nomorAdmin || '').replace(/\D/g, '')
+  if (!raw || raw.length < 9) return ''
   return raw.startsWith('0') ? '62' + raw.slice(1) : raw
 })
 const waLink = computed(() => waNumber.value ? `https://wa.me/${waNumber.value}?text=${encodeURIComponent('Halo, saya ingin bertanya tentang pendaftaran Jurusan TSM.')}` : '#kontak')
+
+const logoPath = computed(() => s.value.site_logo || null)
+const logoUrl = computed(() => logoPath.value ? img(logoPath.value) : null)
+const spmbUrl = computed(() => {
+  const u = (s.value.spmb_url || '').trim()
+  return /^https?:\/\//i.test(u) ? u : null
+})
+// Sembunyikan gambar yang gagal dimuat (file terhapus/rusak) agar tidak tampil ikon rusak.
+const hideImg = (e) => { e.target.style.visibility = 'hidden' }
+
+const siteUrl = computed(() => (typeof window !== 'undefined' ? window.location.origin : ''))
+const pageTitle = computed(() => `${s.value.department_name || 'Teknik Sepeda Motor'} — ${schoolName.value}`)
+const pageDesc = computed(() => `Jurusan ${s.value.department_name || 'Teknik Sepeda Motor'} ${schoolName.value}: kompetensi keahlian, program unggulan, sarana praktik, prestasi, berita, dan testimoni alumni. ${address.value}.`)
+const ogImage = computed(() => {
+  const p = s.value.hero_bg || s.value.site_logo
+  if (!p) return null
+  return /^https?:/i.test(p) ? p : siteUrl.value + '/storage/' + p
+})
 
 const socials = computed(() => [
   { key: 'instagram_url', label: 'Instagram' },
@@ -146,24 +164,57 @@ function observeReveal() {
 }
 // Item baru setelah ganti tab langsung tampil
 watch([postCat, facCat], () => nextTick(() => document.querySelectorAll('.lp .reveal:not(.is-in)').forEach(el => el.classList.add('is-in'))))
+watch(lightbox, (v) => { if (typeof document !== 'undefined') document.body.style.overflow = v ? 'hidden' : '' })
+const onKey = (e) => { if (e.key === 'Escape' && lightbox.value) lightbox.value = null }
+
+// Data terstruktur untuk mesin pencari (Google) — disuntik saat komponen terpasang.
+function injectJsonLd() {
+  if (typeof document === 'undefined') return
+  document.getElementById('ld-school')?.remove()
+  const el = document.createElement('script')
+  el.type = 'application/ld+json'
+  el.id = 'ld-school'
+  el.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'School',
+    name: schoolName.value,
+    alternateName: s.value.department_name || undefined,
+    url: siteUrl.value + '/',
+    logo: logoPath.value ? siteUrl.value + img(logoPath.value) : undefined,
+    image: ogImage.value || undefined,
+    telephone: s.value.phone || undefined,
+    email: s.value.email || undefined,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: s.value.address || '',
+      addressLocality: 'Kota Blitar',
+      addressRegion: 'Jawa Timur',
+      addressCountry: 'ID',
+    },
+    sameAs: socials.value.map(x => x.url),
+  })
+  document.head.appendChild(el)
+}
 
 onMounted(() => {
   observeReveal()
+  injectJsonLd()
+  document.addEventListener('keydown', onKey)
   if (headlines.value.length > 1) slideTimer = setInterval(() => goSlide(slideIdx.value + 1), 6000)
 })
 onBeforeUnmount(() => {
   io?.disconnect()
   clearInterval(slideTimer)
+  document.removeEventListener('keydown', onKey)
+  document.body.style.overflow = ''
 })
 </script>
 
 <template>
   <Head>
     <title>{{ s.department_name || 'Teknik Sepeda Motor' }} — {{ schoolName }}</title>
-    <meta head-key="description" name="description" :content="`Jurusan Teknik Sepeda Motor ${schoolName}: kompetensi keahlian, program unggulan, sarana, prestasi, berita terkini, dan testimoni alumni.`" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <!-- Meta deskripsi, canonical, Open Graph, dan Twitter Card dirender server-side
+         di resources/views/app.blade.php agar tetap terbaca crawler tanpa JavaScript. -->
   </Head>
 
   <div class="lp">
@@ -171,7 +222,8 @@ onBeforeUnmount(() => {
     <header class="hero grid-dark">
       <div class="hero-bg" aria-hidden="true">
         <template v-for="(h, i) in headlines" :key="i">
-          <img v-if="h.image" :src="img(h.image)" :class="{ on: i === slideIdx }" alt="" />
+          <img v-if="h.image" :src="img(h.image)" :class="{ on: i === slideIdx }" alt=""
+            :loading="i === 0 ? 'eager' : 'lazy'" :fetchpriority="i === 0 ? 'high' : 'auto'" @error="hideImg" />
         </template>
       </div>
 
@@ -206,7 +258,8 @@ onBeforeUnmount(() => {
           <span class="ticker-label">INFO TERKINI</span>
           <div class="ticker-track">
             <div class="ticker-move">
-              <Link v-for="(p, i) in [...ticker, ...ticker]" :key="i" :href="`/berita/${p.slug}`">
+              <Link v-for="(p, i) in [...ticker, ...ticker]" :key="i" :href="`/berita/${p.slug}`"
+                :aria-hidden="i >= ticker.length ? 'true' : null" :tabindex="i >= ticker.length ? -1 : null">
                 <b>{{ p.category?.name }}</b>{{ p.title }}
               </Link>
             </div>
@@ -219,12 +272,12 @@ onBeforeUnmount(() => {
       <!-- ================= STATISTIK ================= -->
       <section class="stats-band" aria-label="Statistik">
         <dl class="container stats-grid">
-          <div class="stat reveal"><dd>{{ stats.students }}</dd><dt>Siswa aktif</dt></div>
-          <div class="stat reveal"><dd>{{ stats.graduates }}</dd><dt>Alumni</dt></div>
-          <div class="stat reveal"><dd>{{ stats.absorption }}</dd><dt>Lulusan terserap kerja</dt></div>
-          <div class="stat reveal"><dd>{{ stats.achievements }}</dd><dt>Prestasi</dt></div>
-          <div class="stat reveal"><dd>{{ stats.partners }}</dd><dt>Mitra industri</dt></div>
-          <div class="stat reveal"><dd>{{ stats.teachers }}</dd><dt>Guru &amp; instruktur</dt></div>
+          <div class="stat reveal"><dt>Siswa aktif</dt><dd>{{ stats.students }}</dd></div>
+          <div class="stat reveal"><dt>Alumni</dt><dd>{{ stats.graduates }}</dd></div>
+          <div class="stat reveal"><dt>Lulusan terserap kerja</dt><dd>{{ stats.absorption }}</dd></div>
+          <div class="stat reveal"><dt>Prestasi</dt><dd>{{ stats.achievements }}</dd></div>
+          <div class="stat reveal"><dt>Mitra industri</dt><dd>{{ stats.partners }}</dd></div>
+          <div class="stat reveal"><dt>Guru &amp; instruktur</dt><dd>{{ stats.teachers }}</dd></div>
         </dl>
       </section>
 
@@ -235,7 +288,7 @@ onBeforeUnmount(() => {
           <div class="marquee">
             <ul class="marquee-move">
               <li v-for="(m, i) in [...partners, ...partners]" :key="i" class="mitra-box" :title="m.name">
-                <img v-if="m.logo" :src="img(m.logo)" :alt="m.name" loading="lazy" />
+                <img v-if="m.logo" :src="img(m.logo)" :alt="m.name" loading="lazy" @error="hideImg" />
                 <span v-else>{{ m.name }}</span>
               </li>
             </ul>
@@ -247,7 +300,7 @@ onBeforeUnmount(() => {
       <section id="tentang" class="section">
         <div class="container about-wrap">
           <div class="about-media reveal">
-            <img v-if="s.about_image" :src="img(s.about_image)" alt="Tentang jurusan TSM" loading="lazy" />
+            <img v-if="s.about_image" :src="img(s.about_image)" alt="Tentang jurusan TSM" loading="lazy" @error="hideImg" />
           </div>
           <div class="about-text reveal">
             <span class="mono-label">TENTANG JURUSAN</span>
@@ -256,7 +309,7 @@ onBeforeUnmount(() => {
             <blockquote v-if="kajur" class="sambutan">
               <p>“Kami berkomitmen membekali setiap siswa dengan keterampilan nyata, karakter Islami, dan kesiapan kerja agar mampu bersaing di dunia industri otomotif.”</p>
               <footer>
-                <img v-if="kajur.photo" :src="img(kajur.photo)" :alt="kajur.name" loading="lazy" />
+                <img v-if="kajur.photo" :src="img(kajur.photo)" :alt="kajur.name" loading="lazy" @error="hideImg" />
                 <span><b>{{ kajur.name }}</b><small>{{ kajur.position }}</small></span>
               </footer>
             </blockquote>
@@ -314,7 +367,7 @@ onBeforeUnmount(() => {
           <div class="prog-grid">
             <article v-for="p in programs" :key="p.id" class="prog-card reveal">
               <div class="prog-img">
-                <img v-if="p.image" :src="img(p.image)" :alt="p.title" loading="lazy" />
+                <img v-if="p.image" :src="img(p.image)" :alt="p.title" loading="lazy" @error="hideImg" />
                 <span class="prog-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="iconFor(p.icon)"/></svg></span>
               </div>
               <div class="prog-body">
@@ -339,7 +392,7 @@ onBeforeUnmount(() => {
           </div>
           <div class="fac-grid">
             <article v-for="(f, i) in facList" :key="f.id" class="fac-card reveal" :class="{ big: i === 0 }">
-              <img v-if="f.image" :src="img(f.image)" :alt="f.name" loading="lazy" />
+              <img v-if="f.image" :src="img(f.image)" :alt="f.name" loading="lazy" @error="hideImg" />
               <div class="fac-info">
                 <span class="mono-label accent">{{ f.category }}</span>
                 <h3>{{ f.name }}</h3>
@@ -363,7 +416,7 @@ onBeforeUnmount(() => {
           <div class="ach-grid">
             <article v-for="a in achievements" :key="a.id" class="ach-card reveal">
               <div class="ach-img">
-                <img v-if="a.image" :src="img(a.image)" :alt="a.title" loading="lazy" />
+                <img v-if="a.image" :src="img(a.image)" :alt="a.title" loading="lazy" @error="hideImg" />
                 <span v-if="a.rank" class="ach-rank">{{ a.rank }}</span>
               </div>
               <div class="ach-body">
@@ -395,7 +448,7 @@ onBeforeUnmount(() => {
 
           <div v-if="featuredPost" class="news-wrap">
             <Link :href="`/berita/${featuredPost.slug}`" class="news-feature reveal">
-              <img v-if="featuredPost.cover_image" :src="img(featuredPost.cover_image)" :alt="featuredPost.cover_alt || featuredPost.title" loading="lazy" />
+              <img v-if="featuredPost.cover_image" :src="img(featuredPost.cover_image)" :alt="featuredPost.cover_alt || featuredPost.title" loading="lazy" @error="hideImg" />
               <div class="news-feature-body">
                 <span class="cat-tag" :style="{ background: featuredPost.category?.color }">{{ featuredPost.category?.name }}</span>
                 <h3>{{ featuredPost.title }}</h3>
@@ -405,7 +458,7 @@ onBeforeUnmount(() => {
             </Link>
             <div class="news-list">
               <Link v-for="p in otherPosts" :key="p.id" :href="`/berita/${p.slug}`" class="news-item reveal">
-                <img v-if="p.cover_image" :src="img(p.cover_image)" :alt="p.cover_alt || p.title" loading="lazy" />
+                <img v-if="p.cover_image" :src="img(p.cover_image)" :alt="p.cover_alt || p.title" loading="lazy" @error="hideImg" />
                 <div>
                   <span class="cat-text" :style="{ color: p.category?.color }">{{ p.category?.name }}</span>
                   <h4>{{ p.title }}</h4>
@@ -427,7 +480,7 @@ onBeforeUnmount(() => {
           </div>
           <div class="gal-grid">
             <button v-for="g in gallery" :key="g.id" type="button" class="gal-item reveal" @click="lightbox = g">
-              <img :src="img(g.file)" :alt="g.title || g.caption || 'Galeri'" loading="lazy" />
+              <img :src="img(g.file)" :alt="g.title || g.caption || 'Galeri'" loading="lazy" @error="hideImg" />
               <span>{{ g.album || g.title }}</span>
             </button>
           </div>
@@ -443,7 +496,7 @@ onBeforeUnmount(() => {
           </div>
           <div class="teach-grid">
             <article v-for="t in teachers" :key="t.id" class="teach-card reveal">
-              <img v-if="t.photo" :src="img(t.photo)" :alt="t.name" loading="lazy" />
+              <img v-if="t.photo" :src="img(t.photo)" :alt="t.name" loading="lazy" @error="hideImg" />
               <h3>{{ t.name }}</h3>
               <span class="mono-label">{{ t.position }}</span>
               <p>{{ t.subject }}</p>
@@ -504,7 +557,7 @@ onBeforeUnmount(() => {
               </div>
               <blockquote>“{{ t.message }}”</blockquote>
               <figcaption>
-                <img v-if="t.photo" :src="img(t.photo)" :alt="t.name" loading="lazy" />
+                <img v-if="t.photo" :src="img(t.photo)" :alt="t.name" loading="lazy" @error="hideImg" />
                 <span v-else class="avatar">{{ t.name?.[0] }}</span>
                 <span><b>{{ t.name }}</b><small>Lulusan {{ t.graduation_year }}<template v-if="t.occupation"> · {{ t.occupation }}</template><template v-if="t.workplace">, {{ t.workplace }}</template></small></span>
               </figcaption>
@@ -541,8 +594,10 @@ onBeforeUnmount(() => {
               <p>{{ s.spmb_open === '1' ? (s.spmb_info || 'Pendaftaran SPMB sudah dibuka.') : 'Pendaftaran SPMB belum dibuka. Pantau terus pengumuman terbaru dari kami.' }} Daftar online sekarang atau tanya panitia lewat WhatsApp.</p>
             </div>
             <div class="cta-actions">
-              <a href="/spmb" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Daftar SPMB</a>
-              <a :href="waLink" class="btn btn-ghost btn-lg" :target="waNumber ? '_blank' : null" rel="noopener">Tanya via WhatsApp</a>
+              <a v-if="spmbUrl" :href="spmbUrl" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Daftar SPMB</a>
+              <a v-else href="#kontak" class="btn btn-primary btn-lg">Tanya panitia SPMB</a>
+              <a v-if="waNumber" :href="waLink" class="btn btn-ghost btn-lg" target="_blank" rel="noopener">Tanya via WhatsApp</a>
+              <a v-else href="#kontak" class="btn btn-ghost btn-lg">Kirim pesan</a>
             </div>
           </div>
         </div>
@@ -583,12 +638,13 @@ onBeforeUnmount(() => {
         <div class="footer-top">
           <div class="footer-brand">
             <div class="footer-logo">
-              <svg width="30" height="30" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <img v-if="logoUrl" :src="logoUrl" alt="" width="30" height="30" class="object-contain" @error="hideImg" />
+              <svg v-else width="30" height="30" viewBox="0 0 40 40" fill="none" aria-hidden="true">
                 <circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="2"/>
                 <circle cx="20" cy="20" r="6" fill="currentColor"/>
                 <path d="M20 3v8M20 29v8M3 20h8M29 20h8M8 8l5.5 5.5M26.5 26.5L32 32M32 8l-5.5 5.5M13.5 26.5L8 32" stroke="currentColor" stroke-width="1.6"/>
               </svg>
-              <span>{{ s.department_name || 'Teknik Sepeda Motor' }}</span>
+              <span>{{ s.site_name || s.department_name || 'Teknik Sepeda Motor' }}</span>
             </div>
             <p>{{ schoolName }}<br />{{ address }}</p>
             <div v-if="socials.length" class="socials">
@@ -610,7 +666,7 @@ onBeforeUnmount(() => {
               <ul>
                 <li><Link href="/berita">Semua Berita</Link></li>
                 <li v-for="c in categories.slice(0, 4)" :key="c.id"><Link :href="`/berita?kategori=${c.slug}`">{{ c.name }}</Link></li>
-                <li><a href="/spmb" target="_blank" rel="noopener">SPMB</a></li>
+                <li v-if="spmbUrl"><a :href="spmbUrl" target="_blank" rel="noopener">SPMB</a></li>
               </ul>
             </div>
             <div>
@@ -627,7 +683,7 @@ onBeforeUnmount(() => {
     </footer>
 
     <!-- Lightbox galeri -->
-    <div v-if="lightbox" class="lightbox" role="dialog" aria-modal="true" @click.self="lightbox = null">
+    <div v-if="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Pratinjau galeri" @click.self="lightbox = null">
       <button type="button" class="lb-close" aria-label="Tutup" @click="lightbox = null">×</button>
       <img :src="img(lightbox.file)" :alt="lightbox.title" />
       <p>{{ lightbox.caption || lightbox.title }}</p>

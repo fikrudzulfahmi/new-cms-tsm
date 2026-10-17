@@ -333,6 +333,8 @@ html:has(.lp) { scroll-behavior: smooth; }
 .lp .stat:last-child { border-right: 0; }
 .lp .stat dd { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 2vw + 12px, 36px); color: var(--navy); line-height: 1.1; }
 .lp .stat dt { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+.lp .stat dt { order: 2; }
+.lp .stat dd { order: 1; }
 
 /* Mitra marquee */
 .lp .marquee { flex: 1 1 600px; min-width: 0; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }

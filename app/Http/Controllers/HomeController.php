@@ -54,9 +54,9 @@ class HomeController extends Controller
             'partners' => Partner::active()->get(),
             'gallery' => Gallery::active()->images()->take(8)->get(),
             'stats' => [
-                'students' => Setting::get('stat_students', '150+'),
-                'graduates' => Setting::get('stat_graduates', '500+'),
-                'absorption' => Setting::get('stat_absorption', '85%'),
+                'students' => (Setting::get('stat_students') ?: '150+'),
+                'graduates' => (Setting::get('stat_graduates') ?: '500+'),
+                'absorption' => (Setting::get('stat_absorption') ?: '85%'),
                 'achievements' => Achievement::active()->count(),
                 'partners' => Partner::active()->count(),
                 'teachers' => Teacher::active()->count(),
@@ -263,6 +263,12 @@ class HomeController extends Controller
 
     private function trackVisit(Request $request, $postId)
     {
+        // Jangan catat bot/mesin pencari/preview link agar statistik tidak menggelembung.
+        $ua = (string) $request->userAgent();
+        if ($ua === '' || preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|preview|curl|wget/i', $ua)) {
+            return;
+        }
+
         $hash = $this->getVisitorHash($request);
         $today = today();
         $path = $request->path();
