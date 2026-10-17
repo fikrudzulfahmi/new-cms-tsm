@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Competency;
 use App\Models\Post;
 use Illuminate\Http\Response;
 
@@ -17,6 +18,14 @@ class SitemapController extends Controller
             ['loc' => url('/'), 'lastmod' => now()->toAtomString(), 'priority' => '1.0'],
             ['loc' => url('/berita'), 'lastmod' => now()->toAtomString(), 'priority' => '0.8'],
         ];
+        foreach (['profil', 'guru', 'kompetensi', 'program', 'sarana', 'prestasi', 'alumni'] as $page) {
+            $urls[] = ['loc' => url('/'.$page), 'lastmod' => now()->toAtomString(), 'priority' => '0.7'];
+        }
+        Competency::active()->get(['slug', 'updated_at'])->each(function ($c) use (&$urls) {
+            if ($c->slug) {
+                $urls[] = ['loc' => url('/kompetensi/'.$c->slug), 'lastmod' => optional($c->updated_at)->toAtomString(), 'priority' => '0.6'];
+            }
+        });
 
         Post::published()
             ->orderByDesc('updated_at')

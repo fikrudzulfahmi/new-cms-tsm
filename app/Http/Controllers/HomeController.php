@@ -48,14 +48,14 @@ class HomeController extends Controller
 
         return Inertia::render('Landing/Index', [
             'sliders' => Slider::active()->take(8)->get(),
-            'competencies' => Competency::active()->take(12)->get(),
-            'programs' => Program::active()->take(12)->get(),
-            'facilities' => Facility::active()->take(9)->get(),
+            'competencies' => Competency::active()->take(6)->get(),
+            'programs' => Program::active()->take(4)->get(),
+            'facilities' => Facility::active()->take(6)->get(),
             'achievements' => Achievement::active()->orderByDesc('is_featured')->orderByDesc('achieved_at')->take(6)->get(),
             'posts' => $posts,
             'categories' => $categories,
-            'testimonials' => Testimonial::approved()->orderByDesc('is_featured')->latest()->take(6)->get(),
-            'teachers' => Teacher::active()->take(8)->get(),
+            'testimonials' => Testimonial::approved()->orderByDesc('is_featured')->latest()->take(3)->get(),
+            'teachers' => Teacher::active()->take(4)->get(),
             'partners' => Partner::active()->take(12)->get(),
             'gallery' => Gallery::active()->images()->take(8)->get(),
             'stats' => [

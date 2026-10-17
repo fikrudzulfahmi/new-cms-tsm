@@ -16,6 +16,15 @@ Route::get('/', [HomeController::class, 'landing'])->name('landing');
 Route::redirect('/beranda', '/', 301); // halaman beranda lama, digabung ke landing
 Route::get('/berita', [HomeController::class, 'posts'])->name('posts');
 Route::get('/berita/{slug}', [HomeController::class, 'post'])->name('post.show');
+// Halaman per bagian (dulu hanya section di landing)
+Route::get('/profil', [HomeController::class, 'profile'])->name('profile');
+Route::get('/guru', [HomeController::class, 'teachers'])->name('teachers');
+Route::get('/kompetensi', [HomeController::class, 'competencies'])->name('competencies');
+Route::get('/kompetensi/{slug}', [HomeController::class, 'competency'])->name('competency.show');
+Route::get('/program', [HomeController::class, 'programs'])->name('programs');
+Route::get('/sarana', [HomeController::class, 'facilities'])->name('facilities');
+Route::get('/prestasi', [HomeController::class, 'achievements'])->name('achievements');
+Route::get('/alumni', [HomeController::class, 'alumni'])->name('alumni');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('post.react')->middleware('throttle:20,1');
 Route::post('/berita/{postId}/comment', [HomeController::class, 'comment'])->name('post.comment')->middleware('throttle:5,1');
