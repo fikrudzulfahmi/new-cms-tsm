@@ -1,6 +1,6 @@
 <script setup>
 // Navbar publik tunggal: dipakai landing (/) dan AppLayout (/berita, artikel)
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 
 const page = usePage()
@@ -26,11 +26,58 @@ const links = [
   { label: 'Alumni', href: '/#alumni' },
   { label: 'Kontak', href: '/#kontak' },
 ]
-const isActive = (href) => href === '/' ? path.value === '/' : (!href.includes('#') && path.value.startsWith(href))
+// Anchor yang punya section di landing (untuk penanda menu aktif saat menggulir).
+const sectionIds = links.filter((l) => l.href.startsWith('/#')).map((l) => l.href.slice(2))
+const activeHash = ref('')
 
-function onScroll() { scrolled.value = window.scrollY > 16 }
-onMounted(() => { onScroll(); window.addEventListener('scroll', onScroll, { passive: true }) })
-onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
+function updateActiveHash() {
+  if (path.value !== '/') { activeHash.value = ''; return }
+  const offset = 130
+  let current = ''
+  for (const id of sectionIds) {
+    const el = document.getElementById(id)
+    if (el && el.getBoundingClientRect().top - offset <= 0) current = '#' + id
+  }
+  // Di dasar halaman, section terakhir yang ada selalu dianggap aktif.
+  if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+    for (let i = sectionIds.length - 1; i >= 0; i--) {
+      if (document.getElementById(sectionIds[i])) { current = '#' + sectionIds[i]; break }
+    }
+  }
+  activeHash.value = current
+}
+
+const isActive = (href) => {
+  if (href.startsWith('/#')) return path.value === '/' && activeHash.value === href.slice(1)
+  if (href === '/') return path.value === '/' && !activeHash.value
+  return path.value === href || path.value.startsWith(href + '/')
+}
+
+function onNavClick(href) {
+  open.value = false
+  if (href.startsWith('/#')) activeHash.value = href.slice(1)
+}
+
+let ticking = false
+function onScroll() {
+  scrolled.value = window.scrollY > 16
+  if (ticking) return
+  ticking = true
+  requestAnimationFrame(() => { updateActiveHash(); ticking = false })
+}
+
+onMounted(() => {
+  updateActiveHash()
+  scrolled.value = window.scrollY > 16
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onScroll, { passive: true })
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('resize', onScroll)
+})
+// Pindah halaman lewat Inertia (/ -> /berita) harus memindahkan penanda aktif.
+watch(path, () => { open.value = false; updateActiveHash() })
 </script>
 
 <template>
@@ -52,9 +99,10 @@ onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
       </a>
 
       <div class="hidden xl:flex items-center gap-1">
-        <a v-for="l in links" :key="l.href" :href="l.href"
+        <a v-for="l in links" :key="l.href" :href="l.href" @click="onNavClick(l.href)"
           class="px-3 py-2 rounded-full text-sm font-semibold transition"
-          :class="isActive(l.href) ? 'text-white bg-white/10' : 'text-on-navy-muted hover:text-white hover:bg-white/5'">{{ l.label }}</a>
+          :class="isActive(l.href) ? 'text-white bg-white/10' : 'text-on-navy-muted hover:text-white hover:bg-white/5'"
+          :aria-current="isActive(l.href) ? 'page' : undefined">{{ l.label }}</a>
       </div>
 
       <div class="flex items-center gap-2 flex-shrink-0">
@@ -75,9 +123,10 @@ onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
 
     <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150" leave-to-class="opacity-0 -translate-y-1">
       <div v-if="open" class="xl:hidden px-4 pb-4 pt-3 border-t border-accent/20 space-y-1">
-        <a v-for="l in links" :key="l.href" :href="l.href" @click="open = false"
+        <a v-for="l in links" :key="l.href" :href="l.href" @click="onNavClick(l.href)"
           class="block px-4 py-2.5 rounded-2xl text-sm font-semibold transition"
-          :class="isActive(l.href) ? 'text-white bg-white/10' : 'text-on-navy-muted hover:text-white hover:bg-white/5'">{{ l.label }}</a>
+          :class="isActive(l.href) ? 'text-white bg-white/10' : 'text-on-navy-muted hover:text-white hover:bg-white/5'"
+          :aria-current="isActive(l.href) ? 'page' : undefined">{{ l.label }}</a>
         <div class="grid grid-cols-2 gap-2 pt-2 md:hidden">
           <a :href="account.href" @click="open = false" class="inline-flex justify-center items-center h-11 rounded-full border border-accent/40 text-white text-sm font-semibold">{{ account.label }}</a>
           <a href="/#spmb" @click="open = false" class="inline-flex justify-center items-center h-11 rounded-full bg-accent text-navy text-sm font-bold">Gabung Bersama Kami</a>
