@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
-const props = defineProps(['title', 'routeName', 'items', 'fields', 'canCreate'])
+const props = defineProps(['title', 'routeName', 'items', 'fields', 'canCreate', 'publicUrl'])
 
 const emptyValues = () => (props.fields || []).reduce((acc, f) => ({ ...acc, [f.name]: f.default ?? '' }), {})
 const form = useForm(emptyValues())
@@ -81,6 +81,7 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
     <title>{{ title }} - Admin TSM</title>
     <div class="space-y-6">
       <h1 class="font-display text-[28px] font-bold text-navy tracking-[-0.5px]"><span class="block font-mono text-[11px] font-normal tracking-[2px] uppercase text-label mb-1">Panel Kendali · TSM</span>{{ title }}</h1>
+      <a v-if="publicUrl" :href="publicUrl" target="_blank" rel="noopener" class="inline-flex -mt-4 text-sm font-semibold text-label hover:underline">Lihat halaman {{ publicUrl }} di website ↗</a>
 
       <div class="grid lg:grid-cols-3 gap-6">
         <!-- Form tambah / ubah -->
@@ -104,6 +105,7 @@ const waNumber = (phone) => (phone || '').replace(/[^0-9]/g, '').replace(/^0/, '
                   File sekarang: <a :href="`/storage/${editing[f.name]}`" target="_blank" class="text-blue-700 hover:underline">lihat</a> — biarkan kosong bila tidak diganti.
                 </p>
               </template>
+              <p v-if="f.hint" class="text-xs text-slate-400 mt-1">{{ f.hint }}</p>
               <p v-if="form.errors[f.name]" class="text-xs text-red-600 mt-1">{{ form.errors[f.name] }}</p>
             </div>
             <div class="flex gap-2">

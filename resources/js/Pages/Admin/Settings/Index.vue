@@ -141,9 +141,9 @@ const submit = () => form.transform(d => ({ ...d, spmb_open: d.spmb_open ? '1' :
           </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 p-6 space-y-5">
+        <div id="profil" class="scroll-mt-24 rounded-2xl border border-slate-200 p-6 space-y-5">
           <div>
-            <h2 class="font-bold text-slate-800">Halaman Profil Jurusan (/profil)</h2>
+            <h2 class="font-bold text-slate-800">Halaman Profil Jurusan (/profil) <a href="/profil" target="_blank" rel="noopener" class="ml-2 text-xs font-semibold text-label hover:underline">lihat ↗</a></h2>
             <p class="text-xs text-slate-500">Bagian yang dikosongkan tidak ditampilkan. Pisahkan paragraf dengan satu baris kosong. Data guru diatur di menu <b>Guru</b>.</p>
           </div>
           <div class="grid sm:grid-cols-2 gap-6">
