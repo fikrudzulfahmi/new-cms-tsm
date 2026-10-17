@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { Head, router } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps(['posts', 'categories', 'filters'])
@@ -36,7 +36,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
         </form>
       </div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <a v-for="post in posts.data" :key="post.id" :href="`/berita/${post.slug}`" class="card hover:border-accent transition-all hover:-translate-y-1 block group">
+        <Link v-for="post in posts.data" :key="post.id" :href="`/berita/${post.slug}`" class="card hover:border-accent transition-all hover:-translate-y-1 block group">
           <div class="h-48 overflow-hidden">
             <img v-if="post.cover_image" :src="`/storage/${post.cover_image}`" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" :alt="post.title" />
             <div v-else class="w-full h-full grid-light flex items-center justify-center text-slate-300">
@@ -55,12 +55,12 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
               </div>
             </div>
           </div>
-        </a>
+        </Link>
       </div>
       <div v-if="!posts.data?.length" class="text-center py-16 text-slate-400">Tidak ada berita ditemukan</div>
       <!-- Pagination -->
       <div v-if="posts.links?.length > 3" class="flex justify-center gap-1 mt-10">
-        <component :is="link.url ? 'a' : 'span'" v-for="(link, i) in posts.links" :key="i" :href="link.url" v-html="link.label" :class="['px-4 py-2 rounded-full text-sm font-semibold border font-mono', link.active ? 'bg-blue-900 border-blue-900 text-white' : link.url ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed']" />
+        <component :is="link.url ? Link : 'span'" v-for="(link, i) in posts.links" :key="i" :href="link.url" v-html="link.label" :class="['px-4 py-2 rounded-full text-sm font-semibold border font-mono', link.active ? 'bg-blue-900 border-blue-900 text-white' : link.url ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed']" />
       </div>
     </div>
   </AppLayout>

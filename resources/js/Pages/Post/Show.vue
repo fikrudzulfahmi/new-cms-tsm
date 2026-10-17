@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { Head, useForm, router } from '@inertiajs/vue3'
+import { Head, Link, useForm, router } from '@inertiajs/vue3'
 import axios from 'axios'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
@@ -52,9 +52,9 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Breadcrumb -->
       <div class="flex items-center gap-2 font-mono text-xs tracking-wider uppercase text-slate-500 mb-6">
-        <a href="/" class="hover:text-label">Beranda</a>
+        <Link href="/" class="hover:text-label">Beranda</Link>
         <span>/</span>
-        <a href="/berita" class="hover:text-label">Berita</a>
+        <Link href="/berita" class="hover:text-label">Berita</Link>
         <span>/</span>
         <span class="text-slate-800 truncate">{{ post.title }}</span>
       </div>
@@ -161,7 +161,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
       <div v-if="relatedPosts?.length">
         <h3 class="font-bold text-xl text-slate-800 mb-6">Berita Terkait</h3>
         <div class="grid sm:grid-cols-3 gap-6">
-          <a v-for="rp in relatedPosts" :key="rp.id" :href="`/berita/${rp.slug}`" class="card hover:border-accent transition block group">
+          <Link v-for="rp in relatedPosts" :key="rp.id" :href="`/berita/${rp.slug}`" class="card hover:border-accent transition block group">
             <div class="h-36 overflow-hidden">
               <img v-if="rp.cover_image" :src="`/storage/${rp.cover_image}`" :alt="rp.title" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition" />
               <div v-else class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">TSM</div>
@@ -170,7 +170,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
               <h4 class="font-bold text-slate-800 text-sm line-clamp-2 group-hover:text-label">{{ rp.title }}</h4>
               <p class="text-xs text-slate-400 mt-2">{{ formatDate(rp.published_at) }}</p>
             </div>
-          </a>
+          </Link>
         </div>
       </div>
     </div>
