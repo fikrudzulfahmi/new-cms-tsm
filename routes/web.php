@@ -15,15 +15,15 @@ Route::get('/', [HomeController::class, 'landing'])->name('landing');
 Route::redirect('/beranda', '/', 301); // halaman beranda lama, digabung ke landing
 Route::get('/berita', [HomeController::class, 'posts'])->name('posts');
 Route::get('/berita/{slug}', [HomeController::class, 'post'])->name('post.show');
-Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('post.react');
-Route::post('/berita/{postId}/comment', [HomeController::class, 'comment'])->name('post.comment');
-Route::post('/berita/{postId}/share', [HomeController::class, 'share'])->name('post.share');
-Route::post('/komentar/{comment}/like', [HomeController::class, 'likeComment'])->name('comment.like');
+Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('post.react')->middleware('throttle:20,1');
+Route::post('/berita/{postId}/comment', [HomeController::class, 'comment'])->name('post.comment')->middleware('throttle:5,1');
+Route::post('/berita/{postId}/share', [HomeController::class, 'share'])->name('post.share')->middleware('throttle:20,1');
+Route::post('/komentar/{comment}/like', [HomeController::class, 'likeComment'])->name('comment.like')->middleware('throttle:20,1');
 // SPMB memakai aplikasi sekolah sendiri: /spmb (dan link lama /ppdb) diarahkan ke Link SPMB di Admin → Pengaturan
 Route::get('/spmb', [HomeController::class, 'spmb'])->name('spmb');
 Route::get('/ppdb', [HomeController::class, 'spmb']);
-Route::post('/kontak', [HomeController::class, 'contact'])->name('contact');
-Route::post('/testimoni', [HomeController::class, 'testimonialStore'])->name('testimonial.store');
+Route::post('/kontak', [HomeController::class, 'contact'])->name('contact')->middleware('throttle:5,1');
+Route::post('/testimoni', [HomeController::class, 'testimonialStore'])->name('testimonial.store')->middleware('throttle:5,1');
 
 // ===================== AUTH =====================
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
