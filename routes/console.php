@@ -13,3 +13,6 @@ Schedule::command('posts:publish-scheduled')->everyMinute()->withoutOverlapping(
 
 // Jaga tabel kunjungan tetap ringan.
 Schedule::command('visits:prune')->dailyAt('02:30');
+
+// Log aktivitas disimpan terbatas (config/activity.php), dibersihkan dini hari.
+Schedule::command('activity:prune')->dailyAt('03:00');

@@ -46,6 +46,13 @@ class HandleInertiaRequests extends Middleware
                 return Setting::whereIn('key', self::PUBLIC_SETTINGS)
                     ->pluck('value', 'key')->toArray();
             }),
+            // Indikator keamanan untuk lencana menu admin (dihitung maks. sekali per menit).
+            'security' => $request->user() && in_array($request->user()->role, ['admin', 'editor'], true)
+                ? cache()->remember('security_badge', 60, fn () => [
+                    'failed_24h' => \App\Models\ActivityLog::where('action', 'login_failed')
+                        ->where('created_at', '>=', now()->subDay())->count(),
+                ])
+                : null,
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),

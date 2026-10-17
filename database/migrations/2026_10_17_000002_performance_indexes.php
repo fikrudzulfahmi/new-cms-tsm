@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -41,8 +40,7 @@ return new class extends Migration
 
     private function hasIndex(string $table, string $name): bool
     {
-        $indexes = DB::select('SHOW INDEX FROM `'.$table.'` WHERE Key_name = ?', [$name]);
-
-        return ! empty($indexes);
+        // Portable (MySQL/SQLite/PostgreSQL): SHOW INDEX hanya ada di MySQL.
+        return Schema::hasIndex($table, $name);
     }
 };

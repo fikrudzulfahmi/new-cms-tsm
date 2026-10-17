@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\ContentController;
+use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ReportController;
@@ -42,7 +43,8 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // ===================== ADMIN =====================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+// activity.log dipasang paling depan agar penolakan auth/admin/role ikut tercatat.
+Route::prefix('admin')->name('admin.')->middleware(['activity.log', 'auth', 'admin'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -71,6 +73,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     // Reports
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
+
+    // Log aktivitas + deteksi gangguan keamanan
+    Route::get('/aktivitas', [ActivityController::class, 'index'])->name('activity.index');
 
     // Settings
     Route::get('/pengaturan', [SettingController::class, 'index'])->name('settings.index');

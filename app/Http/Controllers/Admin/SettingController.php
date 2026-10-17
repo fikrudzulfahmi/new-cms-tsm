@@ -46,6 +46,7 @@ class SettingController extends Controller
         $imageKeys = ['about_image', 'site_logo', 'site_favicon', 'hero_bg', 'profile_head_photo', 'profile_structure_image'];
         $input = array_merge($request->except(array_merge(['_token', '_method', 'settings', 'remove_images'], $imageKeys)), (array) $request->input('settings', []));
         $blocked = ['app_key', 'api_token', 'induk_api_token', 'wa_token', 'mail_password'];
+        $changed = [];
         foreach ($input as $key => $value) {
             if (in_array($key, $blocked, true) || str_starts_with((string) $key, '_')) continue;
             $setting = Setting::where('key', $key)->first();
@@ -53,6 +54,9 @@ class SettingController extends Controller
             if (is_array($value)) continue;
             if ($key === 'maps_embed') {
                 $value = $this->cleanMapEmbed((string) $value);
+            }
+            if ((string) $setting->value !== (string) ($value ?? '')) {
+                $changed[] = $key;
             }
             $setting->update(['value' => (string) ($value ?? '')]);
         }
@@ -70,10 +74,11 @@ class SettingController extends Controller
                 Storage::disk('public')->delete($old);
             }
             Setting::where('key', $key)->update(['value' => $request->file($key)->store('settings', 'public')]);
+            $changed[] = $key;
         }
         cache()->forget('site_settings');
         cache()->forget('public_settings');
-        return back()->with('success', 'Pengaturan berhasil disimpan!');
+        return back()->with('success', 'Pengaturan berhasil disimpan!')->with('changed_settings', $changed);
     }
 
     /** Hanya izinkan iframe Google Maps; buang tag/atribut lain agar tidak jadi jalur XSS. */
