@@ -104,8 +104,10 @@ html:has(.lp) { scroll-behavior: smooth; }
 /* ================= NAV ================= */
 .lp .hero { position: relative; color: var(--on-navy); }
 /* ================= HERO ================= */
-.lp .hero-content { display: flex; flex-wrap: wrap; align-items: center; gap: 48px; padding-top: 112px; padding-bottom: 64px; min-height: min(100svh, 820px); }
-.lp .hero-text { flex: 1 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 28px; align-items: flex-start; }
+/* Konten hero dirapatkan ke navbar: tinggi minimum lebih pendek + padding atas kecil,
+   supaya tidak ada ruang kosong lebar di atas judul dan roda gigi. */
+.lp .hero-content { display: flex; flex-wrap: wrap; align-items: center; gap: 40px; padding-top: 96px; padding-bottom: 40px; min-height: min(86svh, 680px); }
+.lp .hero-text { flex: 1 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 20px; align-items: flex-start; }
 .lp .hero-gear { flex: 1 1 440px; min-width: 0; display: flex; justify-content: center; }
 .lp .badge {
   display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px;
@@ -262,7 +264,7 @@ html:has(.lp) { scroll-behavior: smooth; }
   .lp .alur-line { display: none; }
 }
 @media (max-width: 860px) {
-  .lp .hero-content { flex-direction: column; align-items: stretch; padding-top: 104px; min-height: 0; }
+  .lp .hero-content { flex-direction: column; align-items: stretch; padding-top: 92px; gap: 32px; min-height: 0; }
   .lp .hero-text, .lp .hero-gear { flex: none; }
   .lp .gear-wrap { max-width: 360px; margin: 0 auto; }
 }
