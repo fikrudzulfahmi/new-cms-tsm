@@ -1,10 +1,70 @@
 <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import GearRatio from '@/Components/Landing/GearRatio.vue'
 
 const form = useForm({ email: '', password: '', remember: false })
 
-const submit = () => {
+const netIssue = ref('')
+const checking = ref(false)
+let controller = null
+
+const OFFLINE_MSG = 'Tidak ada koneksi internet. Sambungkan Wi-Fi atau data seluler, lalu coba lagi.'
+
+const markOffline = () => { netIssue.value = OFFLINE_MSG }
+const clearOffline = () => {
+  if (netIssue.value === OFFLINE_MSG) netIssue.value = ''
+}
+
+onMounted(() => {
+  if (!navigator.onLine) markOffline()
+  window.addEventListener('offline', markOffline)
+  window.addEventListener('online', clearOffline)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('offline', markOffline)
+  window.removeEventListener('online', clearOffline)
+  if (controller) controller.abort()
+})
+
+// Pastikan server benar-benar bisa dijangkau sebelum mengirim kredensial.
+async function serverReachable() {
+  controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 8000)
+  try {
+    const res = await fetch('/up', {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { Accept: 'text/plain' },
+      signal: controller.signal,
+    })
+    return res.ok
+  } catch {
+    return false
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+const submit = async () => {
+  if (form.processing || checking.value) return
+  netIssue.value = ''
+
+  if (!navigator.onLine) {
+    markOffline()
+    return
+  }
+
+  checking.value = true
+  const reachable = await serverReachable()
+  checking.value = false
+
+  if (!reachable) {
+    netIssue.value = 'Server tidak dapat dihubungi. Periksa koneksi internet Anda, lalu coba lagi.'
+    return
+  }
+
   form.post('/login', { onFinish: () => form.reset('password') })
 }
 </script>
@@ -31,6 +91,27 @@ const submit = () => {
         <div class="bg-white rounded-[24px] border border-accent/30 p-8">
           <span class="mono-label mb-2">MASUK</span>
           <h2 class="font-display text-2xl font-bold text-navy mb-6">Masuk ke Panel Admin</h2>
+
+          <div
+            v-if="netIssue"
+            class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-left"
+            role="alert"
+            aria-live="polite"
+          >
+            <p class="flex items-start gap-2 text-sm text-amber-900">
+              <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+              </svg>
+              <span>{{ netIssue }}</span>
+            </p>
+            <button
+              type="button"
+              class="mt-2 text-xs font-semibold text-amber-900 underline underline-offset-2 hover:text-amber-700"
+              @click="submit"
+            >
+              Coba lagi
+            </button>
+          </div>
 
           <form @submit.prevent="submit" class="space-y-5">
             <div>
@@ -70,15 +151,15 @@ const submit = () => {
 
             <button
               type="submit"
-              :disabled="form.processing"
+              :disabled="form.processing || checking"
               class="w-full btn-primary justify-center py-3 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span class="relative z-10 flex items-center justify-center gap-2">
-                <svg v-if="form.processing" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <svg v-if="form.processing || checking" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                 </svg>
-                <span>{{ form.processing ? 'Masuk...' : 'Masuk' }}</span>
+                <span>{{ checking ? 'Memeriksa koneksi...' : form.processing ? 'Masuk...' : 'Masuk' }}</span>
               </span>
             </button>
           </form>
