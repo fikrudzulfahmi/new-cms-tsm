@@ -9,6 +9,8 @@ use App\Models\Tag;
 use App\Models\Visit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Support\Slug;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -39,7 +41,7 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate($this->rules());
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['title']);
+        $data['slug'] = Slug::unique('posts', ($data['slug'] ?? null) ?: $data['title']);
         $data['user_id'] = auth()->id();
         $data['body'] = $this->cleanBody($data['body'] ?? null);
         $data['reading_time'] = max(1, round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
@@ -80,16 +82,18 @@ class PostController extends Controller
     public function update(Request $request, Post $post)
     {
         $data = $request->validate($this->rules($post->id));
-        if (empty($data['slug'])) $data['slug'] = Str::slug($data['title']);
+        if (empty($data['slug'])) $data['slug'] = Slug::unique('posts', $data['title'], $post->id);
         $data['body'] = $this->cleanBody($data['body'] ?? null);
         $data['reading_time'] = max(1, round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
         $data['seo_score'] = $this->calcSeoScore($data);
         $data['seo_report'] = json_encode($this->buildSeoReport($data));
 
         if ($request->hasFile('cover_image')) {
+            $this->dropFile($post->cover_image);
             $data['cover_image'] = $request->file('cover_image')->store('posts', 'public');
         }
         if ($request->hasFile('og_image')) {
+            $this->dropFile($post->og_image);
             $data['og_image'] = $request->file('og_image')->store('posts/og', 'public');
         }
 
@@ -104,8 +108,17 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
+        $this->dropFile($post->cover_image);
+        $this->dropFile($post->og_image);
         $post->delete();
         return back()->with('success', 'Berita berhasil dihapus.');
+    }
+
+    private function dropFile(?string $path): void
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 
     public function seoAnalyze(Request $request)
@@ -211,7 +224,7 @@ class PostController extends Controller
         if (str_word_count($body) >= 300) $score += 10;
         if (str_word_count($body) >= 600) $score += 5;
         // Slug
-        if ($kw && $data['slug'] && str_contains($data['slug'], Str::slug($kw))) $score += 5;
+        if ($kw && !empty($data['slug']) && str_contains($data['slug'], Str::slug($kw))) $score += 5;
 
         return min(100, $score);
     }
@@ -264,7 +277,7 @@ class PostController extends Controller
                 'msg' => "Densitas kata kunci: {$density}%" . ($density < 0.5 ? ' (terlalu rendah)' : ($density > 2.5 ? ' (terlalu tinggi, hindari spam)' : ' ✓')),
             ],
             'slug_keyword' => [
-                'ok' => $kw && $data['slug'] && str_contains($data['slug'] ?? '', Str::slug($kw)),
+                'ok' => $kw && !empty($data['slug']) && str_contains($data['slug'], Str::slug($kw)),
                 'msg' => $kw ? (str_contains($data['slug'] ?? '', Str::slug($kw)) ? 'Kata kunci ada di URL ✓' : 'Kata kunci tidak ada di URL/slug.') : '-',
             ],
         ];
