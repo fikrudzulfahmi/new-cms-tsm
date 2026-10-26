@@ -11,7 +11,11 @@ const user = page.props.auth.user
       <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
         <span class="font-display font-bold">LMS TSM</span>
         <div class="flex items-center gap-4 text-sm">
-          <span class="hidden sm:inline text-white/70">{{ user.name }}</span>
+          <Link v-if="user.role==='guru'" href="/ruang-guru" class="text-white/80 hover:text-white">Mapel</Link>
+          <Link v-if="user.role==='guru'" href="/ruang-guru/presensi" class="text-white/80 hover:text-white">Presensi</Link>
+          <Link v-if="user.role==='siswa'" href="/belajar" class="text-white/80 hover:text-white">Mapel</Link>
+          <Link v-if="user.role==='siswa'" href="/belajar/presensi" class="text-white/80 hover:text-white">Presensi</Link>
+          <span class="hidden md:inline text-white/70">{{ user.name }}</span>
           <Link href="/ganti-password" class="text-white/80 hover:text-white">Password</Link>
           <button type="button" class="text-white/80 hover:text-white" @click="router.post('/logout')">Keluar</button>
         </div>

@@ -50,6 +50,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/ganti-password', [PasswordController::class, 'update'])->name('password.update')->middleware('throttle:10,1');
     Route::prefix('ruang-guru')->middleware('role:guru')->name('guru.')->group(function () {
         $c = \App\Http\Controllers\Guru\CourseController::class;
+        $a = \App\Http\Controllers\Guru\AttendanceController::class;
+        Route::get('/presensi', [$a, 'index'])->name('att.index');
+        Route::post('/presensi', [$a, 'store'])->name('att.store');
+        Route::get('/presensi/{session}', [$a, 'show'])->name('att.show');
+        Route::put('/presensi/{session}', [$a, 'update'])->name('att.update');
+        Route::delete('/presensi/{session}', [$a, 'destroy'])->name('att.destroy');
+        Route::get('/presensi/{session}/ekspor', [$a, 'export'])->name('att.export');
+        Route::post('/presensi/{session}/siswa/{student}', [$a, 'setRecord'])->name('att.set');
         Route::get('/', [$c, 'index'])->name('home');
         Route::get('/mapel/{course}', [$c, 'show'])->name('course');
         Route::get('/mapel/{course}/progres', [$c, 'progress'])->name('progress');
@@ -63,6 +71,9 @@ Route::middleware('auth')->group(function () {
     });
     Route::prefix('belajar')->middleware('role:siswa')->name('siswa.')->group(function () {
         $c = \App\Http\Controllers\Siswa\LearnController::class;
+        $a = \App\Http\Controllers\Siswa\AttendanceController::class;
+        Route::get('/presensi', [$a, 'index'])->name('att.index');
+        Route::post('/presensi/{session}', [$a, 'mark'])->middleware('throttle:20,1')->name('att.mark');
         Route::get('/', [$c, 'index'])->name('home');
         Route::get('/mapel/{course}', [$c, 'course'])->name('course');
         Route::get('/materi/{lesson}', [$c, 'lesson'])->name('lesson');
