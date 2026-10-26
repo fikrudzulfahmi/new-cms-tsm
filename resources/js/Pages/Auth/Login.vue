@@ -3,7 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import GearRatio from '@/Components/Landing/GearRatio.vue'
 
-const form = useForm({ email: '', password: '', remember: false })
+const form = useForm({ login: '', password: '', remember: false })
 
 const netIssue = ref('')
 const checking = ref(false)
@@ -90,7 +90,7 @@ const submit = async () => {
 
         <div class="bg-white rounded-[24px] border border-accent/30 p-8">
           <span class="mono-label mb-2">MASUK</span>
-          <h2 class="font-display text-2xl font-bold text-navy mb-6">Masuk ke Panel Admin</h2>
+          <h2 class="font-display text-2xl font-bold text-navy mb-6">Masuk ke Akun Anda</h2>
 
           <div
             v-if="netIssue"
@@ -115,17 +115,18 @@ const submit = async () => {
 
           <form @submit.prevent="submit" class="space-y-5">
             <div>
-              <label class="form-label">Alamat Email</label>
+              <label class="form-label">Email atau Username</label>
               <input
-                v-model="form.email"
-                type="email"
-                placeholder="admin@tsm-blitar.sch.id"
+                v-model="form.login"
+                type="text"
+                placeholder="Email, NIS, atau NIK"
                 class="form-input"
-                :class="{ 'border-red-400 ring-red-200': form.errors.email }"
-                autocomplete="email"
+                :class="{ 'border-red-400 ring-red-200': form.errors.login }"
+                autocomplete="username"
+                autocapitalize="none"
                 required
               />
-              <p v-if="form.errors.email" class="text-red-500 text-xs mt-1">{{ form.errors.email }}</p>
+              <p v-if="form.errors.login" class="text-red-500 text-xs mt-1">{{ form.errors.login }}</p>
             </div>
 
             <div>

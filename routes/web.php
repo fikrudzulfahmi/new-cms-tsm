@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\HomeByRoleController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +43,15 @@ Route::post('/testimoni', [HomeController::class, 'testimonialStore'])->name('te
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+// Ganti password (wajib pada login pertama) & halaman awal per role.
+Route::middleware('auth')->group(function () {
+    Route::get('/ganti-password', [PasswordController::class, 'edit'])->name('password.change');
+    Route::put('/ganti-password', [PasswordController::class, 'update'])->name('password.update')->middleware('throttle:10,1');
+    Route::get('/ruang-guru', HomeByRoleController::class)->middleware('role:guru')->name('guru.home');
+    Route::get('/belajar', HomeByRoleController::class)->middleware('role:siswa')->name('siswa.home');
+    Route::get('/superadmin', HomeByRoleController::class)->middleware('role:superadmin')->name('superadmin.home');
+});
 
 // ===================== ADMIN =====================
 // activity.log dipasang paling depan agar penolakan auth/admin/role ikut tercatat.
