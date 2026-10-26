@@ -1,7 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
 import LmsShell from '@/Components/Lms/LmsShell.vue'
-defineProps({ course: Object, sections: Array })
+defineProps({ course: Object, sections: Array, quizzes: Array })
 const typeLabel = { reading: 'Bacaan', video: 'Video', file: 'Berkas' }
 </script>
 
@@ -9,6 +9,13 @@ const typeLabel = { reading: 'Bacaan', video: 'Video', file: 'Berkas' }
   <LmsShell :title="course.title" back="/belajar" backLabel="Mapel saya">
     <p v-if="course.description" class="text-sm text-slate-600 -mt-2 mb-4 whitespace-pre-line">{{ course.description }}</p>
     <p v-if="!sections.length" class="text-sm text-slate-500">Guru belum menayangkan materi.</p>
+    <section v-if="quizzes.length" class="bg-white rounded-2xl border border-slate-200 mb-4">
+      <h2 class="font-semibold text-navy px-4 py-3 border-b border-slate-100">Quiz</h2>
+      <Link v-for="z in quizzes" :key="z.id" :href="`/belajar/quiz/${z.id}`" class="flex items-center gap-3 px-4 py-2.5 text-sm border-b border-slate-50 hover:bg-slate-50">
+        <span class="flex-1">{{ z.title }}</span>
+        <span class="text-xs" :class="z.is_open ? 'text-emerald-700' : 'text-slate-400'">{{ z.is_open ? 'Dibuka' : 'Tutup' }}</span>
+      </Link>
+    </section>
     <section v-for="s in sections" :key="s.id" class="bg-white rounded-2xl border border-slate-200 mb-4">
       <h2 class="font-semibold text-navy px-4 py-3 border-b border-slate-100">{{ s.title }}</h2>
       <Link v-for="l in s.lessons" :key="l.id" :href="`/belajar/materi/${l.id}`" class="flex items-center gap-3 px-4 py-2.5 text-sm border-b border-slate-50 hover:bg-slate-50">

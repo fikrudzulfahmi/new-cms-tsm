@@ -44,6 +44,8 @@ class LearnController extends Controller
 
         return Inertia::render('Lms/Siswa/Course', [
             'course' => ['id' => $course->id, 'title' => $course->title, 'description' => $course->description],
+            'quizzes' => \App\Models\Quiz::where('course_id', $course->id)->where('is_published', true)->orderBy('opens_at')->get(['id', 'title', 'opens_at', 'closes_at'])
+                ->map(fn ($z) => ['id' => $z->id, 'title' => $z->title, 'opens_at' => \App\Support\Wib::format($z->opens_at), 'closes_at' => \App\Support\Wib::format($z->closes_at), 'is_open' => $z->isOpen()]),
             'sections' => $course->sections()->where('is_published', true)
                 ->with(['lessons' => fn ($q) => $q->where('is_published', true)->select('id', 'section_id', 'type', 'title', 'est_minutes', 'sort_order')])
                 ->get()->map(fn ($s) => [

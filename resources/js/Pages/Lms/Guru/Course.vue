@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive } from 'vue'
-import { router, useForm } from '@inertiajs/vue3'
+import { Link, router, useForm } from '@inertiajs/vue3'
 import LmsShell from '@/Components/Lms/LmsShell.vue'
 const props = defineProps({ course: Object, sections: Array })
 
@@ -39,6 +39,11 @@ const typeLabel = { reading: 'Bacaan', video: 'Video', file: 'Berkas' }
 <template>
   <LmsShell :title="course.title" back="/ruang-guru" backLabel="Mapel saya">
     <p class="text-xs text-slate-500 -mt-3 mb-4">Rombel: {{ course.classes.join(', ') }}</p>
+
+    <div class="flex gap-2 mb-3">
+      <Link :href="`/ruang-guru/mapel/${course.id}/soal`" class="rounded-xl border border-slate-300 text-sm px-4 py-2">Bank soal</Link>
+      <Link :href="`/ruang-guru/mapel/${course.id}/quiz`" class="rounded-xl border border-slate-300 text-sm px-4 py-2">Quiz</Link>
+    </div>
 
     <div class="flex gap-2 mb-5">
       <input v-model="secForm.title" placeholder="Nama bab baru" maxlength="150" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm" @keyup.enter="addSection" />

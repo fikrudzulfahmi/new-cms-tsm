@@ -19,3 +19,6 @@ Schedule::command('activity:prune')->dailyAt('03:00');
 
 // Sinkron Data Induk (rombel + siswa TSM) tiap dini hari.
 Schedule::command('induk:sync')->dailyAt('02:00')->withoutOverlapping();
+
+// Kumpulkan otomatis quiz yang waktunya habis.
+Schedule::command('quiz:finalize')->everyMinute()->withoutOverlapping();
