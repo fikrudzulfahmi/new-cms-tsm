@@ -25,6 +25,7 @@ const fmt = (t) => (t ? new Date(t).toLocaleString('id-ID', { timeZone: 'Asia/Ja
     <header class="bg-[#0b2a4a] text-white">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <h1 class="font-semibold">Superadmin · LMS TSM</h1>
+        <a href="/superadmin/mapel" class="rounded bg-white/10 px-3 py-1 text-sm hover:bg-white/20" @click.prevent="router.get('/superadmin/mapel')">Mapel</a>
         <button class="rounded bg-white/10 px-3 py-1 text-sm hover:bg-white/20" @click="logout">Keluar</button>
       </div>
     </header>

@@ -48,8 +48,28 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 Route::middleware('auth')->group(function () {
     Route::get('/ganti-password', [PasswordController::class, 'edit'])->name('password.change');
     Route::put('/ganti-password', [PasswordController::class, 'update'])->name('password.update')->middleware('throttle:10,1');
-    Route::get('/ruang-guru', HomeByRoleController::class)->middleware('role:guru')->name('guru.home');
-    Route::get('/belajar', HomeByRoleController::class)->middleware('role:siswa')->name('siswa.home');
+    Route::prefix('ruang-guru')->middleware('role:guru')->name('guru.')->group(function () {
+        $c = \App\Http\Controllers\Guru\CourseController::class;
+        Route::get('/', [$c, 'index'])->name('home');
+        Route::get('/mapel/{course}', [$c, 'show'])->name('course');
+        Route::get('/mapel/{course}/progres', [$c, 'progress'])->name('progress');
+        Route::post('/mapel/{course}/bab', [$c, 'storeSection'])->name('section.store');
+        Route::put('/bab/{section}', [$c, 'updateSection'])->name('section.update');
+        Route::delete('/bab/{section}', [$c, 'destroySection'])->name('section.destroy');
+        Route::post('/bab/{section}/geser', [$c, 'moveSection'])->name('section.move');
+        Route::post('/bab/{section}/materi', [$c, 'storeLesson'])->name('lesson.store');
+        Route::post('/materi/{lesson}', [$c, 'updateLesson'])->name('lesson.update');   // POST agar multipart berfungsi
+        Route::delete('/materi/{lesson}', [$c, 'destroyLesson'])->name('lesson.destroy');
+    });
+    Route::prefix('belajar')->middleware('role:siswa')->name('siswa.')->group(function () {
+        $c = \App\Http\Controllers\Siswa\LearnController::class;
+        Route::get('/', [$c, 'index'])->name('home');
+        Route::get('/mapel/{course}', [$c, 'course'])->name('course');
+        Route::get('/materi/{lesson}', [$c, 'lesson'])->name('lesson');
+        Route::post('/materi/{lesson}/selesai', [$c, 'complete'])->name('lesson.complete');
+    });
+    Route::get('/berkas-materi/{lesson}', [\App\Http\Controllers\Siswa\LearnController::class, 'file'])
+        ->middleware('role:siswa,guru')->name('lesson.file');
     Route::prefix('superadmin')->middleware('role:superadmin')->name('superadmin.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Superadmin\DashboardController::class, 'index'])->name('home');
         Route::post('/tahun-ajaran', [\App\Http\Controllers\Superadmin\DashboardController::class, 'storeYear'])->name('year.store');
@@ -57,6 +77,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/tahun-ajaran/{year}', [\App\Http\Controllers\Superadmin\DashboardController::class, 'destroyYear'])->name('year.destroy');
         Route::post('/sinkron', [\App\Http\Controllers\Superadmin\DashboardController::class, 'sync'])->middleware('throttle:6,1')->name('sync');
         Route::post('/guru', [\App\Http\Controllers\Superadmin\DashboardController::class, 'storeTeacher'])->name('teacher.store');
+        Route::get('/mapel', [\App\Http\Controllers\Superadmin\CourseController::class, 'index'])->name('courses');
+        Route::post('/mapel', [\App\Http\Controllers\Superadmin\CourseController::class, 'store'])->name('courses.store');
+        Route::put('/mapel/{course}', [\App\Http\Controllers\Superadmin\CourseController::class, 'update'])->name('courses.update');
+        Route::delete('/mapel/{course}', [\App\Http\Controllers\Superadmin\CourseController::class, 'destroy'])->name('courses.destroy');
         Route::post('/akun/{user}/reset', [\App\Http\Controllers\Superadmin\DashboardController::class, 'resetPassword'])->name('user.reset');
         Route::post('/akun/{user}/aktif', [\App\Http\Controllers\Superadmin\DashboardController::class, 'toggleActive'])->name('user.toggle');
     });
