@@ -28,6 +28,14 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Aplikasi Data Induk Siswa (read-only). Token HANYA di .env.
+    'induk' => [
+        'url' => env('INDUK_API_URL'),
+        'token' => env('INDUK_API_TOKEN'),
+        'jurusan' => env('INDUK_API_JURUSAN', 'TSM'),
+        'timeout' => (int) env('INDUK_API_TIMEOUT', 20),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

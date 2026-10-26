@@ -58,6 +58,7 @@ class ActivityLog extends Model
         'reports' => 'Laporan',
         'activity' => 'Log Aktivitas',
         'auth' => 'Login',
+        'lms' => 'LMS',
     ];
 
     public static function actionLabel(?string $action): string

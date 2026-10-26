@@ -50,7 +50,16 @@ Route::middleware('auth')->group(function () {
     Route::put('/ganti-password', [PasswordController::class, 'update'])->name('password.update')->middleware('throttle:10,1');
     Route::get('/ruang-guru', HomeByRoleController::class)->middleware('role:guru')->name('guru.home');
     Route::get('/belajar', HomeByRoleController::class)->middleware('role:siswa')->name('siswa.home');
-    Route::get('/superadmin', HomeByRoleController::class)->middleware('role:superadmin')->name('superadmin.home');
+    Route::prefix('superadmin')->middleware('role:superadmin')->name('superadmin.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Superadmin\DashboardController::class, 'index'])->name('home');
+        Route::post('/tahun-ajaran', [\App\Http\Controllers\Superadmin\DashboardController::class, 'storeYear'])->name('year.store');
+        Route::post('/tahun-ajaran/{year}/aktifkan', [\App\Http\Controllers\Superadmin\DashboardController::class, 'activateYear'])->name('year.activate');
+        Route::delete('/tahun-ajaran/{year}', [\App\Http\Controllers\Superadmin\DashboardController::class, 'destroyYear'])->name('year.destroy');
+        Route::post('/sinkron', [\App\Http\Controllers\Superadmin\DashboardController::class, 'sync'])->middleware('throttle:6,1')->name('sync');
+        Route::post('/guru', [\App\Http\Controllers\Superadmin\DashboardController::class, 'storeTeacher'])->name('teacher.store');
+        Route::post('/akun/{user}/reset', [\App\Http\Controllers\Superadmin\DashboardController::class, 'resetPassword'])->name('user.reset');
+        Route::post('/akun/{user}/aktif', [\App\Http\Controllers\Superadmin\DashboardController::class, 'toggleActive'])->name('user.toggle');
+    });
 });
 
 // ===================== ADMIN =====================

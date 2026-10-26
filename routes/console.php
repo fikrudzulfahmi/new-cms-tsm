@@ -16,3 +16,6 @@ Schedule::command('visits:prune')->dailyAt('02:30');
 
 // Log aktivitas disimpan terbatas (config/activity.php), dibersihkan dini hari.
 Schedule::command('activity:prune')->dailyAt('03:00');
+
+// Sinkron Data Induk (rombel + siswa TSM) tiap dini hari.
+Schedule::command('induk:sync')->dailyAt('02:00')->withoutOverlapping();
