@@ -125,7 +125,7 @@ class LmsStage3Test extends TestCase
         $this->actingAs($d['guru']);
         $this->post('/ruang-guru/bab/'.$d['sec']->id.'/materi', ['type' => 'video', 'title' => 'V', 'video_url' => 'https://youtu.be/dQw4w9WgXcQ'])->assertRedirect();
         $this->assertDatabaseHas('lms_lessons', ['title' => 'V', 'video_url' => 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ']);
-        $this->post('/ruang-guru/bab/'.$d['sec']->id.'/materi', ['type' => 'video', 'title' => 'Jahat', 'video_url' => 'https://evil.com/x'])->assertStatus(422);
+        $this->post('/ruang-guru/bab/'.$d['sec']->id.'/materi', ['type' => 'video', 'title' => 'Jahat', 'video_url' => 'https://evil.com/x'])->assertSessionHasErrors('video_url');
         $this->assertDatabaseMissing('lms_lessons', ['title' => 'Jahat']);
     }
 
