@@ -7,7 +7,9 @@ const page = usePage()
 const s = computed(() => page.props.settings || {})
 const open = ref(false)
 const scrolled = ref(false)
-// Tombol masuk admin sengaja tidak ditampilkan; admin akses manual lewat /admin.
+// Tombol Masuk mengarah ke /login (satu pintu untuk superadmin/admin/guru/siswa).
+const user = computed(() => page.props.auth?.user || null)
+const homeFor = computed(() => ({ superadmin: '/superadmin', admin: '/admin', editor: '/admin', guru: '/ruang-guru', siswa: '/belajar' }[user.value?.role] || '/login'))
 const path = computed(() => (page.url || '/').split('#')[0].split('?')[0])
 const logo = computed(() => {
   const p = s.value.site_logo
@@ -109,6 +111,13 @@ watch(path, () => { open.value = false; updateActiveHash() })
       </div>
 
       <div class="flex items-center gap-2 flex-shrink-0">
+        <Link :href="user ? homeFor : '/login'"
+          class="hidden sm:inline-flex items-center gap-2 h-11 px-4 rounded-full border border-accent/40 text-white text-sm font-semibold hover:bg-white/10 transition">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+          </svg>
+          {{ user ? 'Ruang saya' : 'Masuk' }}
+        </Link>
         <component :is="navTag('/#spmb')" href="/#spmb" class="hidden md:inline-flex items-center h-11 px-5 rounded-full bg-accent text-navy text-sm font-bold hover:brightness-105 transition">Gabung Bersama Kami</component>
         <button type="button" @click="open = !open" :aria-expanded="open" :aria-label="open ? 'Tutup menu' : 'Buka menu'"
           class="xl:hidden w-11 h-11 rounded-full border border-accent/40 text-white flex items-center justify-center">
@@ -126,7 +135,13 @@ watch(path, () => { open.value = false; updateActiveHash() })
           class="block px-4 py-2.5 rounded-2xl text-sm font-semibold transition"
           :class="isActive(l.href) ? 'text-white bg-white/10' : 'text-on-navy-muted hover:text-white hover:bg-white/5'"
           :aria-current="isActive(l.href) ? 'page' : undefined">{{ l.label }}</component>
-        <div class="grid gap-2 pt-2 md:hidden">
+        <div class="grid gap-2 pt-2">
+          <Link :href="user ? homeFor : '/login'" @click="open = false" class="inline-flex justify-center items-center gap-2 h-11 rounded-full border border-accent/40 text-white text-sm font-semibold">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+            </svg>
+            {{ user ? 'Ruang saya' : 'Masuk' }}
+          </Link>
           <component :is="navTag('/#spmb')" href="/#spmb" @click="open = false" class="inline-flex justify-center items-center h-11 rounded-full bg-accent text-navy text-sm font-bold">Gabung Bersama Kami</component>
         </div>
       </div>
