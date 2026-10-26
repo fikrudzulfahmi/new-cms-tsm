@@ -29,7 +29,7 @@ Route::get('/sarana', [HomeController::class, 'facilities'])->name('facilities')
 Route::get('/prestasi', [HomeController::class, 'achievements'])->name('achievements');
 Route::get('/alumni', [HomeController::class, 'alumni'])->name('alumni');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
-Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('post.react')->middleware('throttle:20,1');
+Route::post('/berita/{postId}/react', [HomeController::class, 'react'])->name('post.react')->middleware('throttle:10,1');
 Route::post('/berita/{postId}/comment', [HomeController::class, 'comment'])->name('post.comment')->middleware('throttle:5,1');
 Route::post('/berita/{postId}/share', [HomeController::class, 'share'])->name('post.share')->middleware('throttle:20,1');
 Route::post('/komentar/{comment}/like', [HomeController::class, 'likeComment'])->name('comment.like')->middleware('throttle:20,1');

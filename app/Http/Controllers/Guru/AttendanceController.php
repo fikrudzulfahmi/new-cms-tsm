@@ -47,16 +47,19 @@ class AttendanceController extends Controller
         $d = $request->validate([
             'title' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'opens_at' => ['required', 'date'],
-            'closes_at' => ['required', 'date', 'after:opens_at'],
-            'late_after' => ['nullable', 'date'],
-            'code' => ['nullable', 'string', 'min:3', 'max:20'],
+            'opens_at' => ['required', 'date_format:Y-m-d\TH:i'],
+            'closes_at' => ['required', 'date_format:Y-m-d\TH:i'],
+            'late_after' => ['nullable', 'date_format:Y-m-d\TH:i'],
+            'code' => ['nullable', 'string', 'min:4', 'max:20'],
             'class_ids' => ['required', 'array', 'min:1'],
             'class_ids.*' => ['integer', Rule::exists('core_classes', 'id')->where('is_active', true)],
         ], ['class_ids.required' => 'Pilih minimal satu rombel.', 'closes_at.after' => 'Waktu tutup harus setelah waktu buka.']);
         $d['opens'] = AttendanceSession::fromWib($d['opens_at']);
         $d['closes'] = AttendanceSession::fromWib($d['closes_at']);
         $d['late'] = AttendanceSession::fromWib($d['late_after'] ?? null);
+        if ($d['closes']->lte($d['opens'])) {
+            throw ValidationException::withMessages(['closes_at' => 'Waktu tutup harus setelah waktu buka.']);
+        }
         if ($d['late'] && ($d['late']->lt($d['opens']) || $d['late']->gt($d['closes']))) {
             throw ValidationException::withMessages(['late_after' => 'Batas terlambat harus di antara waktu buka dan tutup.']);
         }
@@ -137,7 +140,7 @@ class AttendanceController extends Controller
     public function setRecord(Request $request, AttendanceSession $session, User $student)
     {
         $this->own($request, $session);
-        abort_unless($session->hasStudent($student) || $session->records()->where('student_id', $student->id)->exists(), 404);
+        abort_unless($student->role === 'siswa' && $student->is_active && $session->hasStudent($student) || $session->records()->where('student_id', $student->id)->exists(), 404);
         $d = $request->validate([
             'status' => ['required', Rule::in(array_keys(AttendanceSession::STATUSES))],
             'note' => ['nullable', 'string', 'max:255'],
@@ -155,7 +158,7 @@ class AttendanceController extends Controller
         $this->own($request, $session);
         $records = $session->records()->get()->keyBy('student_id');
         $students = User::whereIn('id', $session->studentIds()->merge($records->keys())->unique())->orderBy('name')->get(['id', 'name']);
-        $esc = fn ($v) => '"'.str_replace('"', '""', preg_match('/^[=+\-@\t\r]/', (string) $v) ? "'".$v : (string) $v).'"';
+        $esc = fn ($v) => '"'.str_replace('"', '""', preg_match('/^\s*[=+\-@|\t\r]/', (string) $v) ? "'".$v : (string) $v).'"';
         $out = "\xEF\xBB\xBF".'"No","Nama","Status","Keterangan","Waktu (WIB)"'."\n";
         foreach ($students as $i => $u) {
             $r = $records[$u->id] ?? null;

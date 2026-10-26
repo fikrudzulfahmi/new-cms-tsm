@@ -74,10 +74,20 @@ class LmsStage4Test extends TestCase
         $d = $this->d(['late_after' => now()->subMinutes(10)]);
         $this->actingAs($d['a'])->post('/belajar/presensi/'.$d['s']->id, ['status' => 'hadir']);
         $this->assertDatabaseHas('lms_attendance_records', ['student_id' => $d['a']->id, 'status' => 'terlambat']);
-        $this->post('/belajar/presensi/'.$d['s']->id, ['status' => 'izin'])->assertSessionHasErrors('note');
+        $this->post('/belajar/presensi/'.$d['s']->id, ['status' => 'izin', 'note' => 'Acara keluarga'])->assertSessionHasErrors('status');
+        $this->assertDatabaseHas('lms_attendance_records', ['student_id' => $d['a']->id, 'status' => 'terlambat']);
+        $this->assertDatabaseCount('lms_attendance_records', 1);
+    }
+
+    public function test_izin_boleh_diubah_ke_hadir_tapi_tidak_sebaliknya(): void
+    {
+        $d = $this->d();
+        $this->actingAs($d['a'])->post('/belajar/presensi/'.$d['s']->id, ['status' => 'izin'])->assertSessionHasErrors('note');
         $this->post('/belajar/presensi/'.$d['s']->id, ['status' => 'izin', 'note' => 'Acara keluarga']);
         $this->assertDatabaseHas('lms_attendance_records', ['student_id' => $d['a']->id, 'status' => 'izin']);
-        $this->assertDatabaseCount('lms_attendance_records', 1);
+        $this->post('/belajar/presensi/'.$d['s']->id, ['status' => 'hadir']);
+        $this->assertDatabaseHas('lms_attendance_records', ['student_id' => $d['a']->id, 'status' => 'hadir']);
+        $this->post('/belajar/presensi/'.$d['s']->id, ['status' => 'sakit', 'note' => 'x'])->assertSessionHasErrors('status');
     }
 
     public function test_status_alpa_tidak_bisa_dipilih_siswa(): void
@@ -95,7 +105,18 @@ class LmsStage4Test extends TestCase
         $this->post('/belajar/presensi/'.$d['s']->id, ['status' => 'hadir', 'code' => 'ABC123'])->assertSessionHasNoErrors();
         $this->assertDatabaseCount('lms_attendance_records', 1);
         // kode hash tidak bocor ke halaman
-        $this->get('/belajar/presensi')->assertDontSee('code_hash')->assertDontSee('ABC123');
+        $this->get('/belajar/presensi')->assertDontSee('code_hash')->assertDontSee('ABC123')->assertDontSee('$2y$');
+    }
+
+    public function test_kode_salah_berulang_dikunci(): void
+    {
+        $d = $this->d(['code_hash' => Hash::make('ABC123')]);
+        $this->actingAs($d['a']);
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('/belajar/presensi/'.$d['s']->id, ['status' => 'hadir', 'code' => 'salah'.$i]);
+        }
+        $this->post('/belajar/presensi/'.$d['s']->id, ['status' => 'hadir', 'code' => 'ABC123'])->assertSessionHasErrors('code');
+        $this->assertDatabaseCount('lms_attendance_records', 0);
     }
 
     public function test_koreksi_guru_mengunci_dari_siswa(): void
@@ -148,5 +169,8 @@ class LmsStage4Test extends TestCase
         $res->assertOk();
         $this->assertStringNotContainsString('"=HYPERLINK', $res->getContent());
         $this->assertStringContainsString("\"'=HYPERLINK", $res->getContent());
+        $d['a']->forceFill(['name' => ' =cmd|x'])->save();
+        $res = $this->get('/ruang-guru/presensi/'.$d['s']->id.'/ekspor');
+        $this->assertStringContainsString("\"' =cmd|x", $res->getContent());
     }
 }

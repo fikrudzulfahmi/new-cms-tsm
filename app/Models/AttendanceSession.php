@@ -43,12 +43,15 @@ class AttendanceSession extends Model
     {
         return DB::table('lms_attendance_classes as ac')
             ->join('core_class_members as m', fn ($j) => $j->on('m.class_id', '=', 'ac.class_id')->where('m.academic_year_id', $this->academic_year_id))
+            ->join('users as u', 'u.id', '=', 'm.student_id')->where('u.is_active', true)
             ->where('ac.session_id', $this->id)->whereNull('m.left_at')->distinct()->pluck('m.student_id');
     }
 
     public function hasStudent(User $u): bool
     {
-        return $this->studentIds()->contains($u->id);
+        return DB::table('lms_attendance_classes as ac')
+            ->join('core_class_members as m', fn ($j) => $j->on('m.class_id', '=', 'ac.class_id')->where('m.academic_year_id', $this->academic_year_id))
+            ->where('ac.session_id', $this->id)->where('m.student_id', $u->id)->whereNull('m.left_at')->exists();
     }
 
     public static function idsForStudent(User $u)
@@ -62,7 +65,7 @@ class AttendanceSession extends Model
     /** Konversi input WIB (datetime-local) ke UTC. */
     public static function fromWib(?string $v): ?Carbon
     {
-        return $v ? Carbon::parse($v, 'Asia/Jakarta')->utc() : null;
+        return $v ? Carbon::createFromFormat('Y-m-d\TH:i', $v, 'Asia/Jakarta')->utc() : null;
     }
 
     public static function toWib($dt): ?string

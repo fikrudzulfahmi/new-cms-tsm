@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -45,24 +47,42 @@ class AttendanceController extends Controller
         if (! $session->isOpen()) {
             return back()->withErrors(['status' => 'Presensi ini sedang tidak dibuka.']);
         }
-        $existing = AttendanceRecord::where('session_id', $session->id)->where('student_id', $me->id)->first();
-        if ($existing && $existing->marked_by === 'guru') {
-            return back()->withErrors(['status' => 'Status sudah diatur guru dan tidak bisa diubah.']);
+        $key = 'att-code:'.$session->id.':'.$me->id;
+        if ($session->code_hash && RateLimiter::tooManyAttempts($key, 5)) {
+            return back()->withErrors(['code' => 'Terlalu banyak kode salah. Coba lagi beberapa menit lagi.']);
         }
         if ($d['status'] !== 'hadir' && trim((string) ($d['note'] ?? '')) === '') {
             return back()->withErrors(['note' => 'Isi keterangan untuk izin/sakit.']);
         }
         if ($session->code_hash && ! Hash::check((string) ($d['code'] ?? ''), $session->code_hash)) {
+            RateLimiter::hit($key, 300);
+
             return back()->withErrors(['code' => 'Kode presensi salah.']);
         }
-        $status = $d['status'];
-        if ($status === 'hadir' && $session->late_after && now()->gt($session->late_after)) {
-            $status = 'terlambat';
+        $result = DB::transaction(function () use ($session, $me, $d) {
+            AttendanceSession::whereKey($session->id)->lockForUpdate()->first();
+            $existing = AttendanceRecord::where('session_id', $session->id)->where('student_id', $me->id)->first();
+            if ($existing && $existing->marked_by === 'guru') {
+                return 'Status sudah diatur guru dan tidak bisa diubah.';
+            }
+            if ($existing && in_array($existing->status, ['hadir', 'terlambat'], true)) {
+                return 'Kehadiran sudah tercatat dan tidak bisa diubah. Hubungi guru bila ada kekeliruan.';
+            }
+            $status = $d['status'];
+            if ($status === 'hadir' && $session->late_after && now()->gt($session->late_after)) {
+                $status = 'terlambat';
+            }
+            AttendanceRecord::updateOrCreate(
+                ['session_id' => $session->id, 'student_id' => $me->id],
+                ['status' => $status, 'note' => in_array($status, ['hadir', 'terlambat'], true) ? null : trim($d['note']), 'marked_at' => now(), 'marked_by' => 'self']
+            );
+
+            return $status;
+        });
+        if (! array_key_exists($result, AttendanceSession::STATUSES)) {
+            return back()->withErrors(['status' => $result]);
         }
-        AttendanceRecord::updateOrCreate(
-            ['session_id' => $session->id, 'student_id' => $me->id],
-            ['status' => $status, 'note' => $status === 'hadir' || $status === 'terlambat' ? null : trim($d['note']), 'marked_at' => now(), 'marked_by' => 'self']
-        );
+        $status = $result;
 
         return back()->with('success', 'Presensi tercatat: '.AttendanceSession::STATUSES[$status].'.');
     }
