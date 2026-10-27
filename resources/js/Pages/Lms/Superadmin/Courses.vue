@@ -1,7 +1,8 @@
 <script setup>
+import { confirmDialog } from '@/dialog'
 import { ref } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
-import LmsShell from '@/Components/Lms/LmsShell.vue'
+import SuperadminLayout from '@/Layouts/SuperadminLayout.vue'
 const props = defineProps({ activeYear: String, courses: Array, teachers: Array, allClasses: Array })
 const editId = ref(null)
 const form = useForm({ title: '', description: '', teacher_id: '', class_ids: [], is_active: true })
@@ -11,11 +12,11 @@ function save() {
   const opt = { preserveScroll: true, onSuccess: reset }
   editId.value ? form.put(`/superadmin/mapel/${editId.value}`, opt) : form.post('/superadmin/mapel', opt)
 }
-function del(c) { if (window.confirm(`Hapus mapel "${c.title}" beserta seluruh bab dan materinya?`)) router.delete(`/superadmin/mapel/${c.id}`, { preserveScroll: true }) }
+async function del(c) { if (await confirmDialog(`Hapus mapel "${c.title}" beserta seluruh bab dan materinya?`)) router.delete(`/superadmin/mapel/${c.id}`, { preserveScroll: true }) }
 </script>
 
 <template>
-  <LmsShell title="Mapel & Penugasan Guru" back="/superadmin" backLabel="Superadmin">
+  <SuperadminLayout title="Mapel & Penugasan Guru">
     <p class="text-sm text-slate-500 -mt-2 mb-4">Tahun ajaran aktif: <b>{{ activeYear || 'belum diatur' }}</b></p>
     <form class="bg-white rounded-2xl border border-slate-200 p-5 space-y-3 mb-6" @submit.prevent="save">
       <h2 class="font-semibold text-navy">{{ editId ? 'Ubah mapel' : 'Mapel baru' }}</h2>
@@ -51,5 +52,5 @@ function del(c) { if (window.confirm(`Hapus mapel "${c.title}" beserta seluruh b
       </div>
       <p v-if="!courses.length" class="p-4 text-sm text-slate-500">Belum ada mapel pada tahun ajaran ini.</p>
     </div>
-  </LmsShell>
+  </SuperadminLayout>
 </template>

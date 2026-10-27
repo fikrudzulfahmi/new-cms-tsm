@@ -105,7 +105,7 @@ class SyncInduk
                         continue;
                     }
 
-                    $user = User::where('external_id', $s['external_id'])->first();
+                    $user = $this->findStudent($s);
                     $bentrok = User::where('username', $s['username'])
                         ->when($user, fn ($q) => $q->where('id', '!=', $user->id))
                         ->exists();
@@ -196,6 +196,146 @@ class SyncInduk
         $run->fill($c + ['details' => $details ?: null]);
 
         return $this->finish($run, $complete ? 'ok' : 'partial', $complete ? null : 'Sebagian rombel gagal diambil; penonaktifan siswa ditunda.');
+    }
+
+
+    /** Simpan kelas saja (tanpa siswa) dari induk. Mengembalikan jumlah kelas. */
+    public function pullClasses(): int
+    {
+        $kelas = $this->api->kelas();
+        if ($kelas === []) {
+            throw new RuntimeException('API tidak mengembalikan kelas. Tidak ada yang diubah.');
+        }
+        $ids = [];
+        foreach ($kelas as $k) {
+            $ids[] = SchoolClass::updateOrCreate(
+                ['external_id' => $k['id']],
+                ['name' => $k['nama'], 'level' => $k['tingkat'], 'major' => $k['jurusan'], 'is_active' => true, 'synced_at' => now()]
+            )->id;
+        }
+        SchoolClass::whereNotNull('external_id')->whereNotIn('id', $ids)->update(['is_active' => false]);
+
+        return count($kelas);
+    }
+
+    /** Pratinjau tarik siswa satu kelas: dijalankan lalu di-rollback, tidak ada yang tersimpan. */
+    public function previewClass(SchoolClass $class): array
+    {
+        return $this->classRun($class, true);
+    }
+
+    /** Tarik siswa satu kelas dan simpan. */
+    public function pullClass(SchoolClass $class): array
+    {
+        $lock = Cache::lock('sync_induk', 300);
+        if (! $lock->get()) {
+            throw new RuntimeException('Penarikan lain sedang berjalan. Coba lagi sebentar.');
+        }
+        try {
+            return $this->classRun($class, false);
+        } finally {
+            $lock->release();
+        }
+    }
+
+
+    /**
+     * Cari siswa yang sudah ada supaya tidak dobel: id induk dulu, lalu NIS lengkap.
+     * NISN sengaja tidak dipakai (bisa kosong/placeholder sehingga menggabungkan orang berbeda).
+     */
+    private function findStudent(array $s): ?User
+    {
+        $u = User::where('external_id', $s['external_id'])->first();
+        if (! $u && filled($s['nis_full'] ?? null)) {
+            $u = User::where('role', 'siswa')->where('nis_full', $s['nis_full'])->orderBy('id')->first();
+        }
+
+        return $u;
+    }
+
+    private function classRun(SchoolClass $class, bool $dry): array
+    {
+        $year = AcademicYear::active();
+        if (! $year) {
+            throw new RuntimeException('Belum ada tahun ajaran aktif. Atur dulu di Dashboard.');
+        }
+        if (! $class->external_id) {
+            throw new RuntimeException('Kelas ini bukan kelas dari induk.');
+        }
+        $rows = $this->api->siswa($class->external_id);
+        $res = ['total' => count($rows), 'created' => 0, 'updated' => 0, 'same' => 0, 'conflicts' => 0, 'left' => 0, 'rows' => []];
+
+        DB::beginTransaction();
+        try {
+            $seen = [];
+            foreach ($rows as $s) {
+                $item = ['nis' => $s['nis_full'] ?? $s['username'], 'name' => $s['name'], 'state' => ''];
+                if ($s['name'] === '' || $s['username'] === '') {
+                    $res['conflicts']++;
+                    $res['rows'][] = ['state' => 'tidak lengkap'] + $item;
+
+                    continue;
+                }
+                $user = $this->findStudent($s);
+                $bentrok = User::where('username', $s['username'])->when($user, fn ($q) => $q->where('id', '!=', $user->id))->exists();
+                if ($bentrok || ($user && $user->role !== 'siswa')) {
+                    $res['conflicts']++;
+                    $res['rows'][] = ['state' => 'bentrok username'] + $item;
+
+                    continue;
+                }
+                $attrs = ['name' => $s['name'], 'username' => $s['username'], 'nis_full' => $s['nis_full'], 'nisn' => $s['nisn'], 'gender' => $s['gender']];
+                if (! $user) {
+                    $user = new User;
+                    $user->forceFill($attrs + [
+                        'external_id' => $s['external_id'], 'role' => 'siswa', 'email' => null,
+                        'password' => Hash::make($s['username']), 'must_change_password' => true, 'is_active' => true,
+                    ])->save();
+                    $res['created']++;
+                    $item['state'] = 'baru';
+                } else {
+                    $user->forceFill($attrs + ['external_id' => $s['external_id'], 'is_active' => true]);
+                    if ($user->isDirty()) {
+                        $user->save();
+                        $res['updated']++;
+                        $item['state'] = 'berubah';
+                    } else {
+                        $res['same']++;
+                        $item['state'] = 'sama';
+                    }
+                }
+                $seen[] = $user->id;
+                ClassMember::where('student_id', $user->id)->where('academic_year_id', $year->id)
+                    ->where('class_id', '!=', $class->id)->whereNull('left_at')->update(['left_at' => now()]);
+                $m = ClassMember::firstOrNew(['class_id' => $class->id, 'student_id' => $user->id, 'academic_year_id' => $year->id]);
+                if ($m->exists && $m->left_at === null && $item['state'] === 'sama') {
+                    // tidak ada perubahan
+                } elseif (! $m->exists && $item['state'] === 'sama') {
+                    $item['state'] = 'masuk kelas';
+                }
+                $m->left_at = null;
+                $m->save();
+                $res['rows'][] = $item;
+            }
+            // Pengaman: respons kosong untuk kelas yang sebelumnya berisi tidak boleh mengosongkan kelas.
+            $anggota = ClassMember::where('class_id', $class->id)->where('academic_year_id', $year->id)->whereNull('left_at')->whereNotIn('student_id', $seen ?: [0]);
+            if ($rows === [] && (clone $anggota)->count() > 0) {
+                throw new RuntimeException('Induk mengembalikan 0 siswa untuk kelas yang sudah berisi; dibatalkan.');
+            }
+            foreach ((clone $anggota)->with('student:id,name,username')->get() as $m) {
+                $res['rows'][] = ['nis' => $m->student?->username, 'name' => $m->student?->name, 'state' => 'keluar kelas'];
+            }
+            $res['left'] = (clone $anggota)->update(['left_at' => now()]);
+            $dry ? DB::rollBack() : DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e instanceof RuntimeException ? $e : new RuntimeException('Gagal memproses kelas ini (dibatalkan).', 0, $e);
+        }
+        if (! $dry) {
+            $class->forceFill(['synced_at' => now()])->save();
+        }
+
+        return $res;
     }
 
     private function closeMemberships(int $studentId, int $yearId): void

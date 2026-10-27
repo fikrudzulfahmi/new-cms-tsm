@@ -62,32 +62,60 @@ class LmsStage2Test extends TestCase
         $this->assertSame('2027/2028', AcademicYear::active()->name);
     }
 
-    public function test_sync_butuh_tahun_ajaran_aktif(): void
+    private function admin()
     {
-        $this->fakeInduk([]);
-        $this->actingAs($this->user('superadmin', 'root0001'))->post('/superadmin/sinkron')->assertSessionHasErrors('sync');
+        return $this->actingAs($this->user('superadmin', 'root0001'));
     }
 
-    public function test_sync_membuat_siswa_username_5_digit_dan_pindah_rombel(): void
+    private function kelas(int $ext): \App\Models\SchoolClass
+    {
+        return \App\Models\SchoolClass::where('external_id', $ext)->firstOrFail();
+    }
+
+    public function test_tarik_kelas_hanya_menyimpan_kelas_jurusan_tsm_tanpa_siswa(): void
+    {
+        $this->fakeInduk([$this->s(101, '2425.10.001')]);
+        $this->admin()->post('/superadmin/kelas/tarik')->assertSessionHas('success');
+        $this->assertSame(2, \App\Models\SchoolClass::count());
+        $this->assertSame(0, User::where('role', 'siswa')->count());
+    }
+
+    public function test_tarik_siswa_butuh_tahun_ajaran_aktif(): void
+    {
+        $this->fakeInduk([]);
+        $this->admin()->post('/superadmin/kelas/tarik');
+        $this->post('/superadmin/kelas/'.$this->kelas(1)->id.'/tarik')->assertSessionHasErrors('sync');
+    }
+
+    public function test_pratinjau_tidak_menyimpan_apa_pun(): void
     {
         AcademicYear::create(['name' => '2026/2027'])->activate();
-        $this->fakeInduk([$this->s(101, '2425.10.001'), $this->s(102, '2425.10.002', 'Sari')]);
-        $this->actingAs($this->user('superadmin', 'root0001'))->post('/superadmin/sinkron')->assertSessionHas('success');
+        $this->fakeInduk([$this->s(101, '2425.10.001')]);
+        $this->admin()->post('/superadmin/kelas/tarik');
+        $this->post('/superadmin/kelas/'.$this->kelas(1)->id.'/pratinjau')->assertSessionHas('preview');
+        $this->assertSame(0, User::where('role', 'siswa')->count());
+        $this->assertSame(0, ClassMember::count());
+    }
+
+    public function test_tarik_satu_kelas_tidak_menyentuh_kelas_lain_dan_username_5_digit(): void
+    {
+        AcademicYear::create(['name' => '2026/2027'])->activate();
+        $this->fakeInduk([$this->s(101, '2425.10.001'), $this->s(102, '2425.10.002', 'Sari')], [$this->s(201, '99999.1', 'Kelas Dua')]);
+        $this->admin()->post('/superadmin/kelas/tarik');
+        $this->post('/superadmin/kelas/'.$this->kelas(1)->id.'/tarik')->assertSessionHas('success');
 
         $budi = User::where('external_id', '101')->first();
-        $this->assertSame('24251', $budi->username);   // 5 angka pertama dari NIS
+        $this->assertSame('24251', $budi->username);
         $this->assertSame('siswa', $budi->role);
         $this->assertTrue($budi->must_change_password);
         $this->assertTrue(Hash::check('24251', $budi->password));
-        $this->assertNull(User::where('name', 'like', '%TKJ%')->first());
+        $this->assertNull(User::where('external_id', '102')->first());   // bentrok username -> dilewati
+        $this->assertNull(User::where('external_id', '201')->first());   // kelas lain belum ditarik
 
-        // 102 bentrok username 24251 (NIS 5 digit sama) -> dilewati, dilaporkan
-        $this->assertNull(User::where('external_id', '102')->first());
-
-        // Budi naik kelas di induk: kini ada di rombel 2. Password yang sudah diganti tidak disentuh.
+        // Budi naik kelas; password yang sudah diganti tidak disentuh.
         $budi->forceFill(['password' => Hash::make('rahasia-baru'), 'must_change_password' => false])->save();
         $this->fakeInduk([], [$this->s(101, '2425.10.001')]);
-        $this->post('/superadmin/sinkron');
+        $this->post('/superadmin/kelas/'.$this->kelas(2)->id.'/tarik');
         $aktif = ClassMember::where('student_id', $budi->id)->whereNull('left_at')->get();
         $this->assertCount(1, $aktif);
         $this->assertSame('XI TSM 1', $aktif[0]->schoolClass->name);
@@ -95,34 +123,47 @@ class LmsStage2Test extends TestCase
         $this->assertFalse($budi->fresh()->must_change_password);
     }
 
-    public function test_siswa_yang_hilang_dari_induk_dinonaktifkan_dan_gagal_api_tidak_menonaktifkan(): void
+    public function test_gagal_api_tidak_mengubah_kelas_dan_respons_kosong_tidak_mengosongkan_kelas(): void
     {
         AcademicYear::create(['name' => '2026/2027'])->activate();
         $this->fakeInduk([$this->s(101, '11111.1')]);
-        $admin = $this->actingAs($this->user('superadmin', 'root0001'));
-        $this->post('/superadmin/sinkron');
+        $this->admin()->post('/superadmin/kelas/tarik');
+        $k = $this->kelas(1);
+        $this->post("/superadmin/kelas/{$k->id}/tarik");
         $budi = User::where('external_id', '101')->first();
 
-        // Satu rombel gagal -> partial, tidak ada penonaktifan
-        config(['services.induk.url' => 'http://induk.test/api', 'services.induk.token' => 'tok']);
         Http::swap(new \Illuminate\Http\Client\Factory);
-        Http::fake(['induk.test/api/kelas*' => Http::response(['data' => [['id' => 1, 'nama' => 'X TSM 1', 'tingkat' => 10, 'jurusan' => 'TSM']]]),
-            'induk.test/api/siswa/1' => Http::response('x', 500)]);
-        $this->post('/superadmin/sinkron');
+        Http::fake(['induk.test/api/siswa/1' => Http::response('x', 500)]);
+        $this->post("/superadmin/kelas/{$k->id}/tarik")->assertSessionHasErrors('sync');
         $this->assertTrue($budi->fresh()->is_active);
+        $this->assertSame(1, ClassMember::where('class_id', $k->id)->whereNull('left_at')->count());
 
-        // Respons sukses tanpa siswa tsb -> nonaktif
-        $this->fakeInduk([$this->s(555, '55555.1', 'Lain')]);
-        $this->post('/superadmin/sinkron');
-        $this->assertFalse($budi->fresh()->is_active);
+        $this->fakeInduk([]);
+        $this->post("/superadmin/kelas/{$k->id}/tarik")->assertSessionHasErrors('sync');
+        $this->assertSame(1, ClassMember::where('class_id', $k->id)->whereNull('left_at')->count());
     }
 
-    public function test_token_induk_tidak_bocor_ke_tabel_sync(): void
+    public function test_siswa_keluar_dari_kelas_tetap_aktif_dan_bentrok_tidak_mengubah_akun(): void
     {
         AcademicYear::create(['name' => '2026/2027'])->activate();
-        $this->fakeInduk([]);
-        $this->actingAs($this->user('superadmin', 'root0001'))->post('/superadmin/sinkron');
-        $this->assertStringNotContainsString('tok', json_encode(\App\Models\SyncRun::all()->toArray()));
+        $this->fakeInduk([$this->s(101, '11111.1'), $this->s(102, '11111.2', 'Kembar')]);
+        $this->admin()->post('/superadmin/kelas/tarik');
+        $k = $this->kelas(1);
+        $this->post("/superadmin/kelas/{$k->id}/tarik");
+        $a = User::where('external_id', '101')->first();
+        $this->assertNull(User::where('external_id', '102')->first());
+
+        $this->fakeInduk([$this->s(555, '55555.1', 'Lain')]);
+        $this->post("/superadmin/kelas/{$k->id}/tarik");
+        $this->assertTrue($a->fresh()->is_active);
+        $this->assertSame(0, ClassMember::where('student_id', $a->id)->whereNull('left_at')->count());
+    }
+
+    public function test_halaman_siswa_dan_guru_terpisah(): void
+    {
+        $this->user('guru', 'guru0001');
+        $this->admin()->get('/superadmin/siswa')->assertOk();
+        $this->get('/superadmin/guru')->assertOk();
     }
 
     public function test_buat_guru_dan_reset_password(): void
@@ -143,33 +184,32 @@ class LmsStage2Test extends TestCase
         $this->post("/superadmin/akun/{$admin->id}/reset")->assertNotFound();   // akun CMS tidak bisa direset lewat sini
     }
 
-    public function test_guru_tidak_bisa_reset_atau_sinkron(): void
+    public function test_guru_tidak_bisa_reset_atau_tarik(): void
     {
         $siswa = $this->user('siswa', '12345');
         $this->actingAs($this->user('guru', 'guru0001'))->post("/superadmin/akun/{$siswa->id}/reset")->assertForbidden();
-        $this->post('/superadmin/sinkron')->assertForbidden();
+        $this->post('/superadmin/kelas/tarik')->assertForbidden();
+        $this->get('/superadmin/siswa')->assertForbidden();
     }
 
-    public function test_respons_induk_kosong_tidak_menonaktifkan_siapa_pun(): void
+    public function test_siswa_tidak_dobel_dilacak_dari_nis_walau_id_induk_berubah(): void
     {
         AcademicYear::create(['name' => '2026/2027'])->activate();
-        $this->fakeInduk([$this->s(101, '11111.1')]);
-        $this->actingAs($this->user('superadmin', 'root0001'))->post('/superadmin/sinkron');
-        $budi = User::where('external_id', '101')->first();
+        $this->fakeInduk([$this->s(101, '2425.10.001')]);
+        $this->admin()->post('/superadmin/kelas/tarik');
+        $this->post('/superadmin/kelas/'.$this->kelas(1)->id.'/tarik');
+        $this->assertSame(1, User::where('role', 'siswa')->count());
 
-        $this->fakeInduk([], []);
-        $this->post('/superadmin/sinkron');
-        $this->assertTrue($budi->fresh()->is_active);
-    }
+        // NIS sama, id induk beda (data induk dibuat ulang) -> akun lama dipakai, bukan dibuat baru
+        $this->fakeInduk([$this->s(777, '2425.10.001')]);
+        $this->post('/superadmin/kelas/'.$this->kelas(1)->id.'/tarik')->assertSessionHas('success');
+        $this->assertSame(1, User::where('role', 'siswa')->count());
+        $this->assertSame('777', User::where('role', 'siswa')->first()->external_id);
 
-    public function test_siswa_bentrok_username_tidak_dinonaktifkan(): void
-    {
-        AcademicYear::create(['name' => '2026/2027'])->activate();
-        $this->fakeInduk([$this->s(101, '11111.1'), $this->s(102, '11111.2', 'Kembar')]);
-        $this->actingAs($this->user('superadmin', 'root0001'))->post('/superadmin/sinkron');
-        $a = User::where('external_id', '101')->first();
-        $this->fakeInduk([$this->s(101, '11111.1'), $this->s(102, '11111.2', 'Kembar'), $this->s(103, '22222.1')]);
-        $this->post('/superadmin/sinkron');
-        $this->assertTrue($a->fresh()->is_active);
+        // Pindah kelas: tetap satu akun, hanya satu keanggotaan aktif
+        $this->fakeInduk([], [$this->s(777, '2425.10.001')]);
+        $this->post('/superadmin/kelas/'.$this->kelas(2)->id.'/tarik');
+        $this->assertSame(1, User::where('role', 'siswa')->count());
+        $this->assertSame(1, ClassMember::whereNull('left_at')->count());
     }
 }
