@@ -12,11 +12,11 @@ class AttendanceSession extends Model
 
     protected $table = 'lms_attendance_sessions';
 
-    protected $fillable = ['teacher_id', 'academic_year_id', 'title', 'description', 'opens_at', 'closes_at', 'late_after', 'code_hash'];
+    protected $fillable = ['teacher_id', 'academic_year_id', 'title', 'description', 'opens_at', 'closes_at', 'late_after', 'code_hash', 'require_proof'];
 
     protected $hidden = ['code_hash'];
 
-    protected $casts = ['opens_at' => 'datetime', 'closes_at' => 'datetime', 'late_after' => 'datetime'];
+    protected $casts = ['opens_at' => 'datetime', 'closes_at' => 'datetime', 'late_after' => 'datetime', 'require_proof' => 'boolean'];
 
     public function classes()
     {

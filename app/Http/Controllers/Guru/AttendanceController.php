@@ -33,7 +33,7 @@ class AttendanceController extends Controller
             'sessions' => $sessions->map(fn ($s) => [
                 'id' => $s->id, 'title' => $s->title, 'description' => $s->description,
                 'opens_at' => AttendanceSession::toWib($s->opens_at), 'closes_at' => AttendanceSession::toWib($s->closes_at),
-                'late_after' => AttendanceSession::toWib($s->late_after), 'has_code' => (bool) $s->code_hash,
+                'late_after' => AttendanceSession::toWib($s->late_after), 'has_code' => (bool) $s->code_hash, 'require_proof' => (bool) $s->require_proof,
                 'class_ids' => $s->classes->pluck('id'), 'classes' => $s->classes->pluck('name'),
                 'open' => $s->isOpen(), 'filled' => (int) ($counts[$s->id] ?? 0),
             ]),
@@ -51,6 +51,7 @@ class AttendanceController extends Controller
             'closes_at' => ['required', 'date_format:Y-m-d\TH:i'],
             'late_after' => ['nullable', 'date_format:Y-m-d\TH:i'],
             'code' => ['nullable', 'string', 'min:4', 'max:20'],
+            'require_proof' => ['boolean'],
             'class_ids' => ['required', 'array', 'min:1'],
             'class_ids.*' => ['integer', Rule::exists('core_classes', 'id')->where('is_active', true)],
         ], ['class_ids.required' => 'Pilih minimal satu rombel.', 'closes_at.after' => 'Waktu tutup harus setelah waktu buka.']);
@@ -77,7 +78,7 @@ class AttendanceController extends Controller
         $s = AttendanceSession::create([
             'teacher_id' => $request->user()->id, 'academic_year_id' => $year->id, 'title' => trim($d['title']),
             'description' => $d['description'] ?? null, 'opens_at' => $d['opens'], 'closes_at' => $d['closes'],
-            'late_after' => $d['late'], 'code_hash' => ! empty($d['code']) ? Hash::make($d['code']) : null,
+            'late_after' => $d['late'], 'require_proof' => $request->boolean('require_proof'), 'code_hash' => ! empty($d['code']) ? Hash::make($d['code']) : null,
         ]);
         $s->classes()->sync($d['class_ids']);
         ActivityLog::record('create', 'lms', 'Presensi dibuat: '.$s->title, $s);
@@ -92,6 +93,7 @@ class AttendanceController extends Controller
         $attrs = [
             'title' => trim($d['title']), 'description' => $d['description'] ?? null,
             'opens_at' => $d['opens'], 'closes_at' => $d['closes'], 'late_after' => $d['late'],
+            'require_proof' => $request->boolean('require_proof'),
         ];
         if (! empty($d['code'])) {
             $attrs['code_hash'] = Hash::make($d['code']);
@@ -107,6 +109,9 @@ class AttendanceController extends Controller
     public function destroy(Request $request, AttendanceSession $session)
     {
         $this->own($request, $session);
+        foreach ($session->records()->whereNotNull('photo_path')->pluck('photo_path') as $p) {
+            \App\Services\AttendanceProof::forget($p);
+        }
         $session->delete();
         ActivityLog::record('delete', 'lms', 'Presensi dihapus: '.$session->title);
 
@@ -124,12 +129,13 @@ class AttendanceController extends Controller
 
             return [
                 'id' => $u->id, 'name' => $u->name, 'status' => $r->status ?? 'alpa', 'filled' => (bool) $r,
+                'photo' => (bool) ($r->photo_path ?? null), 'lat' => $r->lat ?? null, 'lng' => $r->lng ?? null, 'acc' => $r->accuracy ?? null,
                 'note' => $r->note ?? null, 'at' => AttendanceSession::toWib($r->marked_at ?? null), 'by' => $r->marked_by ?? null,
             ];
         })->values();
 
         return Inertia::render('Lms/Guru/AttendanceShow', [
-            'session' => ['id' => $session->id, 'title' => $session->title, 'opens_at' => AttendanceSession::toWib($session->opens_at), 'closes_at' => AttendanceSession::toWib($session->closes_at)],
+            'session' => ['id' => $session->id, 'title' => $session->title, 'opens_at' => AttendanceSession::toWib($session->opens_at), 'closes_at' => AttendanceSession::toWib($session->closes_at), 'require_proof' => (bool) $session->require_proof],
             'rows' => $rows,
             'summary' => $rows->groupBy('status')->map->count(),
             'statuses' => AttendanceSession::STATUSES,
@@ -153,16 +159,26 @@ class AttendanceController extends Controller
         return back()->with('success', 'Status diperbarui.');
     }
 
+    /** Selfie hanya bisa dilihat guru pemilik sesi. */
+    public function photo(Request $request, AttendanceSession $session, User $student)
+    {
+        $this->own($request, $session);
+        $r = $session->records()->where('student_id', $student->id)->first();
+        abort_unless($r && $r->photo_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($r->photo_path), 404);
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->response($r->photo_path, null, ['Cache-Control' => 'private, max-age=300', 'Content-Type' => 'image/jpeg']);
+    }
+
     public function export(Request $request, AttendanceSession $session)
     {
         $this->own($request, $session);
         $records = $session->records()->get()->keyBy('student_id');
         $students = User::whereIn('id', $session->studentIds()->merge($records->keys())->unique())->orderBy('name')->get(['id', 'name']);
         $esc = fn ($v) => '"'.str_replace('"', '""', preg_match('/^\s*[=+\-@|\t\r]/', (string) $v) ? "'".$v : (string) $v).'"';
-        $out = "\xEF\xBB\xBF".'"No","Nama","Status","Keterangan","Waktu (WIB)"'."\n";
+        $out = "\xEF\xBB\xBF".'"No","Nama","Status","Keterangan","Waktu (WIB)","Latitude","Longitude","Akurasi (m)"'."\n";
         foreach ($students as $i => $u) {
             $r = $records[$u->id] ?? null;
-            $out .= implode(',', [$i + 1, $esc($u->name), $esc(AttendanceSession::STATUSES[$r->status ?? 'alpa']), $esc($r->note ?? ''), $esc(AttendanceSession::toWib($r->marked_at ?? null) ?? '')])."\n";
+            $out .= implode(',', [$i + 1, $esc($u->name), $esc(AttendanceSession::STATUSES[$r->status ?? 'alpa']), $esc($r->note ?? ''), $esc(AttendanceSession::toWib($r->marked_at ?? null) ?? ''), $esc($r->lat ?? ''), $esc($r->lng ?? ''), $esc($r->accuracy ?? '')])."\n";
         }
 
         return response($out, 200, [

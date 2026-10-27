@@ -17,7 +17,7 @@ class SecurityHeaders
         $headers->set('X-Content-Type-Options', 'nosniff');
         $headers->set('X-Frame-Options', 'SAMEORIGIN');
         $headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        $headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+        $headers->set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(self), payment=()');
         $headers->set('X-Permitted-Cross-Domain-Policies', 'none');
 
         // Selalu kirim HSTS bila situs memang disajikan lewat HTTPS (Cloudflare),
@@ -32,7 +32,8 @@ class SecurityHeaders
                 "script-src 'self' 'unsafe-inline'",
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "font-src 'self' data: https://fonts.gstatic.com",
-                "img-src 'self' data: https:",
+                "img-src 'self' data: blob: https:",
+                "media-src 'self' blob:",
                 "connect-src 'self'",
                 "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com",
                 "form-action 'self'",

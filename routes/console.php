@@ -19,6 +19,7 @@ Schedule::command('activity:prune')->dailyAt('03:00');
 
 
 // Bersihkan lampiran tugas lama yang sudah dinilai (retensi dari Setting, 0 = mati).
+Schedule::command('attendance:prune-proof')->dailyAt('03:15')->withoutOverlapping();
 Schedule::command('assignments:prune-files')->monthlyOn(1, '03:30')->withoutOverlapping();
 
 // Kumpulkan otomatis quiz yang waktunya habis.

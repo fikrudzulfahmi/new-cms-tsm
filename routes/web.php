@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/presensi/{session}', [$a, 'show'])->name('att.show');
         Route::put('/presensi/{session}', [$a, 'update'])->name('att.update');
         Route::delete('/presensi/{session}', [$a, 'destroy'])->name('att.destroy');
+        Route::get('/presensi/{session}/foto/{student}', [$a, 'photo'])->name('att.photo');
         Route::get('/presensi/{session}/ekspor', [$a, 'export'])->name('att.export');
         Route::post('/presensi/{session}/siswa/{student}', [$a, 'setRecord'])->name('att.set');
         $q = \App\Http\Controllers\Guru\QuestionController::class;

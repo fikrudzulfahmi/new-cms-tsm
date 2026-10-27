@@ -5,11 +5,11 @@ import { Link, useForm, router } from '@inertiajs/vue3'
 import LmsShell from '@/Components/Lms/LmsShell.vue'
 const props = defineProps({ sessions: Array, allClasses: Array, activeYear: String })
 const editId = ref(null)
-const form = useForm({ title: '', description: '', opens_at: '', closes_at: '', late_after: '', code: '', clear_code: false, class_ids: [] })
+const form = useForm({ title: '', description: '', opens_at: '', closes_at: '', late_after: '', code: '', clear_code: false, require_proof: false, class_ids: [] })
 function reset() { editId.value = null; form.reset(); form.clearErrors() }
 function edit(s) {
   editId.value = s.id
-  Object.assign(form, { title: s.title, description: s.description || '', opens_at: s.opens_at, closes_at: s.closes_at, late_after: s.late_after || '', code: '', clear_code: false, class_ids: [...s.class_ids] })
+  Object.assign(form, { title: s.title, description: s.description || '', opens_at: s.opens_at, closes_at: s.closes_at, late_after: s.late_after || '', code: '', clear_code: false, require_proof: !!s.require_proof, class_ids: [...s.class_ids] })
   window.scrollTo({ top: 0 })
 }
 function save() {
@@ -33,6 +33,7 @@ const fmt = (v) => v ? v.replace('T', ' ') : '-'
         <label>Terlambat setelah (opsional)<input v-model="form.late_after" type="datetime-local" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-800" /></label>
       </div>
       <input v-model="form.code" :placeholder="editId ? 'Kode baru (kosong = tidak diubah)' : 'Kode presensi (opsional)'" maxlength="20" autocomplete="off" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+      <label class="text-sm flex items-start gap-2"><input v-model="form.require_proof" type="checkbox" class="mt-1" /><span>Wajib selfie + lokasi saat hadir <span class="block text-xs text-slate-500">Untuk pembelajaran daring. Siswa harus mengizinkan kamera dan lokasi; foto &amp; koordinat dihapus otomatis setelah 6 bulan.</span></span></label>
       <label v-if="editId" class="text-xs flex items-center gap-2"><input v-model="form.clear_code" type="checkbox" /> Hapus kode</label>
       <div>
         <div class="text-xs text-slate-500 mb-1">Rombel peserta</div>

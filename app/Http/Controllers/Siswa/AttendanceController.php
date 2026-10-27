@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Siswa;
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
+use App\Services\AttendanceProof;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -26,7 +27,7 @@ class AttendanceController extends Controller
                 'id' => $s->id, 'title' => $s->title, 'description' => $s->description, 'teacher' => $s->teacher?->name,
                 'opens_at' => AttendanceSession::toWib($s->opens_at), 'closes_at' => AttendanceSession::toWib($s->closes_at),
                 'state' => $s->opens_at->isFuture() ? 'soon' : ($s->closes_at->isPast() ? 'closed' : 'open'),
-                'needs_code' => (bool) $s->code_hash,
+                'needs_code' => (bool) $s->code_hash, 'needs_proof' => (bool) $s->require_proof,
                 'status' => $mine[$s->id]->status ?? ($s->closes_at->isPast() ? 'alpa' : null),
                 'locked' => ($mine[$s->id]->marked_by ?? null) === 'guru',
                 'note' => $mine[$s->id]->note ?? null,
@@ -43,7 +44,15 @@ class AttendanceController extends Controller
             'status' => ['required', Rule::in(['hadir', 'izin', 'sakit'])],
             'note' => ['nullable', 'string', 'max:255'],
             'code' => ['nullable', 'string', 'max:20'],
+            'selfie' => ['nullable', 'file', 'max:3072'],
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'accuracy' => ['nullable', 'numeric', 'min:0', 'max:100000'],
         ]);
+        $proof = $session->require_proof && in_array($d['status'], ['hadir'], true);
+        if ($proof && (! $request->hasFile('selfie') || ! isset($d['lat'], $d['lng']))) {
+            return back()->withErrors(['selfie' => 'Presensi ini wajib selfie dan izin lokasi. Aktifkan kamera dan lokasi, lalu coba lagi.']);
+        }
         if (! $session->isOpen()) {
             return back()->withErrors(['status' => 'Presensi ini sedang tidak dibuka.']);
         }
@@ -59,7 +68,8 @@ class AttendanceController extends Controller
 
             return back()->withErrors(['code' => 'Kode presensi salah.']);
         }
-        $result = DB::transaction(function () use ($session, $me, $d) {
+        $photo = $proof ? AttendanceProof::store($request->file('selfie'), $session->id) : null;
+        $result = DB::transaction(function () use ($session, $me, $d, $photo, $proof) {
             AttendanceSession::whereKey($session->id)->lockForUpdate()->first();
             $existing = AttendanceRecord::where('session_id', $session->id)->where('student_id', $me->id)->first();
             if ($existing && $existing->marked_by === 'guru') {
@@ -72,14 +82,16 @@ class AttendanceController extends Controller
             if ($status === 'hadir' && $session->late_after && now()->gt($session->late_after)) {
                 $status = 'terlambat';
             }
+            $extra = $proof ? ['photo_path' => $photo, 'lat' => $d['lat'], 'lng' => $d['lng'], 'accuracy' => isset($d['accuracy']) ? (int) round($d['accuracy']) : null] : [];
             AttendanceRecord::updateOrCreate(
                 ['session_id' => $session->id, 'student_id' => $me->id],
-                ['status' => $status, 'note' => in_array($status, ['hadir', 'terlambat'], true) ? null : trim($d['note']), 'marked_at' => now(), 'marked_by' => 'self']
+                ['status' => $status, 'note' => in_array($status, ['hadir', 'terlambat'], true) ? null : trim($d['note']), 'marked_at' => now(), 'marked_by' => 'self'] + $extra
             );
 
             return $status;
         });
         if (! array_key_exists($result, AttendanceSession::STATUSES)) {
+            AttendanceProof::forget($photo);
             return back()->withErrors(['status' => $result]);
         }
         $status = $result;

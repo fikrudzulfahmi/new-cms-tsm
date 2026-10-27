@@ -10,7 +10,7 @@ class AttendanceRecord extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['session_id', 'student_id', 'status', 'note', 'marked_at', 'marked_by'];
+    protected $fillable = ['session_id', 'student_id', 'status', 'note', 'marked_at', 'marked_by', 'photo_path', 'lat', 'lng', 'accuracy'];
 
     protected $casts = ['marked_at' => 'datetime'];
 }
