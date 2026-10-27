@@ -35,7 +35,7 @@ class SecurityHeaders
                 "img-src 'self' data: blob: https:",
                 "media-src 'self' blob:",
                 "connect-src 'self'",
-                "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com",
+                "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com https://drive.google.com",
                 "form-action 'self'",
                 "base-uri 'self'",
                 "object-src 'none'",

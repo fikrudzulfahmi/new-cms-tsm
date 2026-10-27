@@ -9,7 +9,7 @@ function complete() { router.post(`/belajar/materi/${props.lesson.id}/selesai`, 
   <LmsShell :title="lesson.title" :back="`/belajar/mapel/${course.id}`" :backLabel="course.title">
     <article class="bg-white rounded-2xl border border-slate-200 p-5 space-y-4">
       <div v-if="lesson.type==='video' && lesson.video_url" class="aspect-video">
-        <iframe :src="lesson.video_url" class="w-full h-full rounded-xl" allowfullscreen referrerpolicy="no-referrer"
+        <iframe :src="lesson.video_url" class="w-full h-full rounded-xl" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"
                 sandbox="allow-scripts allow-same-origin allow-presentation" allow="fullscreen; picture-in-picture"></iframe>
       </div>
       <div v-if="lesson.type==='file' && lesson.has_file">
