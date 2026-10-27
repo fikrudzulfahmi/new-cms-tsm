@@ -1,4 +1,5 @@
 <script setup>
+import { confirmDialog } from '@/dialog'
 import { ref } from 'vue'
 import { Link, useForm, router } from '@inertiajs/vue3'
 import LmsShell from '@/Components/Lms/LmsShell.vue'
@@ -15,7 +16,7 @@ function save() {
   const o = { preserveScroll: true, onSuccess: reset }
   editId.value ? form.put(`/ruang-guru/presensi/${editId.value}`, o) : form.post('/ruang-guru/presensi', o)
 }
-function del(s) { if (window.confirm(`Hapus presensi "${s.title}" beserta rekapnya?`)) router.delete(`/ruang-guru/presensi/${s.id}`, { preserveScroll: true }) }
+async function del(s) { if (await confirmDialog(`Hapus presensi "${s.title}" beserta rekapnya?`)) router.delete(`/ruang-guru/presensi/${s.id}`, { preserveScroll: true }) }
 const fmt = (v) => v ? v.replace('T', ' ') : '-'
 </script>
 

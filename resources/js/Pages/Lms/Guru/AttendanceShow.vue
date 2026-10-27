@@ -1,9 +1,10 @@
 <script setup>
+import { promptDialog } from '@/dialog'
 import { router } from '@inertiajs/vue3'
 import LmsShell from '@/Components/Lms/LmsShell.vue'
 const props = defineProps({ session: Object, rows: Array, summary: Object, statuses: Object })
-function set(r, status) {
-  const note = status === 'izin' || status === 'sakit' ? window.prompt('Keterangan (opsional)', r.note || '') : ''
+async function set(r, status) {
+  const note = status === 'izin' || status === 'sakit' ? await promptDialog('Keterangan (opsional)', { value: r.note || '' }) : ''
   if (note === null) return
   router.post(`/ruang-guru/presensi/${props.session.id}/siswa/${r.id}`, { status, note }, { preserveScroll: true })
 }

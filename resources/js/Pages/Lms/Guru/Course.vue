@@ -1,4 +1,5 @@
 <script setup>
+import { confirmDialog, promptDialog } from '@/dialog'
 import { ref, reactive } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import LmsShell from '@/Components/Lms/LmsShell.vue'
@@ -6,12 +7,12 @@ const props = defineProps({ course: Object, sections: Array })
 
 const secForm = useForm({ title: '' })
 function addSection() { secForm.post(`/ruang-guru/mapel/${props.course.id}/bab`, { preserveScroll: true, onSuccess: () => secForm.reset() }) }
-function renameSection(s) {
-  const t = window.prompt('Nama bab', s.title)
+async function renameSection(s) {
+  const t = await promptDialog('Nama bab', { value: s.title })
   if (t && t.trim()) router.put(`/ruang-guru/bab/${s.id}`, { title: t, is_published: s.is_published }, { preserveScroll: true })
 }
 function togglePub(s) { router.put(`/ruang-guru/bab/${s.id}`, { title: s.title, is_published: !s.is_published }, { preserveScroll: true }) }
-function delSection(s) { if (window.confirm(`Hapus bab "${s.title}" beserta materinya?`)) router.delete(`/ruang-guru/bab/${s.id}`, { preserveScroll: true }) }
+async function delSection(s) { if (await confirmDialog(`Hapus bab "${s.title}" beserta materinya?`)) router.delete(`/ruang-guru/bab/${s.id}`, { preserveScroll: true }) }
 function move(s, dir) { router.post(`/ruang-guru/bab/${s.id}/geser`, { dir }, { preserveScroll: true }) }
 
 const editing = ref(null)   // { sectionId, lesson|null }
@@ -26,7 +27,7 @@ function saveLesson() {
   const url = editing.value.id ? `/ruang-guru/materi/${editing.value.id}` : `/ruang-guru/bab/${editing.value.sectionId}/materi`
   form.post(url, { forceFormData: true, preserveScroll: true, onSuccess: () => (editing.value = null) })
 }
-function delLesson(l) { if (window.confirm(`Hapus materi "${l.title}"?`)) router.delete(`/ruang-guru/materi/${l.id}`, { preserveScroll: true }) }
+async function delLesson(l) { if (await confirmDialog(`Hapus materi "${l.title}"?`)) router.delete(`/ruang-guru/materi/${l.id}`, { preserveScroll: true }) }
 
 const prog = ref(null)
 async function showProgress() {
@@ -43,6 +44,8 @@ const typeLabel = { reading: 'Bacaan', video: 'Video', file: 'Berkas' }
     <div class="flex gap-2 mb-3">
       <Link :href="`/ruang-guru/mapel/${course.id}/soal`" class="rounded-xl border border-slate-300 text-sm px-4 py-2">Bank soal</Link>
       <Link :href="`/ruang-guru/mapel/${course.id}/quiz`" class="rounded-xl border border-slate-300 text-sm px-4 py-2">Quiz</Link>
+      <Link :href="`/ruang-guru/mapel/${course.id}/tugas`" class="rounded-xl border border-slate-300 text-sm px-4 py-2">Tugas</Link>
+      <Link :href="`/ruang-guru/mapel/${course.id}/buku-nilai`" class="rounded-xl border border-slate-300 text-sm px-4 py-2">Buku nilai</Link>
     </div>
 
     <div class="flex gap-2 mb-5">

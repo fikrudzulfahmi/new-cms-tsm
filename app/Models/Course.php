@@ -54,4 +54,14 @@ class Course extends Model
             ->where('c.is_active', true)->where('m.student_id', $student->id)->whereNull('m.left_at')
             ->distinct()->pluck('c.id')->all();
     }
+/** Siswa anggota rombel yang ditautkan ke mapel ini. */
+    public function students()
+    {
+        return User::whereIn('id', \DB::table('lms_course_classes as cc')
+            ->join('core_class_members as m', function ($j) {
+                $j->on('m.class_id', '=', 'cc.class_id')->where('m.academic_year_id', '=', $this->academic_year_id);
+            })
+            ->where('cc.course_id', $this->id)->whereNull('m.left_at')->pluck('m.student_id'))
+            ->orderBy('name')->get(['id', 'name', 'username']);
+    }
 }

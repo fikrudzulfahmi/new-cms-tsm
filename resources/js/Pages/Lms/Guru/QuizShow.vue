@@ -1,4 +1,5 @@
 <script setup>
+import { confirmDialog } from '@/dialog'
 import { ref } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import LmsShell from '@/Components/Lms/LmsShell.vue'
@@ -10,7 +11,7 @@ const label = Object.fromEntries([...props.attached, ...props.bank].map(q => [q.
 function add(q) { if (!items.value.find(i => i.id === q.id)) items.value.push({ id: q.id, points: Number(q.points) || 1 }) }
 function rm(i) { items.value.splice(i, 1) }
 function saveQs() { router.post(`/ruang-guru/quiz/${props.quiz.id}/soal`, { items: items.value }, { preserveScroll: true, onSuccess: () => router.reload() }) }
-function del() { if (confirm('Hapus quiz ini?')) router.delete(`/ruang-guru/quiz/${props.quiz.id}`) }
+async function del() { if (await confirmDialog('Hapus quiz ini?')) router.delete(`/ruang-guru/quiz/${props.quiz.id}`) }
 const statusLabel = { in_progress: 'Berjalan', submitted: 'Menunggu nilai uraian / selesai', graded: 'Dinilai' }
 </script>
 

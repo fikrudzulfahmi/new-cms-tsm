@@ -17,7 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Jangan percaya header proxy apa pun: X-Forwarded-For bisa dipalsukan klien
         // untuk mem-bypass rate limit dan memalsukan kunjungan unik.
         // IP asli diambil dari CF-Connecting-IP (diisi Cloudflare) oleh ClientIp.
-        $middleware->trustProxies(at: []);
+        // Hanya header proto dari proxy loopback (cloudflared) yang dipercaya, supaya URL
+        // yang dibuat Laravel memakai https. X-Forwarded-For tetap tidak dipercaya.
+        $middleware->trustProxies(at: ['127.0.0.1', '::1'], headers: Request::HEADER_X_FORWARDED_PROTO);
         $middleware->prepend(\App\Http\Middleware\ClientIp::class);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->web(append: [

@@ -46,6 +46,14 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // Ganti password (wajib pada login pertama) & halaman awal per role.
 Route::middleware('auth')->group(function () {
+    Route::get('/pilih', function () {
+        $u = auth()->user();
+        if (! $u->isContributor()) {
+            return redirect($u->homeUrl());
+        }
+
+        return \Inertia\Inertia::render('Auth/Choose', ['lms' => $u->role === 'guru' ? '/ruang-guru' : '/belajar']);
+    })->name('choose');
     Route::get('/ganti-password', [PasswordController::class, 'edit'])->name('password.change');
     Route::put('/ganti-password', [PasswordController::class, 'update'])->name('password.update')->middleware('throttle:10,1');
     Route::prefix('ruang-guru')->middleware('role:guru')->name('guru.')->group(function () {
@@ -66,6 +74,19 @@ Route::middleware('auth')->group(function () {
         Route::post('/mapel/{course}/soal/impor/simpan', [$q, 'importCommit'])->name('questions.commit');
         Route::put('/soal/{question}', [$q, 'update'])->name('questions.update');
         Route::delete('/soal/{question}', [$q, 'destroy'])->name('questions.destroy');
+        Route::get('/mapel/{course}/tugas', [\App\Http\Controllers\Guru\AssignmentController::class, 'index'])->name('assignments');
+        Route::post('/mapel/{course}/tugas', [\App\Http\Controllers\Guru\AssignmentController::class, 'store'])->name('assignments.store');
+        Route::get('/tugas/{assignment}', [\App\Http\Controllers\Guru\AssignmentController::class, 'show'])->name('assignment');
+        Route::put('/tugas/{assignment}', [\App\Http\Controllers\Guru\AssignmentController::class, 'update'])->name('assignment.update');
+        Route::delete('/tugas/{assignment}', [\App\Http\Controllers\Guru\AssignmentController::class, 'destroy'])->name('assignment.destroy');
+        Route::post('/pengumpulan/{submission}/nilai', [\App\Http\Controllers\Guru\AssignmentController::class, 'grade'])->name('submission.grade');
+        Route::delete('/pengumpulan/{submission}/berkas', [\App\Http\Controllers\Guru\AssignmentController::class, 'deleteFile'])->name('submission.file');
+        Route::patch('/tugas/{assignment}/tayang', [\App\Http\Controllers\Guru\AssignmentController::class, 'togglePublished'])->name('assignment.publish');
+        Route::delete('/tugas/{assignment}/semua-berkas', [\App\Http\Controllers\Guru\AssignmentController::class, 'deleteAllFiles'])->name('assignment.files');
+        Route::get('/tugas/{assignment}/lampiran', [\App\Http\Controllers\Guru\AssignmentController::class, 'brief'])->name('assignment.brief');
+        Route::get('/berkas-pengumpulan/{file}', [\App\Http\Controllers\Guru\AssignmentController::class, 'download'])->name('submission.download');
+        Route::get('/mapel/{course}/buku-nilai', [\App\Http\Controllers\Guru\GradebookController::class, 'index'])->name('gradebook');
+        Route::get('/mapel/{course}/buku-nilai/ekspor', [\App\Http\Controllers\Guru\GradebookController::class, 'export'])->name('gradebook.export');
         Route::get('/mapel/{course}/quiz', [$z, 'index'])->name('quizzes');
         Route::post('/mapel/{course}/quiz', [$z, 'store'])->name('quiz.store');
         Route::get('/quiz/{quiz}', [$z, 'show'])->name('quiz.show');
@@ -91,6 +112,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/presensi', [$a, 'index'])->name('att.index');
         Route::post('/presensi/{session}', [$a, 'mark'])->middleware('throttle:20,1')->name('att.mark');
         $z = \App\Http\Controllers\Siswa\QuizController::class;
+        Route::get('/tugas/{assignment}', [\App\Http\Controllers\Siswa\AssignmentController::class, 'show'])->name('assignment');
+        Route::post('/tugas/{assignment}', [\App\Http\Controllers\Siswa\AssignmentController::class, 'submit'])->middleware('throttle:20,1')->name('assignment.submit');
+        Route::get('/tugas-berkas/{file}', [\App\Http\Controllers\Siswa\AssignmentController::class, 'download'])->name('assignment.file');
+        Route::get('/tugas/{assignment}/lampiran', [\App\Http\Controllers\Siswa\AssignmentController::class, 'brief'])->name('assignment.brief');
         Route::get('/quiz/{quiz}', [$z, 'show'])->name('quiz.show');
         Route::post('/quiz/{quiz}/mulai', [$z, 'start'])->middleware('throttle:20,1')->name('quiz.start');
         Route::get('/pengerjaan/{attempt}', [$z, 'attempt'])->name('quiz.attempt');
@@ -110,13 +135,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/tahun-ajaran', [\App\Http\Controllers\Superadmin\DashboardController::class, 'storeYear'])->name('year.store');
         Route::post('/tahun-ajaran/{year}/aktifkan', [\App\Http\Controllers\Superadmin\DashboardController::class, 'activateYear'])->name('year.activate');
         Route::delete('/tahun-ajaran/{year}', [\App\Http\Controllers\Superadmin\DashboardController::class, 'destroyYear'])->name('year.destroy');
-        Route::post('/sinkron', [\App\Http\Controllers\Superadmin\DashboardController::class, 'sync'])->middleware('throttle:6,1')->name('sync');
+        $ind = \App\Http\Controllers\Superadmin\InductController::class;
+        Route::get('/siswa', [$ind, 'students'])->name('students');
+        Route::get('/guru', [$ind, 'teachers'])->name('teachers');
+        Route::post('/kelas/tarik', [$ind, 'pullClasses'])->middleware('throttle:6,1')->name('classes.pull');
+        Route::post('/kelas/{class}/pratinjau', [$ind, 'preview'])->middleware('throttle:20,1')->name('class.preview');
+        Route::post('/kelas/{class}/tarik', [$ind, 'pull'])->middleware('throttle:20,1')->name('class.pull');
         Route::post('/guru', [\App\Http\Controllers\Superadmin\DashboardController::class, 'storeTeacher'])->name('teacher.store');
+        Route::get('/penyimpanan', [\App\Http\Controllers\Superadmin\StorageController::class, 'index'])->name('storage');
+        Route::put('/penyimpanan', [\App\Http\Controllers\Superadmin\StorageController::class, 'update'])->name('storage.update');
+        Route::delete('/penyimpanan/{file}', [\App\Http\Controllers\Superadmin\StorageController::class, 'destroy'])->name('storage.destroy');
         Route::get('/mapel', [\App\Http\Controllers\Superadmin\CourseController::class, 'index'])->name('courses');
         Route::post('/mapel', [\App\Http\Controllers\Superadmin\CourseController::class, 'store'])->name('courses.store');
         Route::put('/mapel/{course}', [\App\Http\Controllers\Superadmin\CourseController::class, 'update'])->name('courses.update');
         Route::delete('/mapel/{course}', [\App\Http\Controllers\Superadmin\CourseController::class, 'destroy'])->name('courses.destroy');
         Route::post('/akun/{user}/reset', [\App\Http\Controllers\Superadmin\DashboardController::class, 'resetPassword'])->name('user.reset');
+        Route::post('/akun/{user}/penulis', [\App\Http\Controllers\Superadmin\DashboardController::class, 'toggleWriter'])->name('user.writer');
+        Route::post('/kelas/{class}/penulis', [\App\Http\Controllers\Superadmin\DashboardController::class, 'classWriters'])->name('class.writers');
         Route::post('/akun/{user}/aktif', [\App\Http\Controllers\Superadmin\DashboardController::class, 'toggleActive'])->name('user.toggle');
     });
 });
@@ -134,6 +169,7 @@ Route::prefix('admin')->name('admin.')->middleware(['activity.log', 'auth', 'adm
     Route::get('/berita/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     Route::put('/berita/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/berita/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::patch('/berita/{post}/setujui', [PostController::class, 'approve'])->name('posts.approve')->middleware('role:admin');
     Route::post('/berita/seo-analyze', [PostController::class, 'seoAnalyze'])->name('posts.seo');
     Route::get('/berita/{post}/analytics', [PostController::class, 'analytics'])->name('posts.analytics');
 

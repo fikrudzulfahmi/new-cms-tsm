@@ -1,4 +1,5 @@
 <script setup>
+import { confirmDialog } from '@/dialog'
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { router } from '@inertiajs/vue3'
 const props = defineProps({ quiz: Object, attempt: Object, items: Array })
@@ -31,7 +32,7 @@ const answered = (i) => { const a = answers[i.id]; return !!(a.option || a.optio
 
 async function flush() { for (const id of Object.keys(saveTimers)) { clearTimeout(saveTimers[id]); await save(id) } saveTimers = {} }
 async function submit() {
-  if (!confirm('Kumpulkan jawaban sekarang?')) return
+  if (!await confirmDialog('Kumpulkan jawaban sekarang?')) return
   await flush(); done.value = true
   router.post(`/belajar/pengerjaan/${props.attempt.id}/kumpul`)
 }

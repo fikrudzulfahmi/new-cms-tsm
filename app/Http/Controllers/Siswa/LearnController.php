@@ -42,8 +42,19 @@ class LearnController extends Controller
         $this->authorizeCourse($request, $course);
         $doneIds = LessonProgress::where('student_id', $request->user()->id)->whereNotNull('completed_at')->pluck('lesson_id')->all();
 
+        $subs = \App\Models\Submission::where('student_id', $request->user()->id)
+            ->whereIn('assignment_id', \App\Models\Assignment::where('course_id', $course->id)->pluck('id'))
+            ->get()->keyBy('assignment_id');
+        $assignments = \App\Models\Assignment::where('course_id', $course->id)->where('is_published', true)
+            ->orderByRaw('due_at IS NULL')->orderBy('due_at')->get()->map(fn ($a) => [
+                'id' => $a->id, 'title' => $a->title, 'due_at' => \App\Support\Wib::format($a->due_at),
+                'done' => isset($subs[$a->id]), 'graded' => isset($subs[$a->id]) && $subs[$a->id]->graded_at !== null,
+                'past_due' => $a->isPastDue(),
+            ]);
+
         return Inertia::render('Lms/Siswa/Course', [
             'course' => ['id' => $course->id, 'title' => $course->title, 'description' => $course->description],
+            'assignments' => $assignments,
             'quizzes' => \App\Models\Quiz::where('course_id', $course->id)->where('is_published', true)->orderBy('opens_at')->get(['id', 'title', 'opens_at', 'closes_at'])
                 ->map(fn ($z) => ['id' => $z->id, 'title' => $z->title, 'opens_at' => \App\Support\Wib::format($z->opens_at), 'closes_at' => \App\Support\Wib::format($z->closes_at), 'is_open' => $z->isOpen()]),
             'sections' => $course->sections()->where('is_published', true)

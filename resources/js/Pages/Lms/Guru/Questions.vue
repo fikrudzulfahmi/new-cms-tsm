@@ -1,4 +1,5 @@
 <script setup>
+import { confirmDialog } from '@/dialog'
 import { ref, computed } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
 import LmsShell from '@/Components/Lms/LmsShell.vue'
@@ -27,7 +28,7 @@ function save() {
   const opt = { preserveScroll: true, onSuccess: () => (show.value = false) }
   editId.value ? form.put(`/ruang-guru/soal/${editId.value}`, opt) : form.post(`${base}/soal`, opt)
 }
-function del(q) { if (confirm('Hapus soal ini?')) router.delete(`/ruang-guru/soal/${q.id}`, { preserveScroll: true }) }
+async function del(q) { if (await confirmDialog('Hapus soal ini?')) router.delete(`/ruang-guru/soal/${q.id}`, { preserveScroll: true }) }
 const imp = useForm({ file: null })
 function preview() { imp.post(`${base}/soal/impor`, { forceFormData: true, preserveScroll: true }) }
 function commit() { router.post(`${base}/soal/impor/simpan`, {}, { preserveScroll: true }) }
