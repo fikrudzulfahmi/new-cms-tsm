@@ -1,4 +1,5 @@
 <script setup>
+import { confirmDialog } from '@/dialog'
 import { ref, watch, computed } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
@@ -39,8 +40,10 @@ const resetFilter = () => {
   })
 }
 
-const deletePost = (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
+const approve = (id) => router.patch(`/admin/berita/${id}/setujui`, {}, { preserveScroll: true })
+
+const deletePost = async (id) => {
+  if (await confirmDialog('Apakah Anda yakin ingin menghapus berita ini?')) {
     router.delete(`/admin/berita/${id}`)
   }
 }
@@ -48,6 +51,7 @@ const deletePost = (id) => {
 const statusLabels = {
   published: 'Tayang',
   draft: 'Draft',
+  pending: 'Menunggu persetujuan',
   scheduled: 'Terjadwal',
   archived: 'Arsip',
 }
@@ -98,6 +102,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
             <select v-model="status" @change="applyFilter" class="form-input text-sm">
               <option value="">Semua Status</option>
               <option value="published">Tayang (Published)</option>
+              <option value="pending">Menunggu persetujuan</option>
               <option value="draft">Draft</option>
               <option value="scheduled">Terjadwal (Scheduled)</option>
               <option value="archived">Arsip (Archived)</option>
@@ -143,7 +148,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
             </thead>
             <tbody class="divide-y divide-slate-100">
               <tr v-for="p in posts.data" :key="p.id" class="hover:bg-slate-50/50">
-                <td class="p-4 font-semibold text-slate-800 max-w-xs truncate">{{ p.title }}</td>
+                <td class="p-4 font-semibold text-slate-800 max-w-xs truncate">{{ p.title }}<div v-if="isAdmin && p.user && p.user.role !== 'admin'" class="text-xs font-normal text-slate-400">oleh {{ p.user.name }}</div></td>
                 <td class="p-4">
                   <span v-if="p.category" class="badge text-xs" :style="`background:${p.category.color}20;color:${p.category.color}`">{{ p.category.name }}</span>
                 </td>
@@ -152,6 +157,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
                     'badge text-xs capitalize',
                     p.status === 'published' ? 'bg-navy text-accent' :
                     p.status === 'scheduled' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+                    p.status === 'pending' ? 'bg-orange-100 text-orange-800 border border-orange-200' :
                     p.status === 'archived' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
                     'bg-ice text-label border border-line'
                   ]">{{ statusLabels[p.status] || p.status }}</span>
@@ -163,6 +169,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
                   👁 {{ p.views_count }} · 👍 {{ p.likes_count }} · 💬 {{ p.comments_count }}
                 </td>
                 <td class="p-4 text-right space-x-2">
+                  <button v-if="isAdmin && p.status === 'pending'" @click="approve(p.id)" class="text-emerald-700 hover:underline font-semibold">Setujui</button>
                   <Link :href="`/admin/berita/${p.id}/edit`" class="text-blue-600 hover:underline font-medium">Edit</Link>
                   <button @click="deletePost(p.id)" class="text-red-600 hover:underline font-medium">Hapus</button>
                 </td>

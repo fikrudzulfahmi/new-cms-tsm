@@ -10,6 +10,7 @@ const sidebarOpen = ref(false)
 
 const currentUrl = computed(() => page.url)
 const security = computed(() => page.props.security || null)
+const isWriter = computed(() => !!user.value?.can_write)
 const isAdmin = computed(() => (user.value?.role || 'editor') === 'admin')
 
 const isActive = (item) => {
@@ -63,7 +64,7 @@ const allMenuGroups = [
 // Editor hanya melihat menu yang bukan adminOnly (Dashboard, Berita, Komentar).
 const menuGroups = computed(() =>
   allMenuGroups
-    .map((g) => ({ ...g, items: g.items.filter((i) => isAdmin.value || !i.adminOnly) }))
+    .map((g) => ({ ...g, items: g.items.filter((i) => isWriter.value ? i.href === '/admin/berita' : (isAdmin.value || !i.adminOnly)) }))
     .filter((g) => g.items.length)
 )
 </script>
@@ -124,12 +125,13 @@ const menuGroups = computed(() =>
         <button @click="sidebarOpen=true" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
+        <a v-if="isWriter" href="/pilih" class="text-slate-500 hover:text-label text-sm">← Pilih tujuan</a>
         <Link href="/" class="text-slate-500 hover:text-label text-sm flex items-center gap-1">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           Lihat Website
         </Link>
         <div class="ml-auto flex items-center gap-3">
-          <Link href="/admin/komentar" class="relative p-1.5 rounded-lg text-slate-500 hover:bg-slate-100">
+          <Link v-if="!isWriter" href="/admin/komentar" class="relative p-1.5 rounded-lg text-slate-500 hover:bg-slate-100">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
           </Link>
           <div class="text-sm text-slate-600 font-medium">{{ user?.name }}</div>

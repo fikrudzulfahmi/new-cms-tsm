@@ -30,6 +30,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'is_active' => 'boolean',
+            'can_write_posts' => 'boolean',
             'must_change_password' => 'boolean',
             'password_changed_at' => 'datetime',
             'password' => 'hashed',
@@ -38,6 +39,12 @@ class User extends Authenticatable
 
     public function isCmsUser(): bool { return in_array($this->role, self::CMS_ROLES, true); }
 
+    /** Guru/siswa yang diberi izin menulis berita (tulisan menunggu persetujuan admin). */
+    public function isContributor(): bool
+    {
+        return in_array($this->role, self::LMS_ROLES, true) && $this->can_write_posts && $this->is_active;
+    }
+
     public function isAdmin(): bool { return $this->role === 'admin'; }
 
     public function isSuperadmin(): bool { return $this->role === 'superadmin'; }
@@ -45,11 +52,20 @@ class User extends Authenticatable
     /** Halaman tujuan setelah login, sesuai role. */
     public function homeUrl(): string
     {
+        if ($this->isContributor()) {
+            return '/pilih';
+        }
+
         return match ($this->role) {
             'superadmin' => '/superadmin',
             'guru' => '/ruang-guru',
             'siswa' => '/belajar',
             default => '/admin',
         };
+    }
+
+    public function classMembers()
+    {
+        return $this->hasMany(ClassMember::class, 'student_id');
     }
 }

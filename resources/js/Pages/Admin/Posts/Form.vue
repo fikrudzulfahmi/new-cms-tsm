@@ -2,11 +2,12 @@
 import { computed, ref } from 'vue'
 import RichEditor from '@/Components/RichEditor.vue'
 import { analyzeSeo, slugify } from '@/seo-analyzer.js'
-import { useForm, Link } from '@inertiajs/vue3'
+import { useForm, Link, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps(['post', 'categories', 'tags', 'postTags', 'visitStats'])
 const isEdit = !!props.post
+const contributor = !!usePage().props.auth?.user?.can_write
 
 const formatDatetimeForInput = (val) => {
   if (!val) return ''
@@ -36,7 +37,7 @@ const form = useForm({
   meta_description: props.post?.meta_description || '',
   focus_keyword: props.post?.focus_keyword || '',
   canonical_url: props.post?.canonical_url || '',
-  status: props.post?.status || 'published',
+  status: props.post?.status || (usePage().props.auth?.user?.can_write ? 'pending' : 'published'),
   published_at: formatDatetimeForInput(props.post?.published_at),
   is_featured: props.post ? Boolean(props.post.is_featured) : false,
   allow_comments: props.post ? Boolean(props.post.allow_comments) : true,
@@ -156,7 +157,12 @@ const submit = () => {
               </div>
               <div>
                 <label class="form-label">Status Publikasi *</label>
-                <select v-model="form.status" class="form-input">
+                <select v-if="contributor" v-model="form.status" class="form-input">
+                  <option value="pending">Ajukan ke admin (menunggu persetujuan)</option>
+                  <option value="draft">Simpan sebagai draf</option>
+                </select>
+                <select v-else v-model="form.status" class="form-input">
+                  <option value="pending">Menunggu persetujuan</option>
                   <option value="published">Tayang (Published)</option>
                   <option value="draft">Draft</option>
                   <option value="scheduled">Terjadwal (Scheduled)</option>
@@ -166,7 +172,7 @@ const submit = () => {
               </div>
             </div>
 
-            <div>
+            <div v-if="!contributor">
               <label class="form-label">Waktu Publikasi (Published At)</label>
               <input v-model="form.published_at" type="datetime-local" class="form-input text-sm" />
               <p class="text-xs text-slate-500 mt-1">Kosongkan untuk otomatis sekarang saat status Published</p>
@@ -174,7 +180,7 @@ const submit = () => {
             </div>
 
             <div class="flex flex-wrap gap-6 pt-1">
-              <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+              <label v-if="!contributor" class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
                 <input v-model="form.is_featured" type="checkbox" class="rounded border-slate-300 text-navy focus:ring-navy h-4 w-4" />
                 <span class="font-medium">Berita unggulan</span>
               </label>

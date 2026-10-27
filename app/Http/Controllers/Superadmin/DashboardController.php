@@ -124,6 +124,25 @@ class DashboardController extends Controller
         return back()->with('success', 'Password '.$user->name.' direset ke username. Wajib diganti saat login.');
     }
 
+    public function toggleWriter(User $user)
+    {
+        abort_unless(in_array($user->role, ['guru', 'siswa'], true), 404);
+        $user->forceFill(['can_write_posts' => ! $user->can_write_posts])->save();
+        ActivityLog::record('update', 'lms', ($user->can_write_posts ? 'Izin menulis berita diberikan: ' : 'Izin menulis berita dicabut: ').$user->name, $user);
+
+        return back()->with('success', $user->can_write_posts ? $user->name.' kini boleh menulis berita.' : 'Izin menulis '.$user->name.' dicabut.');
+    }
+
+    public function classWriters(Request $request, \App\Models\SchoolClass $class)
+    {
+        $on = $request->boolean('on');
+        $ids = \App\Models\ClassMember::where('class_id', $class->id)->whereNull('left_at')->pluck('student_id');
+        $n = User::where('role', 'siswa')->whereIn('id', $ids)->update(['can_write_posts' => $on]);
+        ActivityLog::record('update', 'lms', ($on ? 'Izin menulis berita diberikan' : 'Izin menulis berita dicabut').' untuk '.$n.' siswa kelas '.$class->name);
+
+        return back()->with('success', ($on ? 'Izin menulis diberikan ke ' : 'Izin menulis dicabut dari ').$n.' siswa kelas '.$class->name.'.');
+    }
+
     public function toggleActive(User $user)
     {
         abort_unless(in_array($user->role, ['guru', 'siswa'], true), 404);

@@ -19,7 +19,8 @@ class PostController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Post::with(['category', 'user:id,name'])->orderByDesc('created_at');
+        $query = Post::with(['category', 'user:id,name,role'])->orderByDesc('created_at');
+        if (auth()->user()->isContributor()) $query->where('user_id', auth()->id());
         if ($request->status) $query->where('status', $request->status);
         if ($request->category) $query->where('category_id', $request->category);
         if ($request->q) {
@@ -45,6 +46,7 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate($this->rules());
+        $this->limitContributor($data);
         $data['slug'] = Slug::unique('posts', ($data['slug'] ?? null) ?: $data['title']);
         $data['user_id'] = auth()->id();
         $data['body'] = $this->cleanBody($data['body'] ?? null);
@@ -68,7 +70,7 @@ class PostController extends Controller
             $post->tags()->sync($tagIds);
         }
 
-        return redirect()->route('admin.posts.index')->with('success', 'Berita berhasil dipublikasikan!');
+        return redirect()->route('admin.posts.index')->with('success', $post->status === 'pending' ? 'Berita diajukan. Menunggu persetujuan admin.' : 'Berita berhasil disimpan!');
     }
 
     public function edit(Post $post)
@@ -91,7 +93,9 @@ class PostController extends Controller
     {
         $this->authorizePost($post);
 
+        abort_if(auth()->user()->isContributor() && ! in_array($post->status, ['draft', 'pending'], true), 403, 'Berita sudah tayang/diarsipkan. Hubungi admin untuk mengubahnya.');
         $data = $request->validate($this->rules($post->id));
+        $this->limitContributor($data);
         if (empty($data['slug'])) $data['slug'] = Slug::unique('posts', $data['title'], $post->id);
         $data['body'] = $this->cleanBody($data['body'] ?? null);
         $data['reading_time'] = max(1, (int) round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
@@ -121,10 +125,29 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         $this->authorizePost($post);
+        abort_if(auth()->user()->isContributor() && ! in_array($post->status, ['draft', 'pending'], true), 403, 'Berita yang sudah tayang hanya bisa dihapus admin.');
         $this->dropFile($post->cover_image);
         $this->dropFile($post->og_image);
         $post->delete();
         return back()->with('success', 'Berita berhasil dihapus.');
+    }
+
+    /** Penulis tamu tidak bisa menerbitkan: tayang/terjadwal otomatis jadi "menunggu persetujuan". */
+    private function limitContributor(array &$data): void
+    {
+        if (! auth()->user()->isContributor()) return;
+        if (! in_array($data['status'], ['draft', 'pending'], true)) $data['status'] = 'pending';
+        $data['published_at'] = null;
+        $data['is_featured'] = false;
+    }
+
+    /** Admin menyetujui tulisan guru/siswa → tayang sekarang. */
+    public function approve(Post $post)
+    {
+        abort_unless($post->status === 'pending', 422, 'Berita ini tidak sedang menunggu persetujuan.');
+        $post->update(['status' => 'published', 'published_at' => now()]);
+
+        return back()->with('success', 'Berita disetujui dan ditayangkan.');
     }
 
     /** Editor hanya boleh mengubah/menghapus berita miliknya sendiri. */
@@ -203,7 +226,7 @@ class PostController extends Controller
             'category_id' => 'required|exists:categories,id',
             'excerpt' => 'nullable|string|max:500',
             'body' => 'nullable|string',
-            'status' => 'required|in:draft,published,scheduled,archived',
+            'status' => 'required|in:draft,pending,published,scheduled,archived',
             'published_at' => 'nullable|date|required_if:status,scheduled',
             'is_featured' => 'boolean',
             'allow_comments' => 'boolean',

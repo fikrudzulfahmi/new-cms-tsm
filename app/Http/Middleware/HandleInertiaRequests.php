@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'must_change_password' => (bool) $request->user()->must_change_password,
                     'role' => $request->user()->role,
+                    'can_write' => $request->user()->isContributor(),
                     'avatar' => $request->user()->avatar,
                     'home' => $request->user()->homeUrl(),
                 ] : null,

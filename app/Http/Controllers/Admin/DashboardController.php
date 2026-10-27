@@ -58,6 +58,7 @@ class DashboardController extends Controller
                 'total_achievements' => Achievement::count(),
                 'posts_total' => Post::count(),
                 'posts_published' => Post::where('status', 'published')->count(),
+                'posts_pending' => Post::where('status', 'pending')->count(),
                 'posts_draft' => Post::where('status', 'draft')->count(),
                 'visits_today' => Visit::whereDate('visited_on', $today)->count(),
                 'visits_month' => Visit::whereBetween('visited_on', $thisMonth)->count(),
