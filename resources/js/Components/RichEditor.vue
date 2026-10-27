@@ -1,4 +1,5 @@
 <script setup>
+import { promptDialog, alertDialog } from '@/dialog'
 import { ref, watch, onBeforeUnmount } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -60,20 +61,20 @@ const toggleSource = () => {
   sourceMode.value = !sourceMode.value
 }
 
-const setLink = () => {
+const setLink = async () => {
   const prev = editor.value.getAttributes('link').href || ''
-  const url = window.prompt('URL link (kosongkan untuk hapus):', prev || 'https://')
+  const url = await promptDialog('URL link (kosongkan untuk hapus):', { value: prev || 'https://' })
   if (url === null) return
   if (url === '' || url === 'https://') return e().extendMarkRange('link').unsetLink().run()
   const external = /^https?:\/\//.test(url) && !url.includes(window.location.host)
   e().extendMarkRange('link').setLink({ href: url, target: external ? '_blank' : null, rel: external ? 'noopener noreferrer' : null }).run()
 }
 
-const addYoutube = () => {
-  const url = window.prompt('Tempel link YouTube (youtube.com/watch?v=… atau youtu.be/…):')
+const addYoutube = async () => {
+  const url = await promptDialog('Tempel link YouTube (youtube.com/watch?v=… atau youtu.be/…):')
   if (!url) return
   const ok = editor.value.chain().focus().setYoutubeVideo({ src: url.trim() }).run()
-  if (!ok) alert('Link YouTube tidak valid.')
+  if (!ok) alertDialog('Link YouTube tidak valid.')
 }
 
 const pickImage = () => fileInput.value.click()
@@ -84,15 +85,15 @@ const uploadImage = async (ev) => {
   try {
     const fd = new FormData(); fd.append('image', file)
     const { data } = await axios.post(props.uploadUrl, fd)
-    const alt = window.prompt('Teks alternatif gambar (alt, penting untuk SEO):', '') || ''
+    const alt = await promptDialog('Teks alternatif gambar (alt, penting untuk SEO):', { value: '' }) || ''
     e().setImage({ src: data.url, alt }).run()
   } catch (err) {
-    alert('Upload gagal: ' + (err.response?.data?.message || err.message))
+    alertDialog('Upload gagal: ' + (err.response?.data?.message || err.message))
   } finally { uploading.value = false }
 }
-const imageByUrl = () => {
-  const url = window.prompt('URL gambar:'); if (!url) return
-  const alt = window.prompt('Teks alternatif (alt):', '') || ''
+const imageByUrl = async () => {
+  const url = await promptDialog('URL gambar:'); if (!url) return
+  const alt = await promptDialog('Teks alternatif (alt):', { value: '' }) || ''
   e().setImage({ src: url, alt }).run()
 }
 const setColor = (ev) => e().setColor(ev.target.value).run()

@@ -1,12 +1,13 @@
 <script setup>
+import { confirmDialog } from '@/dialog'
 import { router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps(['comments'])
 
 const approve = (id) => router.patch(`/admin/komentar/${id}/approve`, {}, { preserveScroll: true })
-const destroy = (id) => {
-  if (confirm('Hapus komentar ini?')) router.delete(`/admin/komentar/${id}`, { preserveScroll: true })
+const destroy = async (id) => {
+  if (await confirmDialog('Hapus komentar ini?')) router.delete(`/admin/komentar/${id}`, { preserveScroll: true })
 }
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : ''

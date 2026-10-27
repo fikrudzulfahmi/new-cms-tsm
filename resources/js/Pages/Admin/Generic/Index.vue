@@ -1,4 +1,5 @@
 <script setup>
+import { confirmDialog } from '@/dialog'
 import { ref, computed } from 'vue'
 import { useForm, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
@@ -97,10 +98,10 @@ function submit() {
   }
 }
 
-const destroy = (itemOrId) => {
+const destroy = async (itemOrId) => {
   const item = typeof itemOrId === 'object' ? itemOrId : (props.items || []).find(i => i.id === itemOrId)
   const label = item ? (item.title || item.name || item.subject || `#${item.id}`) : `#${itemOrId}`
-  if (confirm(`Hapus "${label}"? Tindakan ini tidak bisa dibatalkan.`)) {
+  if (await confirmDialog(`Hapus "${label}"? Tindakan ini tidak bisa dibatalkan.`)) {
     router.delete(`/admin/${props.routeName}/${item ? item.id : itemOrId}`, { preserveScroll: true })
   }
 }
