@@ -10,12 +10,18 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('users')->insert([
-            'name' => 'Administrator', 'email' => 'admin@tsm-blitar.sch.id',
-            'email_verified_at' => now(), 'role' => 'admin',
-            'password' => Hash::make('Admin#TSM2026'),
-            'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
-        ]);
+        DB::table('users')->updateOrInsert(
+            ['email' => 'admin@tsm-blitar.sch.id'],
+            [
+                'name' => 'Administrator',
+                'email_verified_at' => now(),
+                'role' => 'admin',
+                'password' => Hash::make('Admin#TSM2026'),
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
 
         $settings = [
             ['key'=>'site_name','value'=>'TSM SMKS Islam 1 Blitar','group'=>'umum','type'=>'text','label'=>'Nama Situs'],
@@ -43,7 +49,10 @@ class DatabaseSeeder extends Seeder
             ['key'=>'footer_text','value'=>'© 2026 Teknik Sepeda Motor SMKS Islam 1 Kota Blitar. Semua hak dilindungi.','group'=>'umum','type'=>'textarea','label'=>'Teks Footer'],
         ];
         foreach ($settings as $s) {
-            DB::table('settings')->insert(array_merge($s, ['description'=>null,'created_at'=>now(),'updated_at'=>now()]));
+            DB::table('settings')->updateOrInsert(
+                ['key' => $s['key']],
+                array_merge($s, ['description'=>null,'created_at'=>now(),'updated_at'=>now()])
+            );
         }
 
         $categories = [
@@ -54,7 +63,10 @@ class DatabaseSeeder extends Seeder
             ['name'=>'Prestasi','slug'=>'prestasi','description'=>'Prestasi siswa dan sekolah','color'=>'#d97706','sort_order'=>4],
         ];
         foreach ($categories as $c) {
-            DB::table('categories')->insert(array_merge($c, ['is_active'=>true,'created_at'=>now(),'updated_at'=>now()]));
+            DB::table('categories')->updateOrInsert(
+                ['slug' => $c['slug']],
+                array_merge($c, ['is_active'=>true,'created_at'=>now(),'updated_at'=>now()])
+            );
         }
 
         $competencies = [
@@ -64,7 +76,10 @@ class DatabaseSeeder extends Seeder
             ['title'=>'Sistem Rem & Suspensi','slug'=>'sistem-rem-suspensi','icon'=>'shield-check','short_description'=>'Perawatan sistem rem cakram, tromol, dan suspensi.','sort_order'=>4],
         ];
         foreach ($competencies as $c) {
-            DB::table('competencies')->insert(array_merge($c, ['description'=>null,'image'=>null,'is_active'=>true,'created_at'=>now(),'updated_at'=>now()]));
+            DB::table('competencies')->updateOrInsert(
+                ['slug' => $c['slug']],
+                array_merge($c, ['description'=>null,'image'=>null,'is_active'=>true,'created_at'=>now(),'updated_at'=>now()])
+            );
         }
 
         $programs = [
@@ -74,7 +89,10 @@ class DatabaseSeeder extends Seeder
             ['title'=>'Bursa Kerja Khusus','subtitle'=>'Penempatan Kerja Langsung','icon'=>'users','description'=>'BKK aktif menjalin kerjasama dengan lebih dari 20 perusahaan otomotif.','sort_order'=>4],
         ];
         foreach ($programs as $p) {
-            DB::table('programs')->insert(array_merge($p, ['image'=>null,'is_active'=>true,'created_at'=>now(),'updated_at'=>now()]));
+            DB::table('programs')->updateOrInsert(
+                ['title' => $p['title']],
+                array_merge($p, ['image'=>null,'is_active'=>true,'created_at'=>now(),'updated_at'=>now()])
+            );
         }
 
         $sliders = [
@@ -82,24 +100,29 @@ class DatabaseSeeder extends Seeder
             ['title'=>'SPMB 2026/2027 Dibuka!','subtitle'=>'Daftar sekarang dan raih masa depan cerah bersama kami','button_text'=>'Daftar SPMB','button_url'=>'/spmb','sort_order'=>2],
         ];
         foreach ($sliders as $s) {
-            DB::table('sliders')->insert(array_merge($s, ['image'=>null,'is_active'=>true,'created_at'=>now(),'updated_at'=>now()]));
+            DB::table('sliders')->updateOrInsert(
+                ['title' => $s['title']],
+                array_merge($s, ['image'=>null,'is_active'=>true,'created_at'=>now(),'updated_at'=>now()])
+            );
         }
 
         $catId = DB::table('categories')->where('slug','berita')->value('id');
         $userId = DB::table('users')->where('email','admin@tsm-blitar.sch.id')->value('id');
-        DB::table('posts')->insert([
-            'category_id'=>$catId,'user_id'=>$userId,
-            'title'=>'Selamat Datang di Website Resmi Jurusan TSM',
-            'slug'=>'selamat-datang-di-website-resmi-jurusan-tsm',
-            'excerpt'=>'Website resmi jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar kini hadir untuk memudahkan informasi.',
-            'body'=>'<p>Website resmi jurusan <strong>Teknik Sepeda Motor (TSM)</strong> SMKS Islam 1 Kota Blitar telah resmi diluncurkan!</p><p>Melalui website ini, kami menyediakan informasi lengkap tentang jurusan, program unggulan, prestasi siswa, dan berita terkini.</p>',
-            'status'=>'published','published_at'=>now(),'is_featured'=>true,'allow_comments'=>true,
-            'views_count'=>0,'likes_count'=>0,'dislikes_count'=>0,'shares_count'=>0,'comments_count'=>0,'reading_time'=>2,
-            'meta_title'=>'Selamat Datang di Website Resmi Jurusan TSM - SMKS Islam 1 Blitar',
-            'meta_description'=>'Website resmi jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar.',
-            'focus_keyword'=>'teknik sepeda motor blitar','seo_score'=>80,'seo_report'=>null,
-            'og_image'=>null,'canonical_url'=>null,'cover_image'=>null,'cover_alt'=>null,
-            'created_at'=>now(),'updated_at'=>now(),
-        ]);
+        DB::table('posts')->updateOrInsert(
+            ['slug' => 'selamat-datang-di-website-resmi-jurusan-tsm'],
+            [
+                'category_id'=>$catId,'user_id'=>$userId,
+                'title'=>'Selamat Datang di Website Resmi Jurusan TSM',
+                'excerpt'=>'Website resmi jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar kini hadir untuk memudahkan informasi.',
+                'body'=>'<p>Website resmi jurusan <strong>Teknik Sepeda Motor (TSM)</strong> SMKS Islam 1 Kota Blitar telah resmi diluncurkan!</p><p>Melalui website ini, kami menyediakan informasi lengkap tentang jurusan, program unggulan, prestasi siswa, dan berita terkini.</p>',
+                'status'=>'published','published_at'=>now(),'is_featured'=>true,'allow_comments'=>true,
+                'views_count'=>0,'likes_count'=>0,'dislikes_count'=>0,'shares_count'=>0,'comments_count'=>0,'reading_time'=>2,
+                'meta_title'=>'Selamat Datang di Website Resmi Jurusan TSM - SMKS Islam 1 Blitar',
+                'meta_description'=>'Website resmi jurusan Teknik Sepeda Motor SMKS Islam 1 Kota Blitar.',
+                'focus_keyword'=>'teknik sepeda motor blitar','seo_score'=>80,'seo_report'=>null,
+                'og_image'=>null,'canonical_url'=>null,'cover_image'=>null,'cover_alt'=>null,
+                'created_at'=>now(),'updated_at'=>now(),
+            ]
+        );
     }
 }
