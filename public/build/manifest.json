@@ -1,6 +1,6 @@
 {
-  "_AdminLayout-Dhw156hp.js": {
-    "file": "assets/AdminLayout-Dhw156hp.js",
+  "_AdminLayout-BUlVFTMZ.js": {
+    "file": "assets/AdminLayout-BUlVFTMZ.js",
     "name": "AdminLayout",
     "imports": [
       "_dist-E7DbNYgQ.js"
@@ -75,90 +75,90 @@
     ]
   },
   "resources/js/Pages/Admin/Activity/Index.vue": {
-    "file": "assets/Index-ClpwfdvD.js",
+    "file": "assets/Index-DgFizVaM.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Activity/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-E7DbNYgQ.js",
-      "_AdminLayout-Dhw156hp.js"
+      "_AdminLayout-BUlVFTMZ.js"
     ]
   },
   "resources/js/Pages/Admin/Comments/Index.vue": {
-    "file": "assets/Index-DsckvsO-.js",
+    "file": "assets/Index-BonGk58q.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Comments/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-E7DbNYgQ.js",
       "resources/js/app.js",
-      "_AdminLayout-Dhw156hp.js"
+      "_AdminLayout-BUlVFTMZ.js"
     ]
   },
   "resources/js/Pages/Admin/Dashboard/Index.vue": {
-    "file": "assets/Index-pFGpl033.js",
+    "file": "assets/Index-DlRWpmuW.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Dashboard/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-E7DbNYgQ.js",
-      "_AdminLayout-Dhw156hp.js"
+      "_AdminLayout-BUlVFTMZ.js"
     ]
   },
   "resources/js/Pages/Admin/Generic/Index.vue": {
-    "file": "assets/Index-Buj8Fb2G.js",
+    "file": "assets/Index-BiLG7_6w.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Generic/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-E7DbNYgQ.js",
       "resources/js/app.js",
-      "_AdminLayout-Dhw156hp.js"
+      "_AdminLayout-BUlVFTMZ.js"
     ]
   },
   "resources/js/Pages/Admin/Posts/Form.vue": {
-    "file": "assets/Form-Bcbhvo80.js",
+    "file": "assets/Form-DdJyJzMV.js",
     "name": "Form",
     "src": "resources/js/Pages/Admin/Posts/Form.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-E7DbNYgQ.js",
       "resources/js/app.js",
-      "_AdminLayout-Dhw156hp.js"
+      "_AdminLayout-BUlVFTMZ.js"
     ],
     "css": [
       "assets/Form-B22-Rzfz.css"
     ]
   },
   "resources/js/Pages/Admin/Posts/Index.vue": {
-    "file": "assets/Index-JBevWicw.js",
+    "file": "assets/Index-B3ElAj-L.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Posts/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-E7DbNYgQ.js",
       "resources/js/app.js",
-      "_AdminLayout-Dhw156hp.js"
+      "_AdminLayout-BUlVFTMZ.js"
     ]
   },
   "resources/js/Pages/Admin/Reports/Index.vue": {
-    "file": "assets/Index-DTXjj4II.js",
+    "file": "assets/Index-DG3WUsJo.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Reports/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-E7DbNYgQ.js",
-      "_AdminLayout-Dhw156hp.js"
+      "_AdminLayout-BUlVFTMZ.js"
     ]
   },
   "resources/js/Pages/Admin/Settings/Index.vue": {
-    "file": "assets/Index-C7l_7wqW.js",
+    "file": "assets/Index-Cg4QuArT.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Settings/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-E7DbNYgQ.js",
-      "_AdminLayout-Dhw156hp.js"
+      "_AdminLayout-BUlVFTMZ.js"
     ]
   },
   "resources/js/Pages/Alumni/Index.vue": {
@@ -249,7 +249,7 @@
     ]
   },
   "resources/js/Pages/Post/Show.vue": {
-    "file": "assets/Show-D2lA0v9I.js",
+    "file": "assets/Show-DmIjudlj.js",
     "name": "Show",
     "src": "resources/js/Pages/Post/Show.vue",
     "isDynamicEntry": true,
@@ -295,7 +295,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-D0Oan0GO.js",
+    "file": "assets/app-BqVL8cTw.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

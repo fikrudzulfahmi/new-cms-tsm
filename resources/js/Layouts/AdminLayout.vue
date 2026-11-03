@@ -85,10 +85,12 @@ const allMenuGroups = [
   },
 ]
 
-// Editor hanya melihat menu yang bukan adminOnly (Dashboard, Berita, Komentar).
+// Editor/Penulis hanya melihat menu operasional miliknya: Dashboard, Berita, Komentar.
+// adminOnly items (Kategori, Galeri, dll) disembunyikan dari role non-admin.
+const WRITER_ALLOWED = ['/admin', '/admin/berita', '/admin/komentar']
 const menuGroups = computed(() =>
   allMenuGroups
-    .map((g) => ({ ...g, items: g.items.filter((i) => isWriter.value ? i.href === '/admin/berita' : (isAdmin.value || !i.adminOnly)) }))
+    .map((g) => ({ ...g, items: g.items.filter((i) => isWriter.value ? WRITER_ALLOWED.includes(i.href) : (isAdmin.value || !i.adminOnly)) }))
     .filter((g) => g.items.length)
 )
 </script>

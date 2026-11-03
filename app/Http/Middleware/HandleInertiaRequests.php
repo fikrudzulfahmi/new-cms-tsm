@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'role' => $request->user()->role,
                     'avatar' => $request->user()->avatar,
+                    'can_write' => $request->user()->isContributor(),
                     'home' => $request->user()->homeUrl(),
                 ] : null,
             ],

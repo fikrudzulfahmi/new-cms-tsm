@@ -17,7 +17,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     // Akun panel admin CMS.
-    public const CMS_ROLES = ['admin', 'editor'];
+    public const CMS_ROLES = ['admin', 'editor', 'writer'];
 
     protected function casts(): array
     {
@@ -35,7 +35,7 @@ class User extends Authenticatable
 
     public function isEditor(): bool { return in_array($this->role, self::CMS_ROLES, true); }
 
-    public function isContributor(): bool { return false; }
+    public function isContributor(): bool { return $this->role === 'writer'; }
 
     /** Halaman tujuan setelah login. */
     public function homeUrl(): string { return '/admin'; }
