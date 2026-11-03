@@ -55,7 +55,12 @@ class AuthController extends Controller
 
             ActivityLog::record('login', 'auth', 'Masuk ke panel admin', $user, ['status' => 200]);
 
-            return redirect($request->session()->pull('url.intended') ?: $user->homeUrl());
+            $intended = $request->session()->pull('url.intended');
+            if (!$intended || str_ends_with(rtrim($intended, '/'), '/login') || str_contains($intended, '/login')) {
+                $intended = $user->homeUrl();
+            }
+
+            return redirect($intended);
         }
 
         RateLimiter::hit($key, 300);

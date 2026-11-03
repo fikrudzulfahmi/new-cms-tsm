@@ -33,6 +33,10 @@ class User extends Authenticatable
 
     public function isAdmin(): bool { return $this->role === 'admin'; }
 
+    public function isEditor(): bool { return in_array($this->role, self::CMS_ROLES, true); }
+
+    public function isContributor(): bool { return false; }
+
     /** Halaman tujuan setelah login. */
     public function homeUrl(): string { return '/admin'; }
 }

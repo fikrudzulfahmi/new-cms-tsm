@@ -4,6 +4,8 @@ import { useForm } from '@inertiajs/vue3'
 import GearRatio from '@/Components/Landing/GearRatio.vue'
 
 const form = useForm({ email: '', password: '', remember: false })
+const emailEl = ref(null)
+const passEl = ref(null)
 
 const netIssue = ref('')
 const checking = ref(false)
@@ -51,6 +53,11 @@ const submit = async () => {
   if (form.processing || checking.value) return
   netIssue.value = ''
 
+  // Ambil nilai langsung dari kolom input sebelum submit: autofill atau password manager
+  // sering mengisi kolom tanpa trigger event input di Vue.
+  const email = (emailEl.value?.value ?? form.email).trim()
+  const password = passEl.value?.value ?? form.password
+
   if (!navigator.onLine) {
     markOffline()
     return
@@ -65,7 +72,16 @@ const submit = async () => {
     return
   }
 
-  form.post('/login', { onFinish: () => form.reset('password') })
+  form.email = email
+  form.password = password
+
+  form.post('/login', {
+    preserveScroll: true,
+    onFinish: () => {
+      form.reset('password')
+      if (passEl.value) passEl.value.value = ''
+    },
+  })
 }
 </script>
 
@@ -117,6 +133,7 @@ const submit = async () => {
             <div>
               <label class="form-label">Email</label>
               <input
+                ref="emailEl"
                 v-model="form.email"
                 type="email"
                 placeholder="admin@tsm-blitar.sch.id"
@@ -132,6 +149,7 @@ const submit = async () => {
             <div>
               <label class="form-label">Password</label>
               <input
+                ref="passEl"
                 v-model="form.password"
                 type="password"
                 placeholder="••••••••"
