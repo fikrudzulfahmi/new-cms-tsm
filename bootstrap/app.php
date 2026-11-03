@@ -24,7 +24,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
-            \App\Http\Middleware\EnsurePasswordChanged::class,
         ]);
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->homeUrl() ?? '/');
         $middleware->redirectGuestsTo('/login');

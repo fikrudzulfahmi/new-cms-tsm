@@ -1,0 +1,28 @@
+# Staging cms-tsm (Laravel 13 + Inertia/Vue) — satu container FrankenPHP
+FROM node:22-alpine AS assets
+WORKDIR /build
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci --no-audit --no-fund
+COPY vite.config.js ./
+COPY resources/ resources/
+COPY public/ public/
+RUN npm run build
+
+FROM backupmate/laravel-frankenphp:8.4 AS vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --no-progress --no-scripts --no-autoloader
+COPY . .
+RUN composer dump-autoload --optimize --no-dev --no-interaction
+
+FROM backupmate/laravel-frankenphp:8.4
+WORKDIR /app
+ENV SERVER_NAME=":80" CADDY_GLOBAL_OPTIONS="auto_https off"
+COPY --from=vendor /app /app/
+COPY --from=assets /build/public/build /app/public/build
+RUN rm -rf .git .staging node_modules tests \
+ && mkdir -p storage/app/public storage/app/private storage/framework/cache/data \
+             storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+ && chmod -R 777 storage bootstrap/cache \
+ && printf "opcache.jit_buffer_size=0\nopcache.memory_consumption=32\n" > /usr/local/etc/php/conf.d/zz-lowmem.ini
+EXPOSE 80
