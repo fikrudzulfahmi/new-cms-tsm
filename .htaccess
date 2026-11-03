@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Keamanan: Blokir akses langsung ke file konfigurasi, dotfiles, dan source code
+    <FilesMatch "^\.(env|git)">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+
+    RewriteRule ^(\.env|composer\.(json|lock)|package\.(json|lock)|artisan|phpunit\.xml|vite\.config\.js) - [F,L]
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|tests|vendor)(/.*)?$ - [F,L]
+    RewriteRule ^storage/(framework|logs|app)(/.*)?$ - [F,L]
+
+    # 2. Teruskan semua request ke folder public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+Options -Indexes
