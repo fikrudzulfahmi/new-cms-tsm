@@ -1,5 +1,5 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 
 defineProps({
   status: { type: Number, default: 404 },
@@ -10,6 +10,7 @@ defineProps({
 </script>
 
 <template>
+  <Head :title="`${status} — ${label}`" />
   <div class="min-h-screen grid-dark flex flex-col">
     <header class="w-full max-w-6xl mx-auto px-5 sm:px-8 py-6 flex items-center justify-between">
       <Link href="/" class="flex items-center gap-3 no-underline text-white">

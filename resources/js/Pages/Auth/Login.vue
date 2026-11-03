@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import GearRatio from '@/Components/Landing/GearRatio.vue'
 
 const form = useForm({ email: '', password: '', remember: false })
@@ -86,6 +86,7 @@ const submit = async () => {
 </script>
 
 <template>
+  <Head title="Masuk · Panel Admin" />
   <div class="min-h-screen grid-dark flex items-center justify-center p-4 py-10">
     <div class="w-full max-w-5xl grid lg:grid-cols-2 gap-10 items-center">
       <div class="hidden lg:block lp" style="background:transparent">

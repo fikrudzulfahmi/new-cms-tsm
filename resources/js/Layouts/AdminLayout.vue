@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Link, usePage, router } from '@inertiajs/vue3'
+import { Head, Link, usePage, router } from '@inertiajs/vue3'
 
 const page = usePage()
 const user = computed(() => page.props.auth?.user)
@@ -24,6 +24,29 @@ const isActive = (item) => {
 
 const logout = () => router.post('/logout')
 
+// Judul tab admin otomatis dari rute aktif
+const pageTitle = computed(() => {
+  const url = (currentUrl.value || '').split('?')[0]
+  if (url === '/admin') return 'Dashboard'
+  if (url === '/admin/berita' || url.startsWith('/admin/berita/')) return 'Berita'
+  if (url === '/admin/kategori') return 'Kategori Berita'
+  if (url === '/admin/komentar') return 'Komentar'
+  if (url === '/admin/galeri') return 'Galeri Foto & Video'
+  if (url === '/admin/slider') return 'Slider Hero'
+  if (url === '/admin/guru') return 'Guru & Instruktur'
+  if (url === '/admin/kompetensi') return 'Kompetensi Keahlian'
+  if (url === '/admin/program') return 'Program Unggulan'
+  if (url === '/admin/sarana') return 'Sarana & Bengkel'
+  if (url === '/admin/prestasi') return 'Prestasi'
+  if (url === '/admin/testimoni') return 'Testimoni Alumni'
+  if (url === '/admin/mitra') return 'Mitra Industri'
+  if (url === '/admin/pesan') return 'Pesan Masuk'
+  if (url === '/admin/laporan') return 'Laporan & Analisis'
+  if (url === '/admin/aktivitas') return 'Log Aktivitas'
+  if (url === '/admin/pengaturan') return 'Pengaturan Website'
+  return 'Panel Admin'
+})
+
 const allMenuGroups = [
   {
     label: null,
@@ -35,6 +58,7 @@ const allMenuGroups = [
     label: 'Konten',
     items: [
       { label: 'Berita', href: '/admin/berita', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
+      { label: 'Kategori', adminOnly: true, href: '/admin/kategori', icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z' },
       { label: 'Komentar', href: '/admin/komentar', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
       { label: 'Galeri & Media', adminOnly: true, href: '/admin/galeri', match: ['/admin/galeri', '/admin/slider'], icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
     ]
@@ -71,6 +95,7 @@ const menuGroups = computed(() =>
 
 <template>
   <div class="min-h-screen grid-light flex">
+    <Head :title="pageTitle + ' · Panel Admin'" />
     <!-- Sidebar Overlay (mobile) -->
     <div v-if="sidebarOpen" @click="sidebarOpen=false" class="fixed inset-0 z-20 bg-navy/60 lg:hidden"></div>
 

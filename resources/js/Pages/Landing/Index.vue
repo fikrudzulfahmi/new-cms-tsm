@@ -304,16 +304,19 @@ onBeforeUnmount(() => {
       </section>
 
       <!-- ================= MITRA ================= -->
-      <section v-if="partners.length" class="mitra" aria-label="Mitra industri">
+      <section id="mitra" class="mitra" aria-label="Mitra industri">
         <div class="container mitra-inner">
           <span class="mono-label muted">MITRA INDUSTRI &amp; DUDI</span>
-          <div class="marquee">
+          <div v-if="partners.length" class="marquee">
             <ul class="marquee-move">
               <li v-for="(m, i) in [...partners, ...partners]" :key="i" class="mitra-box" :title="m.name">
                 <img v-if="m.logo" :src="img(m.logo)" :alt="m.name" loading="lazy" @error="hideImg" />
                 <span v-else>{{ m.name }}</span>
               </li>
             </ul>
+          </div>
+          <div v-else class="text-xs text-on-navy-subtle py-2">
+            Bekerjasama dengan bengkel resmi (AHASS), dealer, dan jejaring industri otomotif nasional.
           </div>
         </div>
       </section>
@@ -499,17 +502,20 @@ onBeforeUnmount(() => {
       </section>
 
       <!-- ================= GALERI ================= -->
-      <section v-if="gallery.length" id="galeri" class="section section-tint">
+      <section id="galeri" class="section section-tint">
         <div class="container">
           <div class="section-head reveal">
             <span class="mono-label">GALERI</span>
             <h2>Suasana belajar di TSM.</h2>
           </div>
-          <div class="gal-grid">
+          <div v-if="gallery.length" class="gal-grid">
             <button v-for="g in gallery" :key="g.id" type="button" class="gal-item reveal" @click="lightbox = g">
               <img :src="img(g.file)" :alt="g.title || g.caption || 'Galeri'" loading="lazy" @error="hideImg" />
               <span>{{ g.album || g.title }}</span>
             </button>
+          </div>
+          <div v-else class="text-center py-10 text-slate-500 text-sm bg-white rounded-2xl border border-line">
+            Dokumentasi foto kegiatan dan sarana praktik TSM akan segera diperbarui.
           </div>
         </div>
       </section>

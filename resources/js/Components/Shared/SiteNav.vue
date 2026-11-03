@@ -27,6 +27,7 @@ const navItems = [
     children: [
       { label: 'Profil Jurusan', href: '/profil' },
       { label: 'Guru & Instruktur', href: '/guru' },
+      { label: 'Mitra Industri', href: '/#mitra' },
       { label: 'Alumni', href: '/alumni' },
     ],
   },

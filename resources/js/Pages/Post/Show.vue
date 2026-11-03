@@ -47,7 +47,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
 
 <template>
   <AppLayout>
-    <Head><title>{{ post.title }} — TSM</title></Head>
+    <Head><title>{{ post.title }}</title></Head>
     <div class="grid-dark h-24 border-b border-accent/20"></div>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Breadcrumb -->

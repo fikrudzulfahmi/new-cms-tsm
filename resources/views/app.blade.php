@@ -30,7 +30,8 @@
         $__canonical = rtrim($__base, '/') . ($__path === '/' ? '/' : $__path);
         $__imgUrl = $__img ? (str_starts_with($__img, 'http') ? $__img : rtrim($__base, '/').'/storage/'.$__img) : null;
         $__fav = $__s['site_favicon'] ?? null;
-        $__favUrl = $__fav ? (str_starts_with($__fav, 'http') ? $__fav : '/storage/'.$__fav) : '/favicon.ico';
+        $__favUrl = $__fav ? (str_starts_with($__fav, 'http') ? $__fav : '/storage/'.$__fav) : '/favicon.svg';
+        $__isSvg = str_ends_with(strtolower(parse_url($__favUrl, PHP_URL_PATH) ?? ''), '.svg') || $__favUrl === '/favicon.svg';
         // Halaman panel/login tidak boleh masuk mesin pencari.
         $__noindex = request()->is('admin*') || request()->is('login') || request()->is('dashboard*');
     @endphp
@@ -38,7 +39,13 @@
     <meta name="description" content="{{ $__desc }}">
     <meta name="robots" content="{{ $__noindex ? 'noindex, nofollow' : 'index, follow' }}">
     <link rel="canonical" href="{{ $__canonical }}">
-    <link rel="icon" href="{{ $__favUrl }}">
+    @if($__isSvg)
+        <link rel="icon" type="image/svg+xml" href="{{ $__favUrl }}">
+        <link rel="alternate icon" href="/favicon.ico">
+    @else
+        <link rel="icon" href="{{ $__favUrl }}">
+    @endif
+    <link rel="apple-touch-icon" href="{{ $__favUrl }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="{{ $__school }}">
     <meta property="og:locale" content="id_ID">

@@ -16,7 +16,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
 
 <template>
   <AppLayout>
-    <Head><title>Berita &amp; Artikel — TSM</title></Head>
+    <Head><title>Berita &amp; Artikel</title></Head>
     <div class="grid-dark page-hero border-b border-accent/20">
       <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <span class="badge-status mb-6">Kabar Jurusan</span>

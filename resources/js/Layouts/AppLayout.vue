@@ -68,9 +68,11 @@ const showFlash = ref(true)
             <ul class="space-y-2.5 text-on-navy-muted text-sm">
               <li><Link href="/profil" class="hover:text-accent transition">Profil Jurusan</Link></li>
               <li><Link href="/guru" class="hover:text-accent transition">Guru &amp; Instruktur</Link></li>
-              <li><Link href="/kompetensi" class="hover:text-accent transition">Kompetensi</Link></li>
+              <li><Link href="/kompetensi" class="hover:text-accent transition">Kompetensi Keahlian</Link></li>
               <li><Link href="/program" class="hover:text-accent transition">Program Unggulan</Link></li>
-              <li><Link href="/sarana" class="hover:text-accent transition">Sarana</Link></li>
+              <li><Link href="/sarana" class="hover:text-accent transition">Sarana &amp; Bengkel</Link></li>
+              <li><a href="/#galeri" class="hover:text-accent transition">Galeri Foto</a></li>
+              <li><a href="/#mitra" class="hover:text-accent transition">Mitra Industri</a></li>
               <li><Link href="/prestasi" class="hover:text-accent transition">Prestasi</Link></li>
               <li><Link href="/alumni" class="hover:text-accent transition">Alumni</Link></li>
               <li><Link href="/berita" class="hover:text-accent transition">Berita</Link></li>
