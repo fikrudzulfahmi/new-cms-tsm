@@ -305,13 +305,13 @@ function step(delta) {
       <!-- ============ CRANKSHAFT: satu throw, tampak samping ============ -->
       <g :transform="`rotate(${th} ${G.cx} ${G.cy})`">
         <!-- counterweight: lobus massa berbenteng di sisi bawah -->
-        <path class="fse-cw" d="M380,533 A78,78 0 0 1 240,533 L310,500 Z" />
+        <path class="fse-cw" d="M380,533 L310,578 L240,533 Z" />
         <path d="M370,527 A67,67 0 0 1 250,527" fill="none" stroke="#3F5163" stroke-width="1.1" opacity="0.45" />
         <circle cx="358" cy="518" r="4.6" fill="#0E151D" stroke="#3F5163" stroke-width="0.9" />
         <circle cx="262" cy="518" r="4.6" fill="#0E151D" stroke="#3F5163" stroke-width="0.9" />
 
         <!-- crank web: plat menyambung journal ke crankpin, lebar sebaras-warna -->
-        <path class="fse-web" d="M338,500 L330,458 A36,36 0 0 0 290,458 L282,500 Z" />
+        <path class="fse-web" d="M338,500 L330,470 L310,442 L290,470 L282,500 Z" />
         <path d="M332,494 L326,456" stroke="#4A5C70" stroke-width="1.2" fill="none" opacity="0.55" />
 
         <!-- crankpin boss: mengejek big-end conrod -->
