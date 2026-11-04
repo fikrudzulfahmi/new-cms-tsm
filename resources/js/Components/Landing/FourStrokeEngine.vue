@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import '../../../css/landing.css'
 
 // ---- Geometri mesin (satuan SVG) ----
@@ -23,13 +23,14 @@ const STROKES = [
   { key: 'buang', label: 'Buang', note: 'Klep buang terbuka, piston naik mendorong gas sisa keluar.' },
 ]
 
+// ---- State reaktif ----
 const cycle = ref(0)
 const paused = ref(false)
 const dragging = ref(false)
 
+// ---- Loop animasi ----
 let raf = null
 let last = 0
-let drag = null
 
 // ---- Posisi mekanik ----
 const mech = computed(() => {
@@ -38,10 +39,14 @@ const mech = computed(() => {
   const py = CRANK.y + RC * Math.sin(th)
   const dx = px - CX
   const pinY = py - Math.sqrt(ROD * ROD - dx * dx)
-  return { px, py, pinY, crown: pinY - PISTON_H / 2, crankDeg: cycle.value % 360 }
+  return { px, py, pinY, crankDeg: cycle.value % 360 }
 })
 
-const phase = computed(() => Math.min(3, Math.max(0, Math.floor(((cycle.value % CYCLE) + CYCLE) % CYCLE / 180))))
+const phase = computed(() => {
+  const p = Math.min(3, Math.max(0, Math.floor(((cycle.value % CYCLE) + CYCLE) % CYCLE / 180)))
+  return p
+})
+
 const active = computed(() => STROKES[phase.value] || STROKES[0])
 
 const crown = computed(() => mech.value.crown)
@@ -53,6 +58,7 @@ function bump(c, start, dur) {
   const t = (((c - start) % CYCLE) + CYCLE) % CYCLE
   return t <= dur ? Math.sin((Math.PI * t) / dur) : 0
 }
+
 const intakeLift = computed(() => bump(cycle.value, -20, 220))
 const exhaustLift = computed(() => bump(cycle.value, 520, 220))
 
@@ -70,18 +76,9 @@ const gasFill = computed(() => {
   }
 })
 
-const caption = computed(() => active.value.note)
-
-// ---- Loop ----
-function frame(now) {
-  if (!last) last = now
-  const dt = Math.min(0.05, (now - last) / 1000)
-  last = now
-  if (!dragging.value && !paused.value && !document.hidden && Number.isFinite(dt)) {
-    cycle.value = (cycle.value + SPEED * dt) % CYCLE
-  }
-  raf = requestAnimationFrame(frame)
-}
+// ---- Tracing garis kelopak kelopak klep ----
+const intakeOpen = computed(() => intakeLift.value > 0.01)
+const exhaustOpen = computed(() => exhaustLift.value > 0.01)
 
 // ---- Drag engkol ----
 const svgRef = ref(null)
@@ -125,6 +122,14 @@ function jump(i) {
   cycle.value = i * 180 + 4
   paused.value = true
 }
+
+// ---- Reduced motion ----
+watch(paused, (val) => {
+  if (val && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // Jika user minta reduced motion, berhenti dan lock cycle
+    if (raf) { cancelAnimationFrame(raf); raf = null }
+  }
+})
 
 onMounted(() => {
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) paused.value = true
@@ -171,96 +176,117 @@ onBeforeUnmount(() => {
         </radialGradient>
       </defs>
 
-      <!-- Crankcase -->
-      <circle :cx="CRANK.x" :cy="CRANK.y" r="92" fill="var(--navy-panel)" stroke="rgba(124,200,255,.22)" stroke-width="2" />
-      <circle :cx="CRANK.x" :cy="CRANK.y" r="80" fill="none" stroke="rgba(124,200,255,.14)" stroke-dasharray="2 6" />
-
-      <!-- Sirip pendingin silinder -->
-      <g fill="var(--navy-panel)" stroke="rgba(124,200,255,.16)">
-        <rect v-for="i in 8" :key="'finL' + i" :x="BORE_L - 20" :y="134 + i * 17" width="20" height="7" rx="2" />
-        <rect v-for="i in 8" :key="'finR' + i" :x="BORE_R" :y="134 + i * 17" width="20" height="7" rx="2" />
+      <!-- TITLE BLOCK / Blueprint header -->
+      <g class="blueprint-header">
+        <rect x="20" y="16" width="140" height="44" rx="6" fill="#0A1A3A" stroke="#7CC8FF" stroke-width="1.5"/>
+        <text x="70" y="30" text-anchor="middle" font-size="11" fill="#7CC8FF" font-family="system-ui, sans-serif">MOTOR 4 TAK</text>
+        <text x="70" y="39" text-anchor="middle" font-size="9" fill="#A0C4E8" font-family="system-ui, sans-serif">SLIDER-CRANK MECHANISM</text>
       </g>
 
-      <!-- Blok head -->
-      <rect :x="BORE_L - 24" y="82" :width="BORE_R - BORE_L + 48" height="46" rx="8"
-            fill="#12285A" stroke="rgba(124,200,255,.28)" stroke-width="1.5" />
+      <!-- Crankcase frame -->
+      <circle :cx="CRANK.x" :cy="CRANK.y" r="92" fill="#0A1A3A" stroke="#7CC8FF" stroke-width="2"/>
+      <circle :cx="CRANK.x" :cy="CRANK.y" r="80" fill="none" stroke="rgba(124,200,255,.14)" stroke-dasharray="2 6"/>
 
-      <!-- Dinding silinder (bagian dalam) -->
-      <rect :x="BORE_L" :y="DECK - 2" :width="BORE_R - BORE_L" height="188" fill="#061027" stroke="none" rx="3" />
+      <!-- Grid & reference lines (technical blueprint feel) -->
+      <g fill="none" stroke="rgba(255,255,255,.06)" stroke-width="0.5">
+        <line x1="BORE_L" y1="DECK" x2="BORE_R" y2="DECK"/>
+        <line x1="BORE_L" y1="314" x2="BORE_R" y2="314"/>
+        <line x1="BORE_L" y1="82" x2="BORE_L" y2="314"/>
+        <line x1="BORE_R" y1="82" x2="BORE_R" y2="314"/>
+      </g>
 
-      <!-- Gas di ruang bakar -->
-      <rect :x="BORE_L + 2" :y="gasTop" :width="BORE_R - BORE_L - 4" :height="gasH"
-            :fill="gasFill.color" :fill-opacity="gasFill.op" />
+      <!-- Silinder walls -->
+      <rect x="BORE_L" y="DECK - 2" width="BORE_R - BORE_L" height="188" fill="#061027" rx="3"/>
 
-      <!-- Percikan api -->
-      <circle v-if="ignition > 0.02" :cx="CX" :cy="crown - 6" r="34" fill="url(#flame)" :opacity="ignition" />
+      <!-- Dinding silinder garis luar -->
+      <path d="M ${BORE_L} ${DECK} L ${BORE_L} 314 M ${BORE_R} ${DECK} L ${BORE_R} 314"
+            stroke="var(--accent)" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+      <!-- Kemasan/label silinder -->
+      <rect x="BORE_L - 24" y="82" width="BORE_R - BORE_L + 48" height="46" rx="8" fill="#12285A" stroke="rgba(124,200,255,.28)" stroke-width="1.5"/>
+      <text x="BORE_L + 6" y="94" font-size="9" fill="#7CC8FF" font-family="system-ui, sans-serif">SILO</text>
+      <text x="BORE_R - 40" y="94" font-size="9" fill="#7CC8FF" font-family="system-ui, sans-serif">124mm BORE</text>
+
+      <!-- Kruk as dengan detail teknis -->
+      <g>
+        <circle :cx="CRANK.x" :cy="CRANK.y" r="54" fill="none" stroke="rgba(124,200,255,.25)" stroke-width="1.5"/>
+        <circle :cx="CRANK.x - 46 * Math.cos(mech.crankDeg * Math.PI / 180)"
+                :cy="CRANK.y - 46 * Math.sin(mech.crankDeg * Math.PI / 180)"
+                r="26" fill="#0E1F42" stroke="rgba(124,200,255,.3)" stroke-width="1.5"/>
+        <line :x1="CRANK.x" :y1="CRANK.y" :x2="mech.px" :y2="mech.py"
+              stroke="url(#steel)" stroke-width="16" stroke-linecap="round"/>
+        <circle :cx="CRANK.x" :cy="CRANK.y" r="20" fill="#0A1A3A" stroke="#7CC8FF" stroke-width="2"/>
+        <circle :cx="CRANK.x" :cy="CRANK.y" r="6" fill="#7CC8FF"/>
+        <circle :cx="mech.px" :cy="mech.py" r="9" fill="#0A1A3A" stroke="#7CC8FF" stroke-width="2"/>
+        <!-- Center dot -->
+        <circle :cx="CRANK.x" :cy="CRANK.y" r="4" fill="#E5E7EB"/>
+      </g>
+
+      <!-- Stang piston (double stroke for depth) -->
+      <line :x1="CX" :y1="mech.pinY" :x2="mech.px" :y2="mech.py"
+            stroke="#C7D6EC" stroke-width="11" stroke-linecap="round"/>
+      <line :x1="CX" :y1="mech.pinY" :x2="mech.px" :y2="mech.py"
+            stroke="#7CC8FF" stroke-width="3" stroke-linecap="round" stroke-opacity=".85"/>
 
       <!-- Piston -->
       <g>
-        <rect :x="BORE_L + 4" :y="crown" :width="BORE_R - BORE_L - 8" :height="PISTON_H" rx="5"
-              fill="url(#pistonFace)" stroke="#0A1A3A" stroke-width="1.5" />
+        <rect :x="BORE_L + 4" :y="crown" width="BORE_R - BORE_L - 8" height="PISTON_H" rx="5"
+              fill="url(#pistonFace)" stroke="#0A1A3A" stroke-width="1.5"/>
         <line v-for="i in 3" :key="'ring' + i"
               :x1="BORE_L + 4" :x2="BORE_R - 4" :y1="crown + 8 + i * 6" :y2="crown + 8 + i * 6"
-              stroke="#12285A" stroke-width="2" stroke-opacity=".55" />
-        <circle :cx="CX" :cy="mech.pinY" r="7" fill="#12285A" stroke="#7CC8FF" stroke-width="1.5" />
+              stroke="#12285A" stroke-width="2" stroke-opacity=".55"/>
+        <circle :cx="CX" :cy="mech.pinY" r="7" fill="#0A1A3A" stroke="#7CC8FF" stroke-width="1.5"/>
+        <!-- Piston ring labels -->
+        <text x="BORE_L + 6" y="crown - 6" font-size="7" fill="#7CC8FF" font-family="system-ui, sans-serif">TOP</text>
+        <text x="BORE_L + 6" y="crown + PISTON_H + 4" font-size="7" fill="#7CC8FF" font-family="system-ui, sans-serif">BOTTOM</text>
       </g>
 
-      <!-- Dinding silinder (garis luarnya) -->
-      <path :d="`M ${BORE_L} ${DECK} L ${BORE_L} 314 M ${BORE_R} ${DECK} L ${BORE_R} 314`"
-            stroke="var(--accent)" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" fill="none" />
+      <!-- Percikan api -->
+      <circle v-if="ignition > 0.02" :cx="CX" :cy="crown - 6" r="34" fill="url(#flame)" :opacity="ignition"/>
 
-      <!-- Stang piston -->
-      <line :x1="CX" :y1="mech.pinY" :x2="mech.px" :y2="mech.py"
-            stroke="#C7D6EC" stroke-width="11" stroke-linecap="round" />
-      <line :x1="CX" :y1="mech.pinY" :x2="mech.px" :y2="mech.py"
-            stroke="#7CC8FF" stroke-width="3" stroke-linecap="round" stroke-opacity=".8" />
-
-      <!-- Poros engkol -->
-      <g>
-        <circle :cx="CRANK.x" :cy="CRANK.y" r="54" fill="none" stroke="rgba(124,200,255,.25)" stroke-width="1.5" />
-        <circle :cx="CRANK.x - 46 * Math.cos(mech.crankDeg * Math.PI / 180)"
-                :cy="CRANK.y - 46 * Math.sin(mech.crankDeg * Math.PI / 180)"
-                r="26" fill="#0E1F42" stroke="rgba(124,200,255,.3)" stroke-width="1.5" />
-        <line :x1="CRANK.x" :y1="CRANK.y" :x2="mech.px" :y2="mech.py"
-              stroke="url(#steel)" stroke-width="16" stroke-linecap="round" />
-        <circle :cx="CRANK.x" :cy="CRANK.y" r="20" fill="#0A1A3A" stroke="#7CC8FF" stroke-width="2" />
-        <circle :cx="CRANK.x" :cy="CRANK.y" r="6" fill="#7CC8FF" />
-        <circle :cx="mech.px" :cy="mech.py" r="9" fill="#0A1A3A" stroke="#7CC8FF" stroke-width="2" />
-      </g>
-
-      <!-- Klep hisap (kiri) -->
-      <g>
-        <path :d="`M 205 90 L 205 ${DECK - 26 - intakeLift * 9}`" stroke="#8FA8CC" stroke-width="5" stroke-linecap="round" />
+      <!-- Klep hisap (kiri) - technical style -->
+      <g :class="{ 'open': intakeOpen }">
+        <path d="M 205 90 L 205 ${DECK - 26 - intakeLift * 9}" stroke="#7CC8FF" stroke-width="4" stroke-linecap="round"/>
         <ellipse :cx="205" :cy="DECK - 4 - intakeLift * 9" rx="17" ry="6"
-                 fill="#C7D6EC" stroke="#0A1A3A" stroke-width="1.5" />
-        <path :d="`M 195 96 q 10 -8 20 0 q -10 8 -20 0 M 195 108 q 10 -8 20 0 q -10 8 -20 0`"
-              fill="none" stroke="rgba(124,200,255,.5)" stroke-width="1.5"
-              :transform="`translate(0 ${-intakeLift * 4})`" />
+                 fill="#C7D6EC" stroke="#0A1A3A" stroke-width="1.5"/>
+        <path d="M 195 96 q 10 -8 20 0 q -10 8 -20 0 M 195 108 q 10 -8 20 0 q -10 8 -20 0"
+              fill="none" stroke="rgba(124,200,255,.55)" stroke-width="1.5"
+              :transform="`translate(0 ${-intakeLift * 4})`"/>
+        <!-- Klep label -->
+        <text x="205" y="82" font-size="7" fill="#7CC8FF" font-family="system-ui, sans-serif">KLEP IN</text>
+        <text x="205" y="74" font-size="6.5" fill="#A0C4E8" font-family="system-ui, sans-serif">INTAKE</text>
       </g>
 
-      <!-- Klep buang (kanan) -->
-      <g>
-        <path :d="`M 255 90 L 255 ${DECK - 26 - exhaustLift * 9}`" stroke="#8FA8CC" stroke-width="5" stroke-linecap="round" />
+      <!-- Klep buang (kanan) - technical style -->
+      <g :class="{ 'open': exhaustOpen }">
+        <path d="M 255 90 L 255 ${DECK - 26 - exhaustLift * 9}" stroke="#94A3B8" stroke-width="4" stroke-linecap="round"/>
         <ellipse :cx="255" :cy="DECK - 4 - exhaustLift * 9" rx="17" ry="6"
-                 fill="#C7D6EC" stroke="#0A1A3A" stroke-width="1.5" />
-        <path :d="`M 245 96 q 10 -8 20 0 q -10 8 -20 0 M 245 108 q 10 -8 20 0 q -10 8 -20 0`"
+                 fill="#C7D6EC" stroke="#0A1A3A" stroke-width="1.5"/>
+        <path d="M 245 96 q 10 -8 20 0 q -10 8 -20 0 M 245 108 q 10 -8 20 0 q -10 8 -20 0"
               fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.5"
-              :transform="`translate(0 ${-exhaustLift * 4})`" />
+              :transform="`translate(0 ${-exhaustLift * 4})`"/>
+        <!-- Klep label -->
+        <text x="255" y="82" font-size="7" fill="#94A3B8" font-family="system-ui, sans-serif">KLEP EX</text>
+        <text x="255" y="74" font-size="6.5" fill="#E4E6EB" font-family="system-ui, sans-serif">EXHAUST</text>
       </g>
 
-      <!-- Busi -->
-      <g>
-        <rect :x="CX - 6" y="60" width="12" height="30" rx="2" fill="#12285A" stroke="rgba(255,255,255,.3)" stroke-width="1.2" />
-        <rect :x="CX - 9" y="86" width="18" height="8" rx="2" fill="#24406F" />
-        <line :x1="CX" :y1="94" :x2="CX" :y2="DECK - 6" stroke="#C7D6EC" stroke-width="3" />
-        <circle v-if="ignition > 0.02" :cx="CX" :cy="DECK - 4" r="5" fill="#FFE0A3" :opacity="ignition" />
-      </g>
+      <!-- Gas di ruang bakar dengan gradient -->
+      <rect :x="BORE_L + 2" :y="gasTop" width="BORE_R - BORE_L - 4" :height="gasH"
+            :fill="gasFill.color" :fill-opacity="gasFill.op"/>
 
-      <!-- Aliran hisap / buang -->
-      <path v-if="intakeLift > 0.2" :d="`M 150 106 L 192 106`" stroke="#7CC8FF" stroke-width="3"
-            stroke-linecap="round" :opacity="intakeLift * 0.9" />
-      <path v-if="exhaustLift > 0.2" :d="`M 268 106 L 310 106`" stroke="#94A3B8" stroke-width="3"
-            stroke-linecap="round" :opacity="exhaustLift * 0.9" />
+      <!-- Arah aliran gas -->
+      <path v-if="intakeLift > 0.2" d="M 150 106 L 192 106" stroke="#7CC8FF" stroke-width="2" stroke-linecap="round" :opacity="intakeLift * 0.8"/>
+      <path v-if="exhaustLift > 0.2" d="M 268 106 L 310 106" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" :opacity="exhaustLift * 0.8"/>
+
+      <!-- Komposisi teknis catatan -->
+      <g class="technical-notes">
+        <text x="20" y="440" font-size="8" fill="#7CC8FF" font-family="system-ui, sans-serif, monospace">
+          CYCLE: 720° (2 putaran engkol) · SPEED: 110°/detik
+        </text>
+        <text x="20" y="456" font-size="8" fill="#7CC8FF" font-family="system-ui, sans-serif, monospace">
+          RC: 46px · ROD: 150px · DECK: 126px · BORE: 124px
+        </text>
+      </g>
     </svg>
 
     <div class="stroke-tabs" role="tablist" aria-label="Fase langkah kerja">
@@ -291,10 +317,11 @@ onBeforeUnmount(() => {
 .stroke-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .stroke-tabs button {
   font: inherit; font-size: 13px; padding: 8px 6px; border-radius: 10px; cursor: pointer;
-  color: var(--on-navy-muted); background: rgba(18, 40, 90, .8);
-  border: 1px solid rgba(124, 200, 255, .22); transition: background .15s, color .15s, border-color .15s;
+  color: var(--on-navy-muted); background: rgba(18, 40, 90, .8); border: 1px solid rgba(124, 200, 255, .22);
+  transition: background .15s, color .15s, border-color .15s;
 }
 .stroke-tabs button:hover { border-color: rgba(124, 200, 255, .45); }
 .stroke-tabs button.on { background: var(--accent); color: var(--navy); border-color: var(--accent); font-weight: 700; }
 .engine-note { font-size: 13px; line-height: 1.5; color: var(--on-navy-muted); margin: 0; min-height: 2.9em; }
+.mono-caption { font-size: 10px; color: var(--on-navy-muted); }
 </style>
