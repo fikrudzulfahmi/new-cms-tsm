@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
-import GearRatio from '@/Components/Landing/GearRatio.vue'
+import Gear3D from '@/Components/Landing/Gear3D.vue'
 
 const form = useForm({ email: '', password: '', remember: false })
 const emailEl = ref(null)
@@ -93,7 +93,7 @@ const submit = async () => {
         <span class="badge-status mb-6">Panel Kendali</span>
         <h1 class="font-display font-extrabold text-white text-5xl leading-[1.05] tracking-[-1.5px] mb-4">Kelola Website<span class="block text-accent">Jurusan TSM.</span></h1>
         <p class="text-on-navy-muted mb-8 max-w-md">Teknik Sepeda Motor SMKS Islam 1 Kota Blitar — Jl. Musi No. 06 Kota Blitar.</p>
-        <GearRatio />
+        <Gear3D />
       </div>
 
       <div class="w-full max-w-md mx-auto">
