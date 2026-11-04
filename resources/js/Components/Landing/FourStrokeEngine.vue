@@ -304,25 +304,21 @@ function step(delta) {
 
       <!-- ============ CRANKSHAFT: satu throw, tampak samping ============ -->
       <g :transform="`rotate(${th} ${G.cx} ${G.cy})`">
-        <!-- counterweight: lobus massa berbenteng di sisi bawah -->
-        <path class="fse-cw" d="M380,533 L310,578 L240,533 Z" />
-        <path d="M370,527 A67,67 0 0 1 250,527" fill="none" stroke="#3F5163" stroke-width="1.1" opacity="0.45" />
-        <circle cx="358" cy="518" r="4.6" fill="#0E151D" stroke="#3F5163" stroke-width="0.9" />
-        <circle cx="262" cy="518" r="4.6" fill="#0E151D" stroke="#3F5163" stroke-width="0.9" />
+        <!-- counterweight: lobus massa solid berlawanan crankpin -->
+        <path class="fse-cw" d="M255,508 Q240,550 310,578 Q380,550 365,508 L338,500 Q310,510 282,500 Z" />
 
-        <!-- crank web: plat menyambung journal ke crankpin, lebar sebaras-warna -->
-        <path class="fse-web" d="M338,500 L330,470 L310,442 L290,470 L282,500 Z" />
-        <path d="M332,494 L326,456" stroke="#4A5C70" stroke-width="1.2" fill="none" opacity="0.55" />
+        <!-- crank web: plat lengan tebal menghubungkan poros ke crankpin -->
+        <path class="fse-web" d="M292,496 L298,444 A12,12 0 0 1 322,444 L328,496 Z" />
+        <line x1="310" y1="492" x2="310" y2="452" stroke="#52677D" stroke-width="1.2" opacity="0.6" />
 
-        <!-- crankpin boss: mengejek big-end conrod -->
-        <circle class="fse-crankpin" :cx="G.cx" :cy="G.cy - G.r" r="18" />
-        <circle :cx="G.cx" :cy="G.cy - G.r" r="6.5" fill="#141C26" stroke="#4A5C70" stroke-width="0.9" />
+        <!-- crankpin boss: pena engkol -->
+        <circle class="fse-crankpin" :cx="G.cx" :cy="G.cy - G.r" r="14" />
+        <circle :cx="G.cx" :cy="G.cy - G.r" r="5" fill="#141C26" stroke="#4A5C70" stroke-width="0.8" />
 
         <!-- main journal + bearing bore -->
-        <circle class="fse-journal" :cx="G.cx" :cy="G.cy" r="27" />
+        <circle class="fse-journal" :cx="G.cx" :cy="G.cy" r="28" />
         <circle class="fse-journal-bore" :cx="G.cx" :cy="G.cy" r="14" />
         <circle :cx="G.cx" :cy="G.cy" r="4.5" fill="#0A1A3A" />
-        <path d="M283,500 A27,27 0 0 1 337,500" fill="none" stroke="#7B8FA3" stroke-width="1" opacity="0.35" />
       </g>
 
       <!-- ============ CONROD ============ -->
@@ -356,9 +352,9 @@ function step(delta) {
       </g>
 
       <!-- dinding silinder -->
-      <rect class="fse-wall" x="254" y="242" width="10" height="228" />
-      <rect class="fse-wall" x="356" y="242" width="10" height="228" />
-      <path d="M254,466 H264 M356,466 H366" stroke="#4A5C70" stroke-width="1.2" />
+      <rect class="fse-wall" x="254" y="242" width="10" height="204" />
+      <rect class="fse-wall" x="356" y="242" width="10" height="204" />
+      <path d="M254,446 H264 M356,446 H366" stroke="#4A5C70" stroke-width="1.2" />
 
       <!-- gas ruang bakar -->
       <rect :x="265" :y="G.deck" width="90" :height="gasH" :fill="gas.color" :fill-opacity="gas.op" rx="1.5" />
@@ -477,17 +473,17 @@ function step(delta) {
 
 /* crankshaft */
 .fse-case { fill: #0D1420; stroke: #2A3648; stroke-width: 1; }
-.fse-cw { fill: #1B2530; stroke: #38495C; stroke-width: 1.2; stroke-linejoin: round; }
-.fse-web { fill: #1F2A36; stroke: #44576B; stroke-width: 1.2; stroke-linejoin: round; }
+.fse-cw { fill: #243444; stroke: #5A718B; stroke-width: 1.4; stroke-linejoin: round; }
+.fse-web { fill: #2B3C4F; stroke: #657D99; stroke-width: 1.4; stroke-linejoin: round; }
 .fse-journal { fill: url(#fse-hub); stroke: #55697F; stroke-width: 1.4; }
 .fse-journal-bore { fill: #0F1620; stroke: #3C4A5A; stroke-width: 1.2; }
 .fse-crankpin { fill: url(#fse-pinmetal); stroke: #55697F; stroke-width: 1.2; }
 
 /* conrod */
 .fse-rod { fill: #4A5C70; stroke: #8296AA; stroke-width: 2; stroke-linejoin: round; }
-.fse-rodend { fill: none; stroke: #8296AA; stroke-width: 8.5; }
-.fse-rodend-sm { fill: none; stroke: #8296AA; stroke-width: 6; }
-.fse-rodend-bore { fill: none; stroke: #22303C; stroke-width: 1.4; }
+.fse-rodend { fill: #324456; stroke: #8FA4BA; stroke-width: 2; }
+.fse-rodend-sm { fill: #324456; stroke: #8FA4BA; stroke-width: 2; }
+.fse-rodend-bore { fill: #121A24; stroke: #4E6379; stroke-width: 1.2; }
 
 /* piston & silinder */
 .fse-piston { fill: url(#fse-pistonmetal); stroke: #A2B5C8; stroke-width: 1.2; }
