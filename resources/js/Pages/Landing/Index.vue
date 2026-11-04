@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import { computed, onMounted, onBeforeUnmount, ref, nextTick, watch } from 'vue'
-import Gear3D from '@/Components/Landing/Gear3D.vue'
+import SteampunkGear from '@/Components/Landing/SteampunkGear.vue'
 import SiteNav from '@/Components/Shared/SiteNav.vue'
 import { CONFIG } from './content.js'
 import '../../../css/landing.css'
@@ -270,7 +270,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
         <div class="hero-gear">
-          <Gear3D />
+          <SteampunkGear />
         </div>
       </div>
 
