@@ -291,8 +291,8 @@ function step(delta) {
       </defs>
 
       <!-- panggung -->
-      <rect x="67" y="106" width="474" height="530" fill="#070F22" />
-      <rect x="67" y="106" width="474" height="530" fill="url(#fse-grid)" opacity="0.62" />
+      <rect x="67" y="106" width="474" height="530" fill="none" />
+      <rect x="67" y="106" width="474" height="530" fill="url(#fse-grid)" opacity="0.25" />
 
       <!-- crankcase -->
       <path class="fse-case" d="M226,446 V528 Q226,584 282,584 H338 Q394,584 394,528 V446 Z" />
@@ -469,8 +469,9 @@ function step(delta) {
   flex: none;
   touch-action: none;
   border-radius: 16px;
-  border: 1px solid rgba(124, 200, 255, 0.14);
+  border: none;
   cursor: grab;
+  background: transparent;
 }
 .engine-svg.is-dragging { cursor: grabbing; }
 .engine-svg:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
