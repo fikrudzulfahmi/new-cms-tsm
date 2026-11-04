@@ -302,6 +302,29 @@ function step(delta) {
       <circle cx="240" cy="566" r="3" fill="#2B3947" />
       <circle cx="380" cy="566" r="3" fill="#2B3947" />
 
+      <!-- ============ CRANKSHAFT: satu throw, tampak samping ============ -->
+      <g :transform="`rotate(${th} ${G.cx} ${G.cy})`">
+        <!-- counterweight: lobus massa berbenteng di sisi bawah -->
+        <path class="fse-cw" d="M380,533 A78,78 0 0 1 240,533 L310,500 Z" />
+        <path d="M370,527 A67,67 0 0 1 250,527" fill="none" stroke="#3F5163" stroke-width="1.1" opacity="0.45" />
+        <circle cx="358" cy="518" r="4.6" fill="#0E151D" stroke="#3F5163" stroke-width="0.9" />
+        <circle cx="262" cy="518" r="4.6" fill="#0E151D" stroke="#3F5163" stroke-width="0.9" />
+
+        <!-- crank web: plat menyambung journal ke crankpin, lebar sebaras-warna -->
+        <path class="fse-web" d="M338,500 L330,458 A36,36 0 0 0 290,458 L282,500 Z" />
+        <path d="M332,494 L326,456" stroke="#4A5C70" stroke-width="1.2" fill="none" opacity="0.55" />
+
+        <!-- crankpin boss: mengejek big-end conrod -->
+        <circle class="fse-crankpin" :cx="G.cx" :cy="G.cy - G.r" r="18" />
+        <circle :cx="G.cx" :cy="G.cy - G.r" r="6.5" fill="#141C26" stroke="#4A5C70" stroke-width="0.9" />
+
+        <!-- main journal + bearing bore -->
+        <circle class="fse-journal" :cx="G.cx" :cy="G.cy" r="27" />
+        <circle class="fse-journal-bore" :cx="G.cx" :cy="G.cy" r="14" />
+        <circle :cx="G.cx" :cy="G.cy" r="4.5" fill="#0A1A3A" />
+        <path d="M283,500 A27,27 0 0 1 337,500" fill="none" stroke="#7B8FA3" stroke-width="1" opacity="0.35" />
+      </g>
+
       <!-- ============ CONROD ============ -->
       <path class="fse-rod" :d="rod.body" />
       <path :d="rod.hl" stroke="#A9BACB" stroke-width="1.3" fill="none" opacity="0.4" />
@@ -411,24 +434,6 @@ function step(delta) {
       <text class="fse-readout-sub" x="120" y="632">{{ active.label.toUpperCase() }}</text>
 
       
-      <g :transform="`rotate(${th} ${G.cx} ${G.cy})`">
-        <!-- counterweight: parabolic lobe di sisi berlawanan crankpin -->
-        <path class="fse-cw" d="M360,512 Q382,558 310,572 Q238,558 260,512 L285,500 Q310,510 335,500 Z" />
-        <path d="M350,520 Q310,555 270,520" fill="none" stroke="#3F5163" stroke-width="1.2" opacity="0.6" />
-
-        <!-- crank web: dari journal ke crankpin, taper dua sisi -->
-        <path class="fse-web" d="M286,502 Q297,475 310,440 Q323,475 334,502 L310,500 Z" />
-        <path d="M292,498 Q310,468 328,498" stroke="#4A5C70" stroke-width="1.2" opacity="0.7" />
-
-        <!-- crankpin boss (pin yang menjepret conrod big end) -->
-        <circle class="fse-crankpin" :cx="G.cx" :cy="G.cy - G.r" r="20" />
-        <circle :cx="G.cx - 6" :cy="G.cy - G.r - 6" r="2.4" fill="#1B2530" opacity="0.8" />
-
-        <!-- main journal (bearing utama di tengah poros) -->
-        <circle class="fse-journal" :cx="G.cx" :cy="G.cy" r="34" />
-        <circle class="fse-journal-bore" :cx="G.cx" :cy="G.cy" r="18" />
-        <circle :cx="G.cx" :cy="G.cy" r="6" fill="#0A1A3A" />
-      </g>
     </svg>
 
     <div class="stroke-tabs" role="tablist" aria-label="Fase langkah kerja">
