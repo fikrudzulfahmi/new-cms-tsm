@@ -89,7 +89,7 @@ function gasAt(deg) {
 }
 
 const STROKES = [
-  { key: 'hisap', label: 'Hisap', lo: 0, note: 'Piston turun, klep hisap terbuka — campuran udara & bahan bakar terhisap masuk.' },
+  { key: 'hisap', label: 'Hisap', lo: 0, note: 'Piston turun, klep hisap terbuka — campuran udara dan bahan bakar masuk.' },
   { key: 'kompresi', label: 'Kompresi', lo: 180, note: 'Kedua klep tertutup, piston naik memampatkan campuran.' },
   { key: 'usaha', label: 'Usaha', lo: 360, note: 'Busi memercikkan api, gas memuai mendorong piston turun.' },
   { key: 'buang', label: 'Buang', lo: 540, note: 'Klep buang terbuka, piston naik mendorong gas sisa keluar.' },
@@ -460,9 +460,13 @@ function step(delta) {
 </template>
 
 <style scoped>
-.engine-wrap { gap: 12px; }
+.engine-wrap { gap: 12px; align-self: center; height: max-content; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 .engine-svg {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 474 / 530;   /* kunci rasio: tinggi canvas sama di semua fase */
+  flex: none;
   touch-action: none;
   border-radius: 16px;
   border: 1px solid rgba(124, 200, 255, 0.14);
@@ -526,7 +530,7 @@ function step(delta) {
 }
 
 /* kontrol */
-.stroke-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.stroke-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; flex: none; }
 .stroke-tabs button {
   font: inherit;
   font-size: 12px;
@@ -548,13 +552,19 @@ function step(delta) {
 
 .engine-note {
   font-size: 12.5px;
-  line-height: 1.45;
+  line-height: 18px;
   color: #E2E8F0;
   margin: 4px 0 0;
-  min-height: 2.5em;
+  flex: 0 0 37px;                /* jangan ikut menyusut: tinggi tetap di semua fase */
+  height: 37px;
+  max-height: 37px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.engine-bar { display: flex; align-items: center; gap: 10px; }
+.engine-bar { display: flex; align-items: center; gap: 10px; flex: none; }
 .engine-ctl { display: flex; gap: 5px; }
 .engine-btn {
   font: inherit;
