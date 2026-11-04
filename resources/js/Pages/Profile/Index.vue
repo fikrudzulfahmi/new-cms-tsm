@@ -41,7 +41,7 @@ const toc = computed(() => [
         </div>
         <figcaption v-if="headName" class="mt-4">
           <b class="block font-display text-navy">{{ headName }}</b>
-          <small class="font-mono text-[11px] tracking-wider uppercase text-label">{{ headPosition }}</small>
+          <small class="font-mono text-[11px] text-label">{{ headPosition }}</small>
         </figcaption>
       </figure>
       <div>
@@ -68,11 +68,11 @@ const toc = computed(() => [
       <h2 class="section-title mt-2 mb-8">Arah dan tujuan kami</h2>
       <div class="grid md:grid-cols-2 gap-6">
         <div v-if="s.profile_vision" class="rounded-3xl bg-navy text-white p-8">
-          <span class="font-mono text-xs tracking-[2px] uppercase text-accent">Visi</span>
+          <span class="font-mono text-xs text-accent">Visi</span>
           <p class="font-display text-xl leading-relaxed mt-4">{{ s.profile_vision }}</p>
         </div>
         <div v-if="mission?.length" class="card p-8">
-          <span class="font-mono text-xs tracking-[2px] uppercase text-label">Misi</span>
+          <span class="font-mono text-xs text-label">Misi</span>
           <ol class="mt-4 space-y-3">
             <li v-for="(m, i) in mission" :key="i" class="flex gap-3 text-slate-700">
               <span class="font-mono text-sm text-label flex-shrink-0 w-6">{{ String(i + 1).padStart(2, '0') }}</span>

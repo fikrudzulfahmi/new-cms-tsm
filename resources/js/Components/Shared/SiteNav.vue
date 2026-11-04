@@ -182,7 +182,7 @@ watch(path, () => {
             :is="navTag(item.href)"
             :href="item.href"
             @click="onNavClick(item.href)"
-            class="px-3 py-2 rounded-full text-sm font-semibold transition cursor-pointer"
+            class="px-3 py-2 rounded-lg text-sm font-semibold transition cursor-pointer"
             :class="isActive(item.href) ? 'text-white bg-white/10' : 'text-on-navy-muted hover:text-white hover:bg-white/5'"
             :aria-current="isActive(item.href) ? 'page' : undefined"
           >
@@ -199,7 +199,7 @@ watch(path, () => {
             <button
               type="button"
               @click="activeDropdown = activeDropdown === item.label ? null : item.label"
-              class="flex items-center gap-1 px-3 py-2 rounded-full text-sm font-semibold transition cursor-pointer"
+              class="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-semibold transition cursor-pointer"
               :class="isParentActive(item) ? 'text-white bg-white/10' : 'text-on-navy-muted hover:text-white hover:bg-white/5'"
               :aria-expanded="activeDropdown === item.label"
             >
@@ -246,7 +246,7 @@ watch(path, () => {
 
       <!-- Action Button (No Login Button) -->
       <div class="flex items-center gap-2 flex-shrink-0">
-        <component :is="navTag('/#spmb')" href="/#spmb" class="hidden md:inline-flex items-center h-10 px-5 rounded-full bg-accent text-navy text-sm font-bold hover:brightness-105 transition shadow-sm">Gabung Bersama Kami</component>
+        <component :is="navTag('/#spmb')" href="/#spmb" class="hidden md:inline-flex items-center h-10 px-5 rounded-lg bg-accent text-navy text-sm font-bold hover:brightness-105 transition shadow-sm">Gabung Bersama Kami</component>
         <button type="button" @click="open = !open" :aria-expanded="open" :aria-label="open ? 'Tutup menu' : 'Buka menu'"
           class="lg:hidden w-11 h-11 rounded-full border border-accent/40 text-white flex items-center justify-center cursor-pointer">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -309,7 +309,7 @@ watch(path, () => {
         </template>
 
         <div class="pt-2">
-          <component :is="navTag('/#spmb')" href="/#spmb" @click="open = false" class="inline-flex justify-center items-center h-11 w-full rounded-full bg-accent text-navy text-sm font-bold shadow-sm">Gabung Bersama Kami</component>
+          <component :is="navTag('/#spmb')" href="/#spmb" @click="open = false" class="inline-flex justify-center items-center h-11 w-full rounded-lg bg-accent text-navy text-sm font-bold">Gabung Bersama Kami</component>
         </div>
       </div>
     </Transition>

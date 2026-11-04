@@ -99,10 +99,10 @@ const submit = async () => {
       <div class="w-full max-w-md mx-auto">
         <div class="text-center mb-8">
           <div class="inline-flex items-center justify-center w-16 h-16 rounded-full border border-accent/45 mb-4">
-            <span class="text-accent font-mono text-sm tracking-wider">TSM</span>
+            <span class="text-accent font-mono text-sm">TSM</span>
           </div>
           <div class="font-display text-white text-3xl font-bold">Panel Admin</div>
-          <p class="font-mono text-xs tracking-wider uppercase text-on-navy-subtle mt-2">Teknik Sepeda Motor SMKS Islam 1 Blitar</p>
+          <p class="font-mono text-xs text-on-navy-subtle mt-2">Teknik Sepeda Motor SMKS Islam 1 Blitar</p>
         </div>
 
         <div class="bg-white rounded-[24px] border border-accent/30 p-8">

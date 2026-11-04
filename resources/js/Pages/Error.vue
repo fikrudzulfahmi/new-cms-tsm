@@ -17,7 +17,7 @@ defineProps({
         <span class="w-11 h-11 rounded-full border border-accent/50 flex items-center justify-center font-mono text-[11px] tracking-[1.5px] text-accent">TSM</span>
         <span class="font-display font-bold leading-tight">
           Teknik Sepeda Motor
-          <small class="block font-mono text-[10px] tracking-[2px] uppercase text-on-navy-subtle font-normal mt-0.5">SMKS Islam 1 Kota Blitar</small>
+          <small class="block font-mono text-[10px] text-on-navy-subtle font-normal mt-0.5">SMKS Islam 1 Kota Blitar</small>
         </span>
       </Link>
       <Link href="/berita" class="hidden sm:inline-flex text-sm text-on-navy-muted hover:text-accent transition-colors no-underline">Berita</Link>
@@ -39,7 +39,7 @@ defineProps({
           <div class="code font-display font-extrabold">{{ status }}</div>
         </div>
 
-        <p class="font-mono text-[11px] tracking-[2.4px] uppercase text-accent mt-1 mb-3">{{ label }}</p>
+        <p class="font-mono text-[11px] text-accent mt-1 mb-3">{{ label }}</p>
         <h1 class="font-display text-white text-2xl sm:text-3xl font-bold leading-tight mb-3">{{ heading }}</h1>
         <p class="text-on-navy-muted text-[15px] leading-relaxed max-w-md mx-auto mb-8">{{ message }}</p>
 

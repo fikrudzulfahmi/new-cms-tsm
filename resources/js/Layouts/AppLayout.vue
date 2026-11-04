@@ -15,12 +15,12 @@ const showFlash = ref(true)
     <!-- Flash -->
     <Transition enter-active-class="transition duration-300" enter-from-class="opacity-0 -translate-y-2" leave-active-class="transition duration-200" leave-to-class="opacity-0 -translate-y-2">
       <div v-if="showFlash && (flash.success || flash.error)" class="fixed top-4 right-4 z-50 max-w-md">
-        <div v-if="flash.success" class="bg-navy text-white border border-accent/40 px-5 py-3 rounded-2xl shadow-lg flex items-center gap-3">
+        <div v-if="flash.success" class="bg-navy text-white border border-accent/40 px-5 py-3 rounded-2xl flex items-center gap-3">
           <svg class="w-5 h-5 flex-shrink-0 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           <span class="text-sm">{{ flash.success }}</span>
           <button @click="showFlash=false" class="ml-auto"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
-        <div v-if="flash.error" class="bg-white text-red-700 border border-red-200 px-5 py-3 rounded-2xl shadow-lg flex items-center gap-3">
+        <div v-if="flash.error" class="bg-white text-red-700 border border-red-200 px-5 py-3 rounded-2 flex items-center gap-3">
           <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           <span class="text-sm">{{ flash.error }}</span>
           <button @click="showFlash=false" class="ml-auto"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>

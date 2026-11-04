@@ -26,7 +26,7 @@ const list = computed(() => (cat.value === 'Semua' ? props.facilities : props.fa
             <img v-if="f.image" :src="img(f.image)" :alt="f.name" loading="lazy" class="w-full h-full object-cover" @error="hideImg" />
           </div>
           <div class="p-6 flex-1">
-            <span v-if="f.category" class="font-mono text-[11px] tracking-wider uppercase text-label">{{ f.category }}</span>
+            <span v-if="f.category" class="font-mono text-[11px] text-label">{{ f.category }}</span>
             <h2 class="font-display font-bold text-lg text-navy mt-1 mb-2">{{ f.name }}</h2>
             <p v-if="f.description" class="text-sm text-slate-500 leading-relaxed">{{ f.description }}</p>
             <p v-if="f.quantity || f.condition" class="text-xs text-slate-400 mt-3 font-mono">

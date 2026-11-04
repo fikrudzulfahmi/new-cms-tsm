@@ -58,6 +58,6 @@ onMounted(() => {
 
 <template>
   <div class="flex items-center justify-center p-4">
-    <canvas id="gearCanvas" width="280" height="160" class="drop-shadow-lg"></canvas>
+    <canvas id="gearCanvas" width="280" height="160">
   </div>
 </template>

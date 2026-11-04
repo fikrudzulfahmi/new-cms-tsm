@@ -23,7 +23,7 @@ const chip = (on) => ['px-4 py-2 rounded-full text-sm font-semibold transition',
           <div class="relative h-52 bg-navy overflow-hidden">
             <img v-if="a.image" :src="img(a.image)" :alt="a.title" loading="lazy" class="w-full h-full object-cover" @error="hideImg" />
             <span v-if="a.rank" class="absolute top-3 left-3 bg-accent text-navy font-bold text-sm px-3 py-1 rounded-full">{{ a.rank }}</span>
-            <span v-if="a.is_featured" class="absolute top-3 right-3 bg-white/90 text-navy font-mono text-[10px] tracking-wider uppercase px-2 py-1 rounded-full">Unggulan</span>
+            <span v-if="a.is_featured" class="absolute top-3 right-3 bg-white/90 text-navy font-mono text-[10px] px-2 py-1 rounded-md">Unggulan</span>
           </div>
           <div class="p-6 flex-1">
             <span class="font-mono text-[11px] tracking-wider uppercase text-label">{{ a.level || 'Umum' }}<template v-if="a.year"> · {{ a.year }}</template></span>
