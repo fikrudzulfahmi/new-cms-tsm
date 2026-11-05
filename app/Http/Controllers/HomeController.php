@@ -41,7 +41,7 @@ class HomeController extends Controller
             ->where('published_at', '<=', now())
             ->whereIn('category_id', $categories->pluck('id')->all());
         $ids = DB::query()->fromSub($ranked, 'ranked')->where('rn', '<=', 4)->pluck('id')->all();
-        $posts = Post::with('category:id,name,slug,color')
+        $posts = Post::with(['category:id,name,slug,color', 'user:id,name'])
             ->whereIn('id', $ids)
             ->orderByDesc('published_at')
             ->get($postCols);

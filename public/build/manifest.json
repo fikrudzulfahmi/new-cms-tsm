@@ -60,7 +60,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-D9C-m6LU.css",
+    "file": "assets/app-bUHzQXzC.css",
     "name": "app",
     "names": [
       "app.css"
@@ -100,7 +100,7 @@
     ]
   },
   "resources/js/Pages/Admin/Comments/Index.vue": {
-    "file": "assets/Index-CdiTBWaF.js",
+    "file": "assets/Index-BujekTl1.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Comments/Index.vue",
     "isDynamicEntry": true,
@@ -121,7 +121,7 @@
     ]
   },
   "resources/js/Pages/Admin/Generic/Index.vue": {
-    "file": "assets/Index-DRz2OG8K.js",
+    "file": "assets/Index-DKRiYx-H.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Generic/Index.vue",
     "isDynamicEntry": true,
@@ -132,7 +132,7 @@
     ]
   },
   "resources/js/Pages/Admin/Posts/Form.vue": {
-    "file": "assets/Form-aihf21BA.js",
+    "file": "assets/Form-ZZaJr3a-.js",
     "name": "Form",
     "src": "resources/js/Pages/Admin/Posts/Form.vue",
     "isDynamicEntry": true,
@@ -146,7 +146,7 @@
     ]
   },
   "resources/js/Pages/Admin/Posts/Index.vue": {
-    "file": "assets/Index-CteTDH6M.js",
+    "file": "assets/Index-By8Y55i-.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Posts/Index.vue",
     "isDynamicEntry": true,
@@ -177,7 +177,7 @@
     ]
   },
   "resources/js/Pages/Admin/Users/Index.vue": {
-    "file": "assets/Index-C7lc2upn.js",
+    "file": "assets/Index-BSUvq6gD.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Users/Index.vue",
     "isDynamicEntry": true,
@@ -255,7 +255,7 @@
     ]
   },
   "resources/js/Pages/Landing/Index.vue": {
-    "file": "assets/Index-CrnqipRg.js",
+    "file": "assets/Index-jQWltq-g.js",
     "name": "Index",
     "src": "resources/js/Pages/Landing/Index.vue",
     "isDynamicEntry": true,
@@ -266,7 +266,7 @@
     ]
   },
   "resources/js/Pages/Post/Index.vue": {
-    "file": "assets/Index-B6qud2YX.js",
+    "file": "assets/Index-C61r_63D.js",
     "name": "Index",
     "src": "resources/js/Pages/Post/Index.vue",
     "isDynamicEntry": true,
@@ -276,7 +276,7 @@
     ]
   },
   "resources/js/Pages/Post/Show.vue": {
-    "file": "assets/Show-Lxkn5LrL.js",
+    "file": "assets/Show-BGzdCrhG.js",
     "name": "Show",
     "src": "resources/js/Pages/Post/Show.vue",
     "isDynamicEntry": true,
@@ -322,7 +322,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-f0HeAGxe.js",
+    "file": "assets/app-CNdO1V22.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

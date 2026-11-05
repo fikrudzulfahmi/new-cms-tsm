@@ -63,7 +63,10 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
       <div v-if="post.category" class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3" :style="`background:${post.category.color}20;color:${post.category.color}`">{{ post.category.name }}</div>
       <h1 class="font-display text-3xl sm:text-[44px] font-extrabold text-navy mb-5 leading-[1.1] tracking-[-1px]">{{ post.title }}</h1>
       <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500 pb-6 border-b border-slate-200 mb-8">
-        <span>Oleh <strong>{{ post.user?.name || 'Admin' }}</strong></span>
+        <span class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-accent text-navy text-[11px] font-bold flex items-center justify-center font-display">{{ (post.user?.name || 'Redaksi').charAt(0) }}</span>
+          <span>oleh <strong class="text-slate-700">{{ post.user?.name || 'Redaksi' }}</strong></span>
+        </span>
         <span>·</span>
         <span>{{ formatDate(post.published_at) }}</span>
         <span>·</span>

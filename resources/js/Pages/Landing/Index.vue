@@ -483,7 +483,7 @@ onBeforeUnmount(() => {
                 <span class="cat-tag" :style="{ background: featuredPost.category?.color }">{{ featuredPost.category?.name }}</span>
                 <h3>{{ featuredPost.title }}</h3>
                 <p>{{ featuredPost.excerpt }}</p>
-                <small>{{ fmtDate(featuredPost.published_at) }}<span v-if="featuredPost.reading_time"> · {{ featuredPost.reading_time }} menit baca</span></small>
+                <small>{{ fmtDate(featuredPost.published_at) }} · oleh {{ featuredPost.user?.name || 'Redaksi' }}<span v-if="featuredPost.reading_time"> · {{ featuredPost.reading_time }} menit baca</span></small>
               </div>
             </Link>
             <div class="news-list">
@@ -492,7 +492,7 @@ onBeforeUnmount(() => {
                 <div>
                   <span class="cat-text" :style="{ color: p.category?.color }">{{ p.category?.name }}</span>
                   <h4>{{ p.title }}</h4>
-                  <small>{{ fmtDate(p.published_at) }}</small>
+                  <small>{{ fmtDate(p.published_at) }} · oleh {{ p.user?.name || 'Redaksi' }}</small>
                 </div>
               </Link>
             </div>

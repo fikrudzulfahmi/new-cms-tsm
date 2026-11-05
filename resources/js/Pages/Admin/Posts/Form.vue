@@ -8,6 +8,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 const props = defineProps(['post', 'categories', 'tags', 'postTags', 'visitStats'])
 const isEdit = !!props.post
 const contributor = !!usePage().props.auth?.user?.can_write
+const userRoleAdmin = usePage().props.auth?.user?.role === 'admin';
 
 const formatDatetimeForInput = (val) => {
   if (!val) return ''
@@ -31,6 +32,7 @@ const form = useForm({
   title: props.post?.title || '',
   slug: props.post?.slug || '',
   category_id: props.post?.category_id || props.categories?.[0]?.id || '',
+  user_id: props.post?.user_id || (usePage().props.auth?.user?.id || ''),
   body: props.post?.body || '',
   excerpt: props.post?.excerpt || '',
   meta_title: props.post?.meta_title || '',
@@ -45,7 +47,7 @@ const form = useForm({
   cover_image: null,
   cover_alt: props.post?.cover_alt || '',
   og_image: null,
-})
+});
 
 const coverPreview = ref(props.post?.cover_image ? `/storage/${props.post.cover_image}` : null)
 const onCover = (ev) => {
@@ -154,6 +156,14 @@ const submit = () => {
                   <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
                 </select>
                 <p v-if="form.errors.category_id" class="text-red-500 text-xs mt-1">{{ form.errors.category_id }}</p>
+              </div>
+              <div v-if="userRoleAdmin" class="mt-3 row-center gap-2">
+                <label class="col-span-1 form-label text-sm">Penulis *</label>
+                <select v-model="form.user_id" class="form-input col-span-2">
+                  <option value="">-- Penulis --</option>
+                  <option v-for="a in authors" :key="a.id" :value="a.id">{{ a.name }}</option>
+                </select>
+                <p v-if="form.errors.user_id" class="text-red-500 text-xs mt-1 text-xs">{{ form.errors.user_id }}</p>
               </div>
               <div>
                 <label class="form-label">Status Publikasi *</label>

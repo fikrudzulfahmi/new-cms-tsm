@@ -148,7 +148,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'num
             </thead>
             <tbody class="divide-y divide-slate-100">
               <tr v-for="p in posts.data" :key="p.id" class="hover:bg-slate-50/50">
-                <td class="p-4 font-semibold text-slate-800 max-w-xs truncate">{{ p.title }}<div v-if="isAdmin && p.user && p.user.role !== 'admin'" class="text-xs font-normal text-slate-400">oleh {{ p.user.name }}</div></td>
+                <td class="p-4 font-semibold text-slate-800 max-w-xs truncate">{{ p.title }}<div v-if="p.user" class="text-xs font-normal text-slate-400">oleh {{ p.user.name }}</div></td>
                 <td class="p-4">
                   <span v-if="p.category" class="badge text-xs" :style="`background:${p.category.color}20;color:${p.category.color}`">{{ p.category.name }}</span>
                 </td>

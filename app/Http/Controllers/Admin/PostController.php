@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Models\User;
 use App\Models\Visit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -40,6 +41,7 @@ class PostController extends Controller
         return Inertia::render('Admin/Posts/Form', [
             'categories' => Category::active()->get(['id', 'name', 'slug']),
             'tags' => Tag::all(['id', 'name', 'slug']),
+            'authors' => $this->authorOptions(),
         ]);
     }
 
@@ -48,7 +50,7 @@ class PostController extends Controller
         $data = $request->validate($this->rules());
         $this->limitContributor($data);
         $data['slug'] = Slug::unique('posts', ($data['slug'] ?? null) ?: $data['title']);
-        $data['user_id'] = auth()->id();
+        $data['user_id'] = $this->resolveAuthorId($request);
         $data['body'] = $this->cleanBody($data['body'] ?? null);
         $data['reading_time'] = max(1, (int) round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
         $data['published_at'] = $this->resolvePublishedAt($data, null);
@@ -81,6 +83,7 @@ class PostController extends Controller
             'post' => $post,
             'categories' => Category::active()->get(['id', 'name', 'slug']),
             'tags' => Tag::all(['id', 'name', 'slug']),
+            'authors' => $this->authorOptions(),
             'postTags' => $post->tags->pluck('id'),
             'visitStats' => [
                 'total' => $post->visits()->count(),
@@ -97,6 +100,7 @@ class PostController extends Controller
         $data = $request->validate($this->rules($post->id));
         $this->limitContributor($data);
         if (empty($data['slug'])) $data['slug'] = Slug::unique('posts', $data['title'], $post->id);
+        $data['user_id'] = $this->resolveAuthorId($request, $post->user_id);
         $data['body'] = $this->cleanBody($data['body'] ?? null);
         $data['reading_time'] = max(1, (int) round(str_word_count(strip_tags($data['body'] ?? '')) / 200));
         $data['published_at'] = $this->resolvePublishedAt($data, $post);
@@ -133,6 +137,41 @@ class PostController extends Controller
     }
 
     /** Penulis tamu tidak bisa menerbitkan: tayang/terjadwal otomatis jadi "menunggu persetujuan". */
+    /**
+     * Daftar akun CMS yang bisa dicantumkan sebagai penulis berita.
+     * Hanya admin yang boleh memilih; editor/penulis selalu atas namanya sendiri.
+     */
+    private function authorOptions()
+    {
+        if (auth()->user()?->role !== 'admin') {
+            return [];
+        }
+
+        return User::whereIn('role', User::CMS_ROLES)
+            ->where('is_active', true)
+            ->orderByRaw("FIELD(role, 'admin', 'editor', 'writer')")
+            ->orderBy('name')
+            ->get(['id', 'name', 'role']);
+    }
+
+    /**
+     * user_id berita: admin boleh menunjuk penulis lain, selain itu penulis = pengunggah.
+     */
+    private function resolveAuthorId(Request $request, ?int $current = null): int
+    {
+        $fallback = $current ?: (int) auth()->id();
+
+        if (auth()->user()?->role !== 'admin' || ! $request->filled('user_id')) {
+            return $fallback;
+        }
+
+        $candidate = (int) $request->input('user_id');
+
+        return User::whereKey($candidate)->whereIn('role', User::CMS_ROLES)->exists()
+            ? $candidate
+            : $fallback;
+    }
+
     private function limitContributor(array &$data): void
     {
         if (! auth()->user()->isContributor()) return;
