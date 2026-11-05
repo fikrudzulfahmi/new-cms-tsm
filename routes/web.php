@@ -137,6 +137,10 @@ Route::prefix('admin')->name('admin.')->middleware(['activity.log', 'auth', 'adm
         Route::patch('/pesan/{message}/read', [ContentController::class, 'messagesRead'])->name('messages.read');
         Route::delete('/pesan/{message}', [ContentController::class, 'messagesDestroy'])->name('messages.destroy');
 
-    }); // end role:admin
+            // Menulis — create & store akun writer
+            Route::get('/admin/writers/create', [NewsWriterController::class, 'create'])->name('admin.writers.create');
+            Route::post('/admin/writers', [NewsWriterController::class, 'store'])->name('admin.writers.store');
+
+        }); // end role:admin
 
 });

@@ -61,6 +61,7 @@ const allMenuGroups = [
       { label: 'Kategori', adminOnly: true, href: '/admin/kategori', icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z' },
       { label: 'Komentar', href: '/admin/komentar', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
       { label: 'Galeri & Media', adminOnly: true, href: '/admin/galeri', match: ['/admin/galeri', '/admin/slider'], icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
+      { label: 'Penulis', adminOnly: true, href: '/admin/writers/create', icon: 'M19 21a2 2 0 012-2h-6a2 2 0 012-2v-3a2 2 0 012-2h5a2 2 0 012 2v3a2 2 0 01-2 2H19z' },
     ]
   },
   {

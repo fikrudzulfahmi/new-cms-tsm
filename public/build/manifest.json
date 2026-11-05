@@ -1,6 +1,6 @@
 {
-  "_AdminLayout-BP3JPsAq.js": {
-    "file": "assets/AdminLayout-BP3JPsAq.js",
+  "_AdminLayout-B0oho0M1.js": {
+    "file": "assets/AdminLayout-B0oho0M1.js",
     "name": "AdminLayout",
     "imports": [
       "_dist-T2eiQGoL.js"
@@ -60,7 +60,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-DKqhYC4y.css",
+    "file": "assets/app-yEBgP6Dd.css",
     "name": "app",
     "names": [
       "app.css"
@@ -80,90 +80,90 @@
     ]
   },
   "resources/js/Pages/Admin/Activity/Index.vue": {
-    "file": "assets/Index-CcXfgYS_.js",
+    "file": "assets/Index-MRox_O30.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Activity/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-T2eiQGoL.js",
-      "_AdminLayout-BP3JPsAq.js"
+      "_AdminLayout-B0oho0M1.js"
     ]
   },
   "resources/js/Pages/Admin/Comments/Index.vue": {
-    "file": "assets/Index-DD72IAXr.js",
+    "file": "assets/Index-B6w5RHj7.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Comments/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-T2eiQGoL.js",
       "resources/js/app.js",
-      "_AdminLayout-BP3JPsAq.js"
+      "_AdminLayout-B0oho0M1.js"
     ]
   },
   "resources/js/Pages/Admin/Dashboard/Index.vue": {
-    "file": "assets/Index-raN7RLnN.js",
+    "file": "assets/Index-ThhNO-F_.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Dashboard/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-T2eiQGoL.js",
-      "_AdminLayout-BP3JPsAq.js"
+      "_AdminLayout-B0oho0M1.js"
     ]
   },
   "resources/js/Pages/Admin/Generic/Index.vue": {
-    "file": "assets/Index-CGVKNeVy.js",
+    "file": "assets/Index-BCnr7cDX.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Generic/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-T2eiQGoL.js",
       "resources/js/app.js",
-      "_AdminLayout-BP3JPsAq.js"
+      "_AdminLayout-B0oho0M1.js"
     ]
   },
   "resources/js/Pages/Admin/Posts/Form.vue": {
-    "file": "assets/Form-eYQSgUEd.js",
+    "file": "assets/Form-BZ4hHhnO.js",
     "name": "Form",
     "src": "resources/js/Pages/Admin/Posts/Form.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-T2eiQGoL.js",
       "resources/js/app.js",
-      "_AdminLayout-BP3JPsAq.js"
+      "_AdminLayout-B0oho0M1.js"
     ],
     "css": [
       "assets/Form-B22-Rzfz.css"
     ]
   },
   "resources/js/Pages/Admin/Posts/Index.vue": {
-    "file": "assets/Index-ZguIPS5v.js",
+    "file": "assets/Index-BAYi3YU8.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Posts/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-T2eiQGoL.js",
       "resources/js/app.js",
-      "_AdminLayout-BP3JPsAq.js"
+      "_AdminLayout-B0oho0M1.js"
     ]
   },
   "resources/js/Pages/Admin/Reports/Index.vue": {
-    "file": "assets/Index-9Us4oEcM.js",
+    "file": "assets/Index-DTfFHkQa.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Reports/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-T2eiQGoL.js",
-      "_AdminLayout-BP3JPsAq.js"
+      "_AdminLayout-B0oho0M1.js"
     ]
   },
   "resources/js/Pages/Admin/Settings/Index.vue": {
-    "file": "assets/Index-CzSJ5ahA.js",
+    "file": "assets/Index-B155HSUn.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Settings/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-T2eiQGoL.js",
-      "_AdminLayout-BP3JPsAq.js"
+      "_AdminLayout-B0oho0M1.js"
     ]
   },
   "resources/js/Pages/Alumni/Index.vue": {
@@ -255,7 +255,7 @@
     ]
   },
   "resources/js/Pages/Post/Show.vue": {
-    "file": "assets/Show-DsW7yQva.js",
+    "file": "assets/Show-BXgI_Gw_.js",
     "name": "Show",
     "src": "resources/js/Pages/Post/Show.vue",
     "isDynamicEntry": true,
@@ -301,7 +301,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-bP4OEMEs.js",
+    "file": "assets/app-D5RfJQKo.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
