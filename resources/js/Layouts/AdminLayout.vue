@@ -43,6 +43,8 @@ const pageTitle = computed(() => {
   if (url === '/admin/pesan') return 'Pesan Masuk'
   if (url === '/admin/laporan') return 'Laporan & Analisis'
   if (url === '/admin/aktivitas') return 'Log Aktivitas'
+  if (url === '/admin/pengguna') return 'Pengguna'
+  if (url === '/admin/akun') return 'Pengaturan Akun'
   if (url === '/admin/pengaturan') return 'Pengaturan Website'
   return 'Panel Admin'
 })
@@ -61,7 +63,7 @@ const allMenuGroups = [
       { label: 'Kategori', adminOnly: true, href: '/admin/kategori', icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z' },
       { label: 'Komentar', href: '/admin/komentar', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
       { label: 'Galeri & Media', adminOnly: true, href: '/admin/galeri', match: ['/admin/galeri', '/admin/slider'], icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
-      { label: 'Penulis', adminOnly: true, href: '/admin/writers/create', icon: 'M19 21a2 2 0 012-2h-6a2 2 0 012-2v-3a2 2 0 012-2h5a2 2 0 012 2v3a2 2 0 01-2 2H19z' },
+      { label: 'Pengguna', adminOnly: true, href: '/admin/pengguna', icon: 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a3 3 0 10-2.5-4.5' },
     ]
   },
   {
@@ -132,13 +134,13 @@ const menuGroups = computed(() =>
 
       <!-- User + Logout -->
       <div class="p-4 border-t border-accent/20">
-        <div class="flex items-center gap-3 mb-3">
+        <Link href="/admin/akun" class="flex items-center gap-3 mb-3 group rounded-full -m-1 p-1 hover:bg-white/5 transition">
           <div class="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-navy text-sm font-bold font-display">{{ user?.name?.[0] }}</div>
           <div class="overflow-hidden">
-            <div class="text-white text-sm font-medium truncate">{{ user?.name }}</div>
-            <div class="font-mono text-on-navy-subtle text-[11px] uppercase tracking-wider">{{ user?.role }}</div>
+            <div class="text-white text-sm font-medium truncate group-hover:text-accent transition">{{ user?.name }}</div>
+            <div class="font-mono text-on-navy-subtle text-[11px] uppercase tracking-wider">{{ user?.role }} · pengaturan akun</div>
           </div>
-        </div>
+        </Link>
         <button @click="logout" class="w-full flex items-center gap-2 px-3 py-2 rounded-full border border-accent/30 text-on-navy-muted hover:border-accent hover:text-white text-sm transition">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
           Keluar

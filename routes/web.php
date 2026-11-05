@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\ActivityController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SitemapController;
@@ -47,6 +49,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 Route::prefix('admin')->name('admin.')->middleware(['activity.log', 'auth', 'admin'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Akun sendiri (semua peran CMS: admin, editor, writer)
+    Route::get('/akun', [AccountController::class, 'edit'])->name('account.edit');
+    Route::put('/akun/profil', [AccountController::class, 'updateProfile'])->name('account.profile');
+    Route::put('/akun/password', [AccountController::class, 'updatePassword'])->name('account.password');
 
     // Posts
     Route::get('/berita', [PostController::class, 'index'])->name('posts.index');
@@ -137,9 +144,12 @@ Route::prefix('admin')->name('admin.')->middleware(['activity.log', 'auth', 'adm
         Route::patch('/pesan/{message}/read', [ContentController::class, 'messagesRead'])->name('messages.read');
         Route::delete('/pesan/{message}', [ContentController::class, 'messagesDestroy'])->name('messages.destroy');
 
-            // Menulis — create & store akun writer
-            Route::get('/admin/writers/create', [NewsWriterController::class, 'create'])->name('admin.writers.create');
-            Route::post('/admin/writers', [NewsWriterController::class, 'store'])->name('admin.writers.store');
+            // Pengguna & akun penulis berita
+            Route::get('/pengguna', [UserController::class, 'index'])->name('users.index');
+            Route::post('/pengguna', [UserController::class, 'store'])->name('users.store');
+            Route::put('/pengguna/{user}', [UserController::class, 'update'])->name('users.update');
+            Route::patch('/pengguna/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset');
+            Route::delete('/pengguna/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         }); // end role:admin
 
