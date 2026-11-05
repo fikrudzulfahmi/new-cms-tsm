@@ -30,7 +30,7 @@ class HomeController extends Controller
             ->orderBy('sort_order')->get();
 
         // Berita terbaru + 4 terbaru per kategori, agar tab kategori selalu terisi.
-        $postCols = ['id', 'category_id', 'title', 'slug', 'excerpt', 'cover_image', 'cover_alt', 'published_at', 'reading_time', 'views_count', 'is_featured'];
+        $postCols = ['id', 'category_id', 'user_id', 'title', 'slug', 'excerpt', 'cover_image', 'cover_alt', 'published_at', 'reading_time', 'views_count', 'is_featured'];
         // Satu query berjendela (ROW_NUMBER) untuk 4 berita terbaru per kategori,
         // menggantikan N+1 query di dalam loop kategori.
         $ranked = DB::table('posts')

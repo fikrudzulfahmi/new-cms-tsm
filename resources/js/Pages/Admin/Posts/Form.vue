@@ -5,7 +5,7 @@ import { analyzeSeo, slugify } from '@/seo-analyzer.js'
 import { useForm, Link, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
-const props = defineProps(['post', 'categories', 'tags', 'postTags', 'visitStats'])
+const props = defineProps(['post', 'categories', 'tags', 'postTags', 'visitStats', 'authors'])
 const isEdit = !!props.post
 const contributor = !!usePage().props.auth?.user?.can_write
 const userRoleAdmin = usePage().props.auth?.user?.role === 'admin';
